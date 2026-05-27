@@ -1,0 +1,15 @@
+﻿<Solution>
+  <Folder Name="/Umbraco/">
+    <Project Path="Umbraco/17.3.4/Umbraco-17.3.4-sinfull.csproj" />
+    <Project Path="Umbraco/17.4/Umbraco-17.4.csproj" />
+    <Project Path="Umbraco/17.4/Umbraco-17.4.csproj" />
+    <Project Path="Umbraco/17.4/Umbraco-17.4.csproj" />
+    <Project Path="Umbraco/17.4/Umbraco-17.4.csproj" />
+    <Project Path="Umbraco/17.4/Umbraco-17.4.csproj" />
+  </Folder>
+  <Project Path="Umbraco.Community.Sinners.Backend/Umbraco.Community.Sinners.Backend.csproj" />
+  <Project Path="Umbraco.Community.Sinners.Extension/Umbraco.Community.Sinners.Extension.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+</Solution>

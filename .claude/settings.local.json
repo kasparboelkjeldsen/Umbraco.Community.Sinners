@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($content = [System.IO.File]::ReadAllText\\(\"C:\\\\Users\\\\kaskje\\\\.nuget\\\\packages\\\\umbraco.cms.core\\\\17.3.4\\\\lib\\\\net10.0\\\\Umbraco.Core.xml\"\\); $idx = $content.IndexOf\\('SuperUserKey'\\); if \\($idx -ge 0\\) { $content.Substring\\([Math]::Max\\(0,$idx-100\\), 400\\) } else { \"NOT FOUND\" })",
+      "PowerShell(Get-ChildItem \"x:\\\\kasparboelkjeldsen\\\\Umbraco.Community.Sinners\\\\Umbraco.Community.Sinners.Extension\\\\src\" -Recurse | Where-Object { !$_.PSIsContainer } | Select-Object FullName)",
+      "PowerShell($content = [System.IO.File]::ReadAllText\\(\"C:\\\\Users\\\\kaskje\\\\.nuget\\\\packages\\\\umbraco.cms.core\\\\17.3.4\\\\lib\\\\net10.0\\\\Umbraco.Core.xml\"\\); $idx = $content.IndexOf\\('T:Umbraco.Cms.Core.Models.IContentTypeComposition'\\); if \\($idx -ge 0\\) { $content.Substring\\($idx, 800\\) } else { \"NOT FOUND\" })",
+      "PowerShell($content = [System.IO.File]::ReadAllText\\(\"C:\\\\Users\\\\kaskje\\\\.nuget\\\\packages\\\\umbraco.cms.core\\\\17.3.4\\\\lib\\\\net10.0\\\\Umbraco.Core.xml\"\\); $matches = [regex]::Matches\\($content, 'Umbraco\\\\.\\(BlockList|BlockGrid|RichText|TinyMCE\\)'\\); foreach \\($m in $matches | Select-Object -First 10\\) { $start = [Math]::Max\\(0, $m.Index-50\\); $content.Substring\\($start, 200\\) + \"`n---\" })",
+      "PowerShell($content = [System.IO.File]::ReadAllText\\(\"C:\\\\Users\\\\kaskje\\\\.nuget\\\\packages\\\\umbraco.cms.core\\\\17.3.4\\\\lib\\\\net10.0\\\\Umbraco.Core.xml\"\\); $idx = $content.IndexOf\\('P:Umbraco.Cms.Core.Models.IContentTypeComposition.ContentTypeComposition'\\); $content.Substring\\($idx, 600\\))",
+      "PowerShell($content = [System.IO.File]::ReadAllText\\(\"C:\\\\Users\\\\kaskje\\\\.nuget\\\\packages\\\\umbraco.cms.core\\\\17.3.4\\\\lib\\\\net10.0\\\\Umbraco.Core.xml\"\\); $pattern = '\"Umbraco\\\\.\\(BlockList|BlockGrid|RichText|TinyMCE|RTE\\)\"'; $matches = [regex]::Matches\\($content, $pattern\\); foreach \\($m in $matches | Select-Object -First 10\\) { $start = [Math]::Max\\(0,$m.Index-80\\); $content.Substring\\($start, 250\\) + \"`n---\" })",
+      "PowerShell($content = [System.IO.File]::ReadAllText\\(\"C:\\\\Users\\\\kaskje\\\\.nuget\\\\packages\\\\umbraco.cms.core\\\\17.3.4\\\\lib\\\\net10.0\\\\Umbraco.Core.xml\"\\); $pattern = 'name=\"M:Umbraco\\\\.Cms\\\\.Core\\\\.Services\\\\.IContentTypeBaseService`1\\\\.GetComposedOf'; $matches = [regex]::Matches\\($content, $pattern\\); foreach \\($m in $matches\\) { $start = $m.Index; $content.Substring\\($start, 500\\) + \"`n---\" })",
+      "PowerShell($content = [System.IO.File]::ReadAllText\\(\"C:\\\\Users\\\\kaskje\\\\.nuget\\\\packages\\\\umbraco.cms.core\\\\17.3.4\\\\lib\\\\net10.0\\\\Umbraco.Core.xml\"\\); $idx = $content.IndexOf\\('PropertyEditors.Aliases'\\); if \\($idx -ge 0\\) { $content.Substring\\([Math]::Max\\(0,$idx-50\\), 2000\\) } else { \"NOT FOUND\" })",
+      "PowerShell($content = [System.IO.File]::ReadAllText\\(\"C:\\\\Users\\\\kaskje\\\\.nuget\\\\packages\\\\umbraco.cms.core\\\\17.3.4\\\\lib\\\\net10.0\\\\Umbraco.Core.xml\"\\); $idx = $content.IndexOf\\('F:Umbraco.Cms.Core.Constants.PropertyEditors.Aliases.RichText'\\); if \\($idx -ge 0\\) { $content.Substring\\([Math]::Max\\(0,$idx-20\\), 400\\) } else { \"RichText NOT FOUND - searching TinyMCE...\"; $idx2 = $content.IndexOf\\('TinyMCE'\\); if \\($idx2 -ge 0\\) { $content.Substring\\([Math]::Max\\(0,$idx2-100\\), 300\\) } })",
+      "PowerShell(cd \"x:\\\\kasparboelkjeldsen\\\\Umbraco.Community.Sinners\" ; dotnet build \"Umbraco.Community.Sinners.Backend\\\\Umbraco.Community.Sinners.Backend.csproj\" 2>&1 | Where-Object { $_ -match \"error|warning CS|Error\" } | Select-Object -Last 15)",
+      "Bash(Get-ChildItem -Path \"x:\\\\kasparboelkjeldsen\\\\Umbraco.Community.Sinners\" -Recurse -Force)",
+      "Bash(Select-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"x:\\\\kasparboelkjeldsen\\\\Umbraco.Community.Sinners\" -Recurse -Force | Select-Object FullName | ForEach-Object { $_.FullName })",
+      "Read(//x/umbraco/Umbraco-CMS/src/Umbraco.Core/Services/**)",
+      "Read(//x/umbraco/Umbraco-CMS/src/Umbraco.Core/Models/**)",
+      "Read(//x/umbraco/Umbraco-CMS/src/**)",
+      "Bash(git add *)",
+      "Bash(git rm *)",
+      "Bash(git commit *)",
+      "Bash(echo \"\")",
+      "Bash(echo \"# PowerPoint \\(too large for GitHub\\)\")",
+      "Bash(echo \"*.pptx\")",
+      "Bash(git push *)"
+    ]
+  }
+}

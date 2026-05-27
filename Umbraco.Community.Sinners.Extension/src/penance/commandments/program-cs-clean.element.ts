@@ -1,0 +1,159 @@
+import { LitElement, html, css } from 'lit';
+import { customElement, state } from 'lit/decorators.js';
+import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
+import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
+
+interface ProgramCsAuditResult {
+    found: boolean;
+    isClean: boolean;
+    useUmbracoSavedToVariable: boolean;
+    extraMiddleware: string[];
+    extraEndpoints: string[];
+}
+
+const API_BASE = '/umbraco/management/api/v1/sinners';
+
+@customElement('sinners-program-cs-clean')
+export class ProgramCsCleanElement extends UmbElementMixin(LitElement) {
+    #authCtx?: typeof UMB_AUTH_CONTEXT.TYPE;
+
+    @state() private _result: ProgramCsAuditResult | null = null;
+    @state() private _loading = true;
+
+    static override styles = css`
+        .clean {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--uui-color-positive-standalone, #0d7a54);
+            font-weight: 600;
+        }
+
+        .not-found {
+            padding: 16px;
+            color: var(--uui-color-text-alt, #888);
+            font-size: 13px;
+        }
+
+        .issue-list {
+            padding: 8px 0;
+        }
+
+        .issue-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--uui-color-border-standalone, #f0f0f0);
+            font-size: 13px;
+        }
+
+        .issue-row:last-child { border-bottom: none; }
+
+        .issue-icon {
+            font-size: 15px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .issue-body {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .issue-title {
+            font-weight: 600;
+            color: var(--uui-color-danger-standalone, #d42054);
+        }
+
+        .issue-detail {
+            font-size: 11px;
+            color: var(--uui-color-text-alt, #888);
+            font-family: monospace;
+        }
+    `;
+
+    override connectedCallback() {
+        super.connectedCallback();
+        this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
+            this.#authCtx = ctx;
+            void this.#load();
+        });
+    }
+
+    async #load() {
+        this._loading = true;
+        try {
+            const token = await this.#authCtx?.getLatestToken();
+            const res = await fetch(`${API_BASE}/program-cs-audit`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+            });
+            if (res.ok) this._result = (await res.json()) as ProgramCsAuditResult;
+
+            const issues = this._result
+                ? (this._result.useUmbracoSavedToVariable ? 1 : 0)
+                  + this._result.extraMiddleware.length
+                  + this._result.extraEndpoints.length
+                : 0;
+            this.dispatchEvent(new CustomEvent('sinners-status', {
+                bubbles: true, composed: true,
+                detail: { issueCount: issues, severity: issues > 0 ? 'error' : 'ok' },
+            }));
+        } finally {
+            this._loading = false;
+        }
+    }
+
+    #renderIssues(result: ProgramCsAuditResult) {
+        const issues: { title: string; detail: string }[] = [];
+
+        if (result.useUmbracoSavedToVariable)
+            issues.push({
+                title: 'UseUmbraco() result is assigned to a variable',
+                detail: 'Chain it directly: app.UseUmbraco().WithMiddleware(...).WithEndpoints(...)',
+            });
+
+        for (const name of result.extraMiddleware)
+            issues.push({
+                title: 'Non-standard middleware registered',
+                detail: `u.${name}()  — found inside .WithMiddleware(...)`,
+            });
+
+        for (const name of result.extraEndpoints)
+            issues.push({
+                title: 'Non-standard endpoint registered',
+                detail: `u.${name}()  — found inside .WithEndpoints(...)`,
+            });
+
+        return html`
+            <div class="issue-list">
+                ${issues.map((issue) => html`
+                    <div class="issue-row">
+                        <span class="issue-icon">✕</span>
+                        <div class="issue-body">
+                            <span class="issue-title">${issue.title}</span>
+                            <span class="issue-detail">${issue.detail}</span>
+                        </div>
+                    </div>
+                `)}
+            </div>
+        `;
+    }
+
+    override render() {
+        const result = this._result;
+        return html`
+            <uui-box headline="IV — Program.cs is clean">
+                ${this._loading
+                    ? html`<uui-loader-bar></uui-loader-bar>`
+                    : !result || !result.found
+                      ? html`<div class="not-found">Program.cs not found at the application root.</div>`
+                      : result.isClean
+                        ? html`<div class="clean">✓ Program.cs looks clean.</div>`
+                        : this.#renderIssues(result)}
+            </uui-box>
+        `;
+    }
+}
