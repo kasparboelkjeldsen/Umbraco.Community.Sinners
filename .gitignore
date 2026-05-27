@@ -441,4 +441,4 @@ node_modules/
 dist/
 
 # PowerPoint (too large for GitHub)
-*.pptx
+talk.pptx
