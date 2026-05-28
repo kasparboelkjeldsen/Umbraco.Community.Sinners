@@ -2,6 +2,7 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
+import { presenter } from '../presenter.js';
 
 type SixTypes = 'Page' | 'Block' | 'Data' | 'Composition' | 'Repository' | 'RepositoryItem';
 
@@ -201,6 +202,11 @@ export class SixSacredTypesElement extends UmbElementMixin(LitElement) {
 
     override connectedCallback() {
         super.connectedCallback();
+        presenter.registerSteps('II', [
+            () => this.#autofillClassifications(),
+            () => this.#saveAll(),
+            () => this.#autoCategorize(),
+        ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;
             void this.#load();
@@ -246,6 +252,32 @@ export class SixSacredTypesElement extends UmbElementMixin(LitElement) {
         const map = new Map(this._pendingChanges);
         map.set(alias, suggestion);
         this._pendingChanges = map;
+    }
+
+    #autofillClassifications() {
+        const map = new Map(this._pendingChanges);
+        for (const item of this._items) {
+            if (item.classification) continue;
+            if (map.has(item.contentTypeAlias)) continue;
+
+            if (item.suggestedClassification) {
+                map.set(item.contentTypeAlias, item.suggestedClassification);
+                console.log(`[RULE II] suggestion → ${item.contentTypeAlias} = ${item.suggestedClassification}`);
+            } else {
+                const path = item.folderPath ?? '';
+                if (path.startsWith('/Elements/Setting')) {
+                    map.set(item.contentTypeAlias, 'Data');
+                    console.log(`[RULE II] path rule (Data) → ${item.contentTypeAlias} (${path})`);
+                } else if (path.startsWith('/Elements/')) {
+                    map.set(item.contentTypeAlias, 'Block');
+                    console.log(`[RULE II] path rule (Block) → ${item.contentTypeAlias} (${path})`);
+                } else {
+                    console.warn(`[RULE II] no rule matched — ${item.contentTypeAlias} (${path}) left unclassified`);
+                }
+            }
+        }
+        this._pendingChanges = map;
+        console.log(`[RULE II] autofill complete — ${map.size} pending`);
     }
 
     async #autoCategorize() {

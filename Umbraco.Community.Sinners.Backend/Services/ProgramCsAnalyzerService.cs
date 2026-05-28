@@ -35,6 +35,23 @@ public class ProgramCsAnalyzerService(IWebHostEnvironment env)
         };
     }
 
+    public bool FixSavedVariable()
+    {
+        var path = Path.Combine(env.ContentRootPath, "Program.cs");
+        if (!File.Exists(path)) return false;
+
+        var source = File.ReadAllText(path);
+        var match = Regex.Match(source, @"var\s+(.+?)\s*=\s*(?:\w+\.)*UseUmbraco\s*\(\s*\)\s*;");
+        if (!match.Success) return false;
+
+        var varName = match.Groups[1].Value.Trim();
+        var result = Regex.Replace(source, @"var\s+.+?\s*=\s*(?:\w+\.)*UseUmbraco\s*\(\s*\)\s*;", "app.UseUmbraco()");
+        result = Regex.Replace(result, Regex.Escape(varName) + @"\s*\.", "");
+        result = Regex.Replace(result, @"UseUmbraco\(\)\s*;\s*\n+\s*\.", "UseUmbraco()\n    .");
+        File.WriteAllText(path, result);
+        return true;
+    }
+
     // Extracts the content between the outer parentheses of .MethodName(...)
     private static string? ExtractCallBody(string source, string methodName)
     {

@@ -257,34 +257,34 @@ var g = class extends HTMLElement {
 g.elementStyles = [], g.shadowRootOptions = { mode: "open" }, g[p("elementProperties")] = /* @__PURE__ */ new Map(), g[p("finalized")] = /* @__PURE__ */ new Map(), ce?.({ ReactiveElement: g }), (f.reactiveElementVersions ??= []).push("2.1.2");
 //#endregion
 //#region node_modules/lit-html/lit-html.js
-var _ = globalThis, ue = (e) => e, v = _.trustedTypes, de = v ? v.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, fe = "$lit$", y = `lit$${Math.random().toFixed(9).slice(2)}$`, pe = "?" + y, me = `<${pe}>`, b = document, x = () => b.createComment(""), S = (e) => e === null || typeof e != "object" && typeof e != "function", C = Array.isArray, he = (e) => C(e) || typeof e?.[Symbol.iterator] == "function", w = "[ 	\n\f\r]", T = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ge = /-->/g, _e = />/g, E = RegExp(`>|${w}(?:([^\\s"'>=/]+)(${w}*=${w}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), ve = /'/g, ye = /"/g, be = /^(?:script|style|textarea|title)$/i, D = ((e) => (t, ...n) => ({
+var _ = globalThis, ue = (e) => e, v = _.trustedTypes, de = v ? v.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, fe = "$lit$", y = `lit$${Math.random().toFixed(9).slice(2)}$`, pe = "?" + y, me = `<${pe}>`, b = document, x = () => b.createComment(""), S = (e) => e === null || typeof e != "object" && typeof e != "function", he = Array.isArray, ge = (e) => he(e) || typeof e?.[Symbol.iterator] == "function", _e = "[ 	\n\f\r]", C = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ve = /-->/g, ye = />/g, w = RegExp(`>|${_e}(?:([^\\s"'>=/]+)(${_e}*=${_e}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), be = /'/g, xe = /"/g, Se = /^(?:script|style|textarea|title)$/i, T = ((e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
 	values: n
-}))(1), O = Symbol.for("lit-noChange"), k = Symbol.for("lit-nothing"), xe = /* @__PURE__ */ new WeakMap(), A = b.createTreeWalker(b, 129);
-function Se(e, t) {
-	if (!C(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
+}))(1), E = Symbol.for("lit-noChange"), D = Symbol.for("lit-nothing"), Ce = /* @__PURE__ */ new WeakMap(), O = b.createTreeWalker(b, 129);
+function we(e, t) {
+	if (!he(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
 	return de === void 0 ? t : de.createHTML(t);
 }
-var Ce = (e, t) => {
-	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = T;
+var Te = (e, t) => {
+	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = C;
 	for (let t = 0; t < n; t++) {
 		let n = e[t], s, c, l = -1, u = 0;
-		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === T ? c[1] === "!--" ? o = ge : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = E) : (be.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = E) : o = _e : o === E ? c[0] === ">" ? (o = i ?? T, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? E : c[3] === "\"" ? ye : ve) : o === ye || o === ve ? o = E : o === ge || o === _e ? o = T : (o = E, i = void 0);
-		let d = o === E && e[t + 1].startsWith("/>") ? " " : "";
-		a += o === T ? n + me : l >= 0 ? (r.push(s), n.slice(0, l) + fe + n.slice(l) + y + d) : n + y + (l === -2 ? t : d);
+		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === C ? c[1] === "!--" ? o = ve : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = w) : (Se.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = w) : o = ye : o === w ? c[0] === ">" ? (o = i ?? C, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? w : c[3] === "\"" ? xe : be) : o === xe || o === be ? o = w : o === ve || o === ye ? o = C : (o = w, i = void 0);
+		let d = o === w && e[t + 1].startsWith("/>") ? " " : "";
+		a += o === C ? n + me : l >= 0 ? (r.push(s), n.slice(0, l) + fe + n.slice(l) + y + d) : n + y + (l === -2 ? t : d);
 	}
-	return [Se(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
-}, j = class e {
+	return [we(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
+}, k = class e {
 	constructor({ strings: t, _$litType$: n }, r) {
 		let i;
 		this.parts = [];
-		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = Ce(t, n);
-		if (this.el = e.createElement(l, r), A.currentNode = this.el.content, n === 2 || n === 3) {
+		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = Te(t, n);
+		if (this.el = e.createElement(l, r), O.currentNode = this.el.content, n === 2 || n === 3) {
 			let e = this.el.content.firstChild;
 			e.replaceWith(...e.childNodes);
 		}
-		for (; (i = A.nextNode()) !== null && c.length < s;) {
+		for (; (i = O.nextNode()) !== null && c.length < s;) {
 			if (i.nodeType === 1) {
 				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(fe)) {
 					let t = u[o++], n = i.getAttribute(e).split(y), r = /([.?@])?(.*)/.exec(t);
@@ -293,17 +293,17 @@ var Ce = (e, t) => {
 						index: a,
 						name: r[2],
 						strings: n,
-						ctor: r[1] === "." ? Te : r[1] === "?" ? Ee : r[1] === "@" ? De : P
+						ctor: r[1] === "." ? De : r[1] === "?" ? Oe : r[1] === "@" ? ke : M
 					}), i.removeAttribute(e);
 				} else e.startsWith(y) && (c.push({
 					type: 6,
 					index: a
 				}), i.removeAttribute(e));
-				if (be.test(i.tagName)) {
+				if (Se.test(i.tagName)) {
 					let e = i.textContent.split(y), t = e.length - 1;
 					if (t > 0) {
 						i.textContent = v ? v.emptyScript : "";
-						for (let n = 0; n < t; n++) i.append(e[n], x()), A.nextNode(), c.push({
+						for (let n = 0; n < t; n++) i.append(e[n], x()), O.nextNode(), c.push({
 							type: 2,
 							index: ++a
 						});
@@ -329,12 +329,12 @@ var Ce = (e, t) => {
 		return n.innerHTML = e, n;
 	}
 };
-function M(e, t, n = e, r) {
-	if (t === O) return t;
+function A(e, t, n = e, r) {
+	if (t === E) return t;
 	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = S(t) ? void 0 : t._$litDirective$;
-	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = M(e, i._$AS(e, t.values), i, r)), t;
+	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = A(e, i._$AS(e, t.values), i, r)), t;
 }
-var we = class {
+var Ee = class {
 	constructor(e, t) {
 		this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
 	}
@@ -346,27 +346,27 @@ var we = class {
 	}
 	u(e) {
 		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? b).importNode(t, !0);
-		A.currentNode = r;
-		let i = A.nextNode(), a = 0, o = 0, s = n[0];
+		O.currentNode = r;
+		let i = O.nextNode(), a = 0, o = 0, s = n[0];
 		for (; s !== void 0;) {
 			if (a === s.index) {
 				let t;
-				s.type === 2 ? t = new N(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new Oe(i, this, e)), this._$AV.push(t), s = n[++o];
+				s.type === 2 ? t = new j(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new Ae(i, this, e)), this._$AV.push(t), s = n[++o];
 			}
-			a !== s?.index && (i = A.nextNode(), a++);
+			a !== s?.index && (i = O.nextNode(), a++);
 		}
-		return A.currentNode = b, r;
+		return O.currentNode = b, r;
 	}
 	p(e) {
 		let t = 0;
 		for (let n of this._$AV) n !== void 0 && (n.strings === void 0 ? n._$AI(e[t]) : (n._$AI(e, n, t), t += n.strings.length - 2)), t++;
 	}
-}, N = class e {
+}, j = class e {
 	get _$AU() {
 		return this._$AM?._$AU ?? this._$Cv;
 	}
 	constructor(e, t, n, r) {
-		this.type = 2, this._$AH = k, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
+		this.type = 2, this._$AH = D, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
 	}
 	get parentNode() {
 		let e = this._$AA.parentNode, t = this._$AM;
@@ -379,7 +379,7 @@ var we = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = M(this, e, t), S(e) ? e === k || e == null || e === "" ? (this._$AH !== k && this._$AR(), this._$AH = k) : e !== this._$AH && e !== O && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? he(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = A(this, e, t), S(e) ? e === D || e == null || e === "" ? (this._$AH !== D && this._$AR(), this._$AH = D) : e !== this._$AH && e !== E && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? ge(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -388,22 +388,22 @@ var we = class {
 		this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
 	}
 	_(e) {
-		this._$AH !== k && S(this._$AH) ? this._$AA.nextSibling.data = e : this.T(b.createTextNode(e)), this._$AH = e;
+		this._$AH !== D && S(this._$AH) ? this._$AA.nextSibling.data = e : this.T(b.createTextNode(e)), this._$AH = e;
 	}
 	$(e) {
-		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = j.createElement(Se(n.h, n.h[0]), this.options)), n);
+		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = k.createElement(we(n.h, n.h[0]), this.options)), n);
 		if (this._$AH?._$AD === r) this._$AH.p(t);
 		else {
-			let e = new we(r, this), n = e.u(this.options);
+			let e = new Ee(r, this), n = e.u(this.options);
 			e.p(t), this.T(n), this._$AH = e;
 		}
 	}
 	_$AC(e) {
-		let t = xe.get(e.strings);
-		return t === void 0 && xe.set(e.strings, t = new j(e)), t;
+		let t = Ce.get(e.strings);
+		return t === void 0 && Ce.set(e.strings, t = new k(e)), t;
 	}
 	k(t) {
-		C(this._$AH) || (this._$AH = [], this._$AR());
+		he(this._$AH) || (this._$AH = [], this._$AR());
 		let n = this._$AH, r, i = 0;
 		for (let a of t) i === n.length ? n.push(r = new e(this.O(x()), this.O(x()), this, this.options)) : r = n[i], r._$AI(a), i++;
 		i < n.length && (this._$AR(r && r._$AB.nextSibling, i), n.length = i);
@@ -417,7 +417,7 @@ var we = class {
 	setConnected(e) {
 		this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
 	}
-}, P = class {
+}, M = class {
 	get tagName() {
 		return this.element.tagName;
 	}
@@ -425,47 +425,47 @@ var we = class {
 		return this._$AM._$AU;
 	}
 	constructor(e, t, n, r, i) {
-		this.type = 1, this._$AH = k, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = k;
+		this.type = 1, this._$AH = D, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = D;
 	}
 	_$AI(e, t = this, n, r) {
 		let i = this.strings, a = !1;
-		if (i === void 0) e = M(this, e, t, 0), a = !S(e) || e !== this._$AH && e !== O, a && (this._$AH = e);
+		if (i === void 0) e = A(this, e, t, 0), a = !S(e) || e !== this._$AH && e !== E, a && (this._$AH = e);
 		else {
 			let r = e, o, s;
-			for (e = i[0], o = 0; o < i.length - 1; o++) s = M(this, r[n + o], t, o), s === O && (s = this._$AH[o]), a ||= !S(s) || s !== this._$AH[o], s === k ? e = k : e !== k && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
+			for (e = i[0], o = 0; o < i.length - 1; o++) s = A(this, r[n + o], t, o), s === E && (s = this._$AH[o]), a ||= !S(s) || s !== this._$AH[o], s === D ? e = D : e !== D && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
 		}
 		a && !r && this.j(e);
 	}
 	j(e) {
-		e === k ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
+		e === D ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
 	}
-}, Te = class extends P {
+}, De = class extends M {
 	constructor() {
 		super(...arguments), this.type = 3;
 	}
 	j(e) {
-		this.element[this.name] = e === k ? void 0 : e;
+		this.element[this.name] = e === D ? void 0 : e;
 	}
-}, Ee = class extends P {
+}, Oe = class extends M {
 	constructor() {
 		super(...arguments), this.type = 4;
 	}
 	j(e) {
-		this.element.toggleAttribute(this.name, !!e && e !== k);
+		this.element.toggleAttribute(this.name, !!e && e !== D);
 	}
-}, De = class extends P {
+}, ke = class extends M {
 	constructor(e, t, n, r, i) {
 		super(e, t, n, r, i), this.type = 5;
 	}
 	_$AI(e, t = this) {
-		if ((e = M(this, e, t, 0) ?? k) === O) return;
-		let n = this._$AH, r = e === k && n !== k || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== k && (n === k || r);
+		if ((e = A(this, e, t, 0) ?? D) === E) return;
+		let n = this._$AH, r = e === D && n !== D || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== D && (n === D || r);
 		r && this.element.removeEventListener(this.name, this, n), i && this.element.addEventListener(this.name, this, e), this._$AH = e;
 	}
 	handleEvent(e) {
 		typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
 	}
-}, Oe = class {
+}, Ae = class {
 	constructor(e, t, n) {
 		this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
 	}
@@ -473,18 +473,18 @@ var we = class {
 		return this._$AM._$AU;
 	}
 	_$AI(e) {
-		M(this, e);
+		A(this, e);
 	}
-}, ke = _.litHtmlPolyfillSupport;
-ke?.(j, N), (_.litHtmlVersions ??= []).push("3.3.2");
-var Ae = (e, t, n) => {
+}, je = _.litHtmlPolyfillSupport;
+je?.(k, j), (_.litHtmlVersions ??= []).push("3.3.2");
+var Me = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
-		r._$litPart$ = i = new N(t.insertBefore(x(), e), e, void 0, n ?? {});
+		r._$litPart$ = i = new j(t.insertBefore(x(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, F = globalThis, I = class extends g {
+}, N = globalThis, P = class extends g {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -494,7 +494,7 @@ var Ae = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Ae(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Me(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -503,25 +503,25 @@ var Ae = (e, t, n) => {
 		super.disconnectedCallback(), this._$Do?.setConnected(!1);
 	}
 	render() {
-		return O;
+		return E;
 	}
 };
-I._$litElement$ = !0, I.finalized = !0, F.litElementHydrateSupport?.({ LitElement: I });
-var je = F.litElementPolyfillSupport;
-je?.({ LitElement: I }), (F.litElementVersions ??= []).push("4.2.2");
+P._$litElement$ = !0, P.finalized = !0, N.litElementHydrateSupport?.({ LitElement: P });
+var Ne = N.litElementPolyfillSupport;
+Ne?.({ LitElement: P }), (N.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/custom-element.js
-var L = (e) => (t, n) => {
+var F = (e) => (t, n) => {
 	n === void 0 ? customElements.define(e, t) : n.addInitializer(() => {
 		customElements.define(e, t);
 	});
-}, Me = {
+}, Pe = {
 	attribute: !0,
 	type: String,
 	converter: m,
 	reflect: !1,
 	hasChanged: h
-}, Ne = (e = Me, t, n) => {
+}, Fe = (e = Pe, t, n) => {
 	let { kind: r, metadata: i } = n, a = globalThis.litPropertyMetadata.get(i);
 	if (a === void 0 && globalThis.litPropertyMetadata.set(i, a = /* @__PURE__ */ new Map()), r === "setter" && ((e = Object.create(e)).wrapped = !0), a.set(n.name, e), r === "accessor") {
 		let { name: r } = n;
@@ -544,16 +544,16 @@ var L = (e) => (t, n) => {
 	}
 	throw Error("Unsupported decorator location: " + r);
 };
-function Pe(e) {
-	return (t, n) => typeof n == "object" ? Ne(e, t, n) : ((e, t, n) => {
+function Ie(e) {
+	return (t, n) => typeof n == "object" ? Fe(e, t, n) : ((e, t, n) => {
 		let r = t.hasOwnProperty(n);
 		return t.constructor.createProperty(n, e), r ? Object.getOwnPropertyDescriptor(t, n) : void 0;
 	})(e, t, n);
 }
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/state.js
-function R(e) {
-	return Pe({
+function I(e) {
+	return Ie({
 		...e,
 		state: !0,
 		attribute: !1
@@ -561,12 +561,12 @@ function R(e) {
 }
 //#endregion
 //#region src/penance/spooky-themes.ts
-function Fe(e, t, n) {
+function Le(e, t, n) {
 	if (e.length !== 7 || t.length !== 7) return e;
 	let r = parseInt(e.slice(1, 3), 16), i = parseInt(e.slice(3, 5), 16), a = parseInt(e.slice(5, 7), 16), o = parseInt(t.slice(1, 3), 16), s = parseInt(t.slice(3, 5), 16), c = parseInt(t.slice(5, 7), 16);
 	return `#${Math.round(r + (o - r) * n).toString(16).padStart(2, "0")}${Math.round(i + (s - i) * n).toString(16).padStart(2, "0")}${Math.round(a + (c - a) * n).toString(16).padStart(2, "0")}`;
 }
-var Ie = {
+var Re = {
 	"--uui-color-selected": "#316dca",
 	"--uui-color-selected-emphasis": "#3e79d0",
 	"--uui-color-selected-standalone": "#5b8dd7",
@@ -612,7 +612,7 @@ var Ie = {
 	"--uui-color-positive-emphasis": "#347d39",
 	"--uui-color-positive-standalone": "#347d39",
 	"--uui-color-positive-contrast": "#eeeeef"
-}, Le = {
+}, ze = {
 	"--uui-color-selected": "#8b1a1a",
 	"--uui-color-selected-emphasis": "#a52020",
 	"--uui-color-selected-standalone": "#c84040",
@@ -659,17 +659,17 @@ var Ie = {
 	"--uui-color-positive-standalone": "#2d8c36",
 	"--uui-color-positive-contrast": "#f0e0e0"
 };
-function Re(e) {
-	let t = (e - 1) / 9, n = Object.keys(Ie).map((e) => `    ${e}: ${Fe(Ie[e], Le[e], t)};`);
-	return n.push("    --uui-color-scheme: dark;"), `:root {\n${n.join("\n")}\n}`;
-}
-var ze = (e) => `sinners-spooky-${e}`;
 function Be(e) {
+	let t = (e - 1) / 9, n = Object.keys(Re).map((e) => `    ${e}: ${Le(Re[e], ze[e], t)};`);
+	return n.push("    --uui-color-scheme: dark;"), n.push("    --sinners-action-btn-bg: #e64241;"), n.push("    --sinners-action-btn-color: #ffffff;"), `:root {\n${n.join("\n")}\n}`;
+}
+var Ve = (e) => `sinners-spooky-${e}`;
+function He(e) {
 	for (let t = 1; t <= 10; t++) {
-		let n = Re(t);
+		let n = Be(t);
 		e.register({
 			type: "theme",
-			alias: ze(t),
+			alias: Ve(t),
 			name: `☠ Sinners: Abyss (Level ${t})`,
 			css: () => Promise.resolve({ default: n }),
 			weight: 50 - t
@@ -677,8 +677,32 @@ function Be(e) {
 	}
 }
 //#endregion
+//#region src/penance/presenter.ts
+var Ue = /* @__PURE__ */ new Map(), L = /* @__PURE__ */ new Map(), R = "", We = null, z = {
+	setActiveTab(e) {
+		R = e;
+	},
+	onNextTab(e) {
+		We = e;
+	},
+	nextTab() {
+		console.log("[PRESENTER] nextTab()"), We?.();
+	},
+	registerSteps(e, t) {
+		Ue.set(e, t), L.set(e, 0);
+	},
+	async next() {
+		let e = Ue.get(R) ?? [], t = L.get(R) ?? 0;
+		if (console.log(`[PRESENTER] next() — tab="${R}" step=${t + 1}/${e.length}`), t >= e.length) {
+			console.log(`[PRESENTER] no more steps on tab "${R}"`);
+			return;
+		}
+		await e[t](), L.set(R, t + 1), console.log(`[PRESENTER] step ${t + 1} done`);
+	}
+};
+//#endregion
 //#region \0@oxc-project+runtime@0.128.0/helpers/decorate.js
-function z(e, t, n, r) {
+function B(e, t, n, r) {
 	var i = arguments.length, a = i < 3 ? t : r === null ? r = Object.getOwnPropertyDescriptor(t, n) : r, o;
 	if (typeof Reflect == "object" && typeof Reflect.decorate == "function") a = Reflect.decorate(e, t, n, r);
 	else for (var s = e.length - 1; s >= 0; s--) (o = e[s]) && (a = (i < 3 ? o(a) : i > 3 ? o(t, n, a) : o(t, n)) || a);
@@ -686,11 +710,11 @@ function z(e, t, n, r) {
 }
 //#endregion
 //#region src/penance/commandments/content-not-composable.element.ts
-var B = "/umbraco/management/api/v1/sinners", Ve = {
+var V = "/umbraco/management/api/v1/sinners", Ge = {
 	"Umbraco.BlockList": "Block List",
 	"Umbraco.BlockGrid": "Block Grid",
 	"Umbraco.RichText": "Rich Text"
-}, V = class extends e(I) {
+}, H = class extends e(P) {
 	constructor(...e) {
 		super(...e), this._items = [], this._emptyItems = [], this._loading = !0, this._folding = /* @__PURE__ */ new Set(), this._blessing = /* @__PURE__ */ new Set(), this._deleting = /* @__PURE__ */ new Set(), this._lastResult = null;
 	}
@@ -896,7 +920,13 @@ var B = "/umbraco/management/api/v1/sinners", Ve = {
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), this.consumeContext(n, (e) => {
+		super.connectedCallback(), z.registerSteps("I", [
+			() => this.#r("contentRows"),
+			() => this.#r("socialIconLinks"),
+			() => this.#i("instructionMessage"),
+			() => this.#i("successMessage"),
+			() => this.#i("errorMessage")
+		]), this.consumeContext(n, (e) => {
 			this.#e = e, this.#n();
 		});
 	}
@@ -914,7 +944,7 @@ var B = "/umbraco/management/api/v1/sinners", Ve = {
 	async #n() {
 		this._loading = !0;
 		try {
-			let [e, t] = await Promise.all([this.#t(`${B}/sinful-compositions`), this.#t(`${B}/empty-compositions`)]);
+			let [e, t] = await Promise.all([this.#t(`${V}/sinful-compositions`), this.#t(`${V}/empty-compositions`)]);
 			e.ok && (this._items = await e.json()), t.ok && (this._emptyItems = await t.json());
 			let n = this._items.reduce((e, t) => e + t.sinfulProperties.filter((e) => !e.isBlessed).length, 0);
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -929,12 +959,65 @@ var B = "/umbraco/management/api/v1/sinners", Ve = {
 			this._loading = !1;
 		}
 	}
-	async #r(e, t) {
+	async #r(e) {
+		let t = this._items.flatMap((e) => e.sinfulProperties.map((t) => `${e.contentTypeAlias}.${t.propertyAlias}`));
+		console.log(`[RULE I] foldInByAlias("${e}") — available:`, t);
+		for (let t of this._items) {
+			let n = t.sinfulProperties.find((t) => t.propertyAlias === e);
+			if (n) {
+				console.log(`[RULE I] found "${e}" on "${t.contentTypeAlias}", folding in`), await this.#a(t, n);
+				return;
+			}
+		}
+		console.warn(`[RULE I] property "${e}" not found in any sinful composition`);
+	}
+	async #i(e) {
+		let t = this._items.flatMap((e) => e.sinfulProperties.map((t) => `${e.contentTypeAlias}.${t.propertyAlias}(blessed=${t.isBlessed})`));
+		console.log(`[RULE I] blessByAlias("${e}") — available:`, t);
+		for (let t of this._items) {
+			let n = t.sinfulProperties.find((t) => t.propertyAlias === e && !t.isBlessed);
+			if (n) {
+				console.log(`[RULE I] found unblessed "${e}" on "${t.contentTypeAlias}", blessing`), await this.#c(t, n, !0);
+				return;
+			}
+		}
+		console.warn(`[RULE I] property "${e}" not found or already blessed`);
+	}
+	async #a(e, t) {
+		let n = `${e.contentTypeAlias}:${t.propertyAlias}`;
+		this._folding = new Set([...this._folding, n]), this._lastResult = null;
+		try {
+			let r = await (await this.#t(`${V}/fold-in`, {
+				method: "POST",
+				body: JSON.stringify({
+					compositionAlias: e.contentTypeAlias,
+					propertyAlias: t.propertyAlias
+				})
+			})).json();
+			this._lastResult = {
+				key: n,
+				result: r
+			}, r.success && await this.#n();
+		} catch (e) {
+			this._lastResult = {
+				key: n,
+				result: {
+					success: !1,
+					message: String(e),
+					affectedDocTypeCount: 0,
+					affectedContentCount: 0
+				}
+			};
+		} finally {
+			this._folding = new Set([...this._folding].filter((e) => e !== n));
+		}
+	}
+	async #o(e, t) {
 		let n = `${e.contentTypeAlias}:${t.propertyAlias}`;
 		if (window.confirm(`Fold "${t.propertyAlias}" from "${e.contentTypeName}" into: ${e.usedOn.join(", ")}?\n\nThis will:\n  1. Add "${t.propertyAlias}_fold_tmp" to each target doc type\n  2. Copy all content values across\n  3. Remove the property from the composition\n  4. Rename the temp property back to "${t.propertyAlias}"\n\nContent nodes will be saved as drafts. This cannot be undone.`)) {
 			this._folding = new Set([...this._folding, n]), this._lastResult = null;
 			try {
-				let r = await (await this.#t(`${B}/fold-in`, {
+				let r = await (await this.#t(`${V}/fold-in`, {
 					method: "POST",
 					body: JSON.stringify({
 						compositionAlias: e.contentTypeAlias,
@@ -960,21 +1043,21 @@ var B = "/umbraco/management/api/v1/sinners", Ve = {
 			}
 		}
 	}
-	async #i(e) {
+	async #s(e) {
 		if (window.confirm(`Delete "${e.contentTypeName}" (${e.contentTypeAlias})?\n\nThis cannot be undone.`)) {
 			this._deleting = new Set([...this._deleting, e.contentTypeAlias]);
 			try {
-				await this.#t(`${B}/empty-compositions/${encodeURIComponent(e.contentTypeAlias)}`, { method: "DELETE" }), await this.#n();
+				await this.#t(`${V}/empty-compositions/${encodeURIComponent(e.contentTypeAlias)}`, { method: "DELETE" }), await this.#n();
 			} finally {
 				this._deleting = new Set([...this._deleting].filter((t) => t !== e.contentTypeAlias));
 			}
 		}
 	}
-	async #a(e, t, n) {
+	async #c(e, t, n) {
 		let r = `${e.contentTypeAlias}:${t.propertyAlias}`;
 		this._blessing = new Set([...this._blessing, r]);
 		try {
-			await this.#t(`${B}/bless`, {
+			await this.#t(`${V}/bless`, {
 				method: "POST",
 				body: JSON.stringify({
 					compositionAlias: e.contentTypeAlias,
@@ -986,8 +1069,8 @@ var B = "/umbraco/management/api/v1/sinners", Ve = {
 			this._blessing = new Set([...this._blessing].filter((e) => e !== r));
 		}
 	}
-	#o(e) {
-		return D`
+	#l(e) {
+		return T`
             <div class="composition-row">
                 <div class="name-block">
                     <span class="name">${e.contentTypeName}</span>
@@ -995,21 +1078,21 @@ var B = "/umbraco/management/api/v1/sinners", Ve = {
                     <div class="props">
                         ${e.sinfulProperties.map((t) => {
 			let n = `${e.contentTypeAlias}:${t.propertyAlias}`, r = this._folding.has(n), i = this._blessing.has(n);
-			return D`
+			return T`
                                 <span class="prop-chip ${t.isBlessed ? "blessed" : ""}">
-                                    ${Ve[t.editorAlias] ?? t.editorAlias}
+                                    ${Ge[t.editorAlias] ?? t.editorAlias}
                                     <code>${t.propertyAlias}</code>
                                     <button
                                         class="fold-btn"
                                         ?disabled=${r || i}
-                                        @click=${() => this.#r(e, t)}
+                                        @click=${() => this.#o(e, t)}
                                         title="Move this property directly onto the doc types that compose it">
                                         ${r ? "⏳" : "↩ Fold In"}
                                     </button>
                                     <button
                                         class="fold-btn"
                                         ?disabled=${r || i}
-                                        @click=${() => this.#a(e, t, !t.isBlessed)}
+                                        @click=${() => this.#c(e, t, !t.isBlessed)}
                                         title=${t.isBlessed ? "Remove blessing from this property" : "Mark this property as intentionally composable"}>
                                         ${i ? "⏳" : t.isBlessed ? "✕ Unbless" : "✦ Bless"}
                                     </button>
@@ -1026,10 +1109,10 @@ var B = "/umbraco/management/api/v1/sinners", Ve = {
             </div>
         `;
 	}
-	#s() {
-		return this._emptyItems.length === 0 ? k : D`
+	#u() {
+		return this._emptyItems.length === 0 ? D : T`
             <div class="section-divider">Empty compositions</div>
-            ${this._emptyItems.map((e) => D`
+            ${this._emptyItems.map((e) => T`
                 <div class="empty-comp-row">
                     <div class="name-block">
                         <span class="name">${e.contentTypeName}</span>
@@ -1038,7 +1121,7 @@ var B = "/umbraco/management/api/v1/sinners", Ve = {
                     <button
                         class="delete-btn"
                         ?disabled=${this._deleting.has(e.contentTypeAlias)}
-                        @click=${() => this.#i(e)}>
+                        @click=${() => this.#s(e)}>
                         ${this._deleting.has(e.contentTypeAlias) ? "⏳" : "⊗ Delete"}
                     </button>
                 </div>
@@ -1047,32 +1130,32 @@ var B = "/umbraco/management/api/v1/sinners", Ve = {
 	}
 	render() {
 		let e = this._lastResult;
-		return D`
+		return T`
             <uui-box headline="I — Content is not composable">
-                ${e ? D`
+                ${e ? T`
                           <div class="result-banner ${e.result.success ? "success" : "error"}">
                               ${e.result.message}
                           </div>
-                      ` : k}
-                ${this._loading ? D`<uui-loader-bar></uui-loader-bar>` : D`
-                          ${this._items.length === 0 ? D`<div class="clean">✓ No compositions expose block lists, block grids, or rich text editors.</div>` : D`${this._items.map((e) => this.#o(e))}`}
-                          ${this.#s()}
+                      ` : D}
+                ${this._loading ? T`<uui-loader-bar></uui-loader-bar>` : T`
+                          ${this._items.length === 0 ? T`<div class="clean">✓ No compositions expose block lists, block grids, or rich text editors.</div>` : T`${this._items.map((e) => this.#l(e))}`}
+                          ${this.#u()}
                       `}
             </uui-box>
         `;
 	}
 };
-z([R()], V.prototype, "_items", void 0), z([R()], V.prototype, "_emptyItems", void 0), z([R()], V.prototype, "_loading", void 0), z([R()], V.prototype, "_folding", void 0), z([R()], V.prototype, "_blessing", void 0), z([R()], V.prototype, "_deleting", void 0), z([R()], V.prototype, "_lastResult", void 0), V = z([L("sinners-content-not-composable")], V);
+B([I()], H.prototype, "_items", void 0), B([I()], H.prototype, "_emptyItems", void 0), B([I()], H.prototype, "_loading", void 0), B([I()], H.prototype, "_folding", void 0), B([I()], H.prototype, "_blessing", void 0), B([I()], H.prototype, "_deleting", void 0), B([I()], H.prototype, "_lastResult", void 0), H = B([F("sinners-content-not-composable")], H);
 //#endregion
 //#region src/penance/commandments/six-sacred-types.element.ts
-var H = [
+var Ke = [
 	"Page",
 	"Block",
 	"Data",
 	"Composition",
 	"Repository",
 	"RepositoryItem"
-], U = "/umbraco/management/api/v1/sinners", W = class extends e(I) {
+], qe = "/umbraco/management/api/v1/sinners", U = class extends e(P) {
 	constructor(...e) {
 		super(...e), this._items = [], this._loading = !0, this._saving = !1, this._categorizing = !1, this._pendingChanges = /* @__PURE__ */ new Map();
 	}
@@ -1251,7 +1334,11 @@ var H = [
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), this.consumeContext(n, (e) => {
+		super.connectedCallback(), z.registerSteps("II", [
+			() => this.#a(),
+			() => this.#s(),
+			() => this.#o()
+		]), this.consumeContext(n, (e) => {
 			this.#e = e, this.#n();
 		});
 	}
@@ -1269,7 +1356,7 @@ var H = [
 	async #n() {
 		this._loading = !0;
 		try {
-			let e = await this.#t(`${U}/content-type-classifications`);
+			let e = await this.#t(`${qe}/content-type-classifications`);
 			e.ok && (this._items = await e.json());
 			let t = this._items.filter((e) => !e.classification).length;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -1292,19 +1379,28 @@ var H = [
 		let n = new Map(this._pendingChanges);
 		n.set(e, t), this._pendingChanges = n;
 	}
-	async #a() {
+	#a() {
+		let e = new Map(this._pendingChanges);
+		for (let t of this._items) if (!t.classification && !e.has(t.contentTypeAlias)) if (t.suggestedClassification) e.set(t.contentTypeAlias, t.suggestedClassification), console.log(`[RULE II] suggestion → ${t.contentTypeAlias} = ${t.suggestedClassification}`);
+		else {
+			let n = t.folderPath ?? "";
+			n.startsWith("/Elements/Setting") ? (e.set(t.contentTypeAlias, "Data"), console.log(`[RULE II] path rule (Data) → ${t.contentTypeAlias} (${n})`)) : n.startsWith("/Elements/") ? (e.set(t.contentTypeAlias, "Block"), console.log(`[RULE II] path rule (Block) → ${t.contentTypeAlias} (${n})`)) : console.warn(`[RULE II] no rule matched — ${t.contentTypeAlias} (${n}) left unclassified`);
+		}
+		this._pendingChanges = e, console.log(`[RULE II] autofill complete — ${e.size} pending`);
+	}
+	async #o() {
 		this._categorizing = !0;
 		try {
-			(await this.#t(`${U}/auto-categorize`, { method: "POST" })).ok && await this.#n();
+			(await this.#t(`${qe}/auto-categorize`, { method: "POST" })).ok && await this.#n();
 		} finally {
 			this._categorizing = !1;
 		}
 	}
-	async #o() {
+	async #s() {
 		if (this._pendingChanges.size !== 0) {
 			this._saving = !0;
 			try {
-				for (let [e, t] of this._pendingChanges) if ((await this.#t(`${U}/content-type-classifications`, {
+				for (let [e, t] of this._pendingChanges) if ((await this.#t(`${qe}/content-type-classifications`, {
 					method: "POST",
 					body: JSON.stringify({
 						contentTypeAlias: e,
@@ -1324,12 +1420,12 @@ var H = [
 			}
 		}
 	}
-	#s(e) {
+	#c(e) {
 		return this._pendingChanges.get(e.contentTypeAlias) ?? e.classification ?? "";
 	}
-	#c(e) {
-		let t = this.#s(e), n = this._pendingChanges.has(e.contentTypeAlias);
-		return D`
+	#l(e) {
+		let t = this.#c(e), n = this._pendingChanges.has(e.contentTypeAlias);
+		return T`
             <div class="item-row">
                 <div class="name-col">
                     <span class="name" title=${e.contentTypeName}>${e.contentTypeName}</span>
@@ -1346,55 +1442,55 @@ var H = [
                         @change=${(t) => this.#r(e.contentTypeAlias, t.target.value)}
                     >
                         <option value="">— Unclassified —</option>
-                        ${H.map((e) => D`<option value=${e} ?selected=${t === e}>${e}</option>`)}
+                        ${Ke.map((e) => T`<option value=${e} ?selected=${t === e}>${e}</option>`)}
                     </select>
-                    ${e.suggestedClassification && !n ? D`<span
+                    ${e.suggestedClassification && !n ? T`<span
                               class="suggestion"
                               @click=${() => this.#i(e.contentTypeAlias, e.suggestedClassification)}
                               >Suggest: ${e.suggestedClassification}</span
-                          >` : k}
+                          >` : D}
                 </div>
             </div>
         `;
 	}
-	#l(e, t, n = !1) {
-		return t.length === 0 ? k : D`
+	#u(e, t, n = !1) {
+		return t.length === 0 ? D : T`
             <details ?open=${n}>
                 <summary>
                     <span class=${e === "Unclassified" ? "sinful-label" : ""}>${e}</span>
                     <span class="group-count">${t.length}</span>
                 </summary>
-                ${t.map((e) => this.#c(e))}
+                ${t.map((e) => this.#l(e))}
             </details>
         `;
 	}
 	render() {
 		let e = this._items.filter((e) => !e.classification), t = (e) => this._items.filter((t) => t.classification === e), n = e.length;
-		return D`
+		return T`
             <uui-box headline="II — The Six Sacred Types">
-                ${this._loading ? D`<uui-loader-bar></uui-loader-bar>` : this._items.length === 0 ? D`<div class="empty">No content types found.</div>` : D`
+                ${this._loading ? T`<uui-loader-bar></uui-loader-bar>` : this._items.length === 0 ? T`<div class="empty">No content types found.</div>` : T`
                             <div class="stats">
                                 <uui-button
                                     look="outline"
                                     .disabled=${this._categorizing}
-                                    @click=${() => void this.#a()}
+                                    @click=${() => void this.#o()}
                                 >
                                     ${this._categorizing ? "Categorizing…" : "Auto Categorize"}
                                 </uui-button>
-                                ${n > 0 ? D`<span class="stat-chip sinful">⚠ ${n} unclassified</span>` : D`<span class="stat-chip clean">✓ All classified</span>`}
-                                ${H.map((e) => {
+                                ${n > 0 ? T`<span class="stat-chip sinful">⚠ ${n} unclassified</span>` : T`<span class="stat-chip clean">✓ All classified</span>`}
+                                ${Ke.map((e) => {
 			let n = t(e).length;
-			return n > 0 ? D`<span class="stat-chip">${e}: ${n}</span>` : k;
+			return n > 0 ? T`<span class="stat-chip">${e}: ${n}</span>` : D;
 		})}
                             </div>
 
-                            ${this.#l("Unclassified", e, !0)}
-                            ${H.map((e) => this.#l(e, t(e)))}
+                            ${this.#u("Unclassified", e, !0)}
+                            ${Ke.map((e) => this.#u(e, t(e)))}
                             <div class="save-bar">
                                 <uui-button
                                     look="primary"
                                     .disabled=${this._pendingChanges.size === 0 || this._saving}
-                                    @click=${() => void this.#o()}
+                                    @click=${() => void this.#s()}
                                 >
                                     ${this._saving ? "Saving…" : "Save"}
                                 </uui-button>
@@ -1404,10 +1500,10 @@ var H = [
         `;
 	}
 };
-z([R()], W.prototype, "_items", void 0), z([R()], W.prototype, "_loading", void 0), z([R()], W.prototype, "_saving", void 0), z([R()], W.prototype, "_categorizing", void 0), z([R()], W.prototype, "_pendingChanges", void 0), W = z([L("sinners-six-sacred-types")], W);
+B([I()], U.prototype, "_items", void 0), B([I()], U.prototype, "_loading", void 0), B([I()], U.prototype, "_saving", void 0), B([I()], U.prototype, "_categorizing", void 0), B([I()], U.prototype, "_pendingChanges", void 0), U = B([F("sinners-six-sacred-types")], U);
 //#endregion
 //#region src/penance/commandments/data-types-in-folders.element.ts
-var He = "/umbraco/management/api/v1/sinners", G = class extends e(I) {
+var Je = "/umbraco/management/api/v1/sinners", W = class extends e(P) {
 	constructor(...e) {
 		super(...e), this._items = [], this._loading = !0, this._organizing = !1, this._lastMessage = null;
 	}
@@ -1445,8 +1541,8 @@ var He = "/umbraco/management/api/v1/sinners", G = class extends e(I) {
             font-size: 12px;
             font-weight: 700;
             border: none;
-            background: var(--uui-color-interactive, #1b264f);
-            color: white;
+            background: var(--sinners-action-btn-bg, #1b264f);
+            color: var(--sinners-action-btn-color, white);
             cursor: pointer;
         }
 
@@ -1518,7 +1614,7 @@ var He = "/umbraco/management/api/v1/sinners", G = class extends e(I) {
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), this.consumeContext(n, (e) => {
+		super.connectedCallback(), z.registerSteps("III", [() => this.#r()]), this.consumeContext(n, (e) => {
 			this.#e = e, this.#n();
 		});
 	}
@@ -1536,7 +1632,7 @@ var He = "/umbraco/management/api/v1/sinners", G = class extends e(I) {
 	async #n() {
 		this._loading = !0;
 		try {
-			let e = await this.#t(`${He}/unorganized-data-types`);
+			let e = await this.#t(`${Je}/unorganized-data-types`);
 			e.ok && (this._items = await e.json());
 			let t = this._items.length;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -1554,7 +1650,7 @@ var He = "/umbraco/management/api/v1/sinners", G = class extends e(I) {
 	async #r() {
 		this._organizing = !0, this._lastMessage = null;
 		try {
-			let e = await this.#t(`${He}/organize-data-types`, { method: "POST" });
+			let e = await this.#t(`${Je}/organize-data-types`, { method: "POST" });
 			if (e.ok) {
 				let t = await e.json();
 				this._lastMessage = {
@@ -1584,10 +1680,10 @@ var He = "/umbraco/management/api/v1/sinners", G = class extends e(I) {
 	}
 	render() {
 		let e = this._lastMessage;
-		return D`
+		return T`
             <uui-box headline="III — Data types live in folders">
-                ${e ? D`<div class="result-banner ${e.success ? "success" : "error"}">${e.text}</div>` : k}
-                ${this._loading ? D`<uui-loader-bar></uui-loader-bar>` : this._items.length === 0 ? D`<div class="clean">✓ All data types are in folders.</div>` : D`
+                ${e ? T`<div class="result-banner ${e.success ? "success" : "error"}">${e.text}</div>` : D}
+                ${this._loading ? T`<uui-loader-bar></uui-loader-bar>` : this._items.length === 0 ? T`<div class="clean">✓ All data types are in folders.</div>` : T`
                             <div class="toolbar">
                                 <span class="count">${this._items.length} data type(s) need organizing</span>
                                 <button
@@ -1597,13 +1693,13 @@ var He = "/umbraco/management/api/v1/sinners", G = class extends e(I) {
                                     ${this._organizing ? "⏳ Organizing…" : "⊞ Organize All"}
                                 </button>
                             </div>
-                            ${[...this.#i().entries()].map(([e, t]) => D`
+                            ${[...this.#i().entries()].map(([e, t]) => T`
                                 <div class="folder-group">
                                     <div class="folder-header">${e}</div>
-                                    ${t.map((e) => D`
+                                    ${t.map((e) => T`
                                         <div class="dt-row">
                                             <span class="dt-name">${e.name}</span>
-                                            ${e.isBuiltIn ? D`<span class="built-in-badge">built-in</span>` : k}
+                                            ${e.isBuiltIn ? T`<span class="built-in-badge">built-in</span>` : D}
                                         </div>
                                     `)}
                                 </div>
@@ -1613,10 +1709,50 @@ var He = "/umbraco/management/api/v1/sinners", G = class extends e(I) {
         `;
 	}
 };
-z([R()], G.prototype, "_items", void 0), z([R()], G.prototype, "_loading", void 0), z([R()], G.prototype, "_organizing", void 0), z([R()], G.prototype, "_lastMessage", void 0), G = z([L("sinners-data-types-in-folders")], G);
+B([I()], W.prototype, "_items", void 0), B([I()], W.prototype, "_loading", void 0), B([I()], W.prototype, "_organizing", void 0), B([I()], W.prototype, "_lastMessage", void 0), W = B([F("sinners-data-types-in-folders")], W);
+//#endregion
+//#region src/penance/magic.ts
+var Ye = !1;
+function Xe() {
+	if (Ye) return;
+	let e = document.createElement("style");
+	e.textContent = "\n        @keyframes sinners-magic-fly {\n            0%   { left: -300px; opacity: 1; transform: scale(1); }\n            60%  { left: 50%; opacity: 1; transform: translateX(-50%) scale(1.1); }\n            80%  { left: 50%; opacity: 1; transform: translateX(-50%) scale(1.15); }\n            100% { left: 110%; opacity: 0; transform: scale(0.8); }\n        }\n    ", document.head.appendChild(e), Ye = !0;
+}
+function Ze(e) {
+	Xe();
+	let t = document.createElement("div");
+	Object.assign(t.style, {
+		position: "fixed",
+		top: "0",
+		left: "0",
+		right: "0",
+		height: "500px",
+		paddingTop: "200px",
+		pointerEvents: "none",
+		zIndex: "99999",
+		overflow: "hidden"
+	});
+	let n = document.createElement("span");
+	n.textContent = "✨ Magic ✨", Object.assign(n.style, {
+		position: "absolute",
+		top: "0",
+		left: "-300px",
+		fontSize: "96px",
+		fontWeight: "900",
+		fontStyle: "italic",
+		background: "linear-gradient(90deg, #ff6b35, #f7c59f, #efefd0, #00b4d8, #9b5de5)",
+		webkitBackgroundClip: "text",
+		webkitTextFillColor: "transparent",
+		backgroundClip: "text",
+		whiteSpace: "nowrap",
+		animation: "sinners-magic-fly 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards"
+	}), t.appendChild(n), document.body.appendChild(t), setTimeout(() => {
+		document.body.removeChild(t), e();
+	}, 1400);
+}
 //#endregion
 //#region src/penance/commandments/program-cs-clean.element.ts
-var Ue = "/umbraco/management/api/v1/sinners", K = class extends e(I) {
+var Qe = "/umbraco/management/api/v1/sinners", $e = "var i̸̖l̷̼l̴̮i̵̗g̸̫a̷̮l̶̼ = app.UseUmbraco();\n\ni̸̖l̷̼l̴̮i̵̗g̸̫a̷̮l̶̼.WithMiddleware(u =>\n    {\n        u.UseBackOffice();\n        u.UseWebsite();\n    })\n    .WithEndpoints(u =>\n    {\n        u.UseBackOfficeEndpoints();\n        u.UseWebsiteEndpoints();\n    });", et = "app.UseUmbraco()\n    .WithMiddleware(u =>\n    {\n        u.UseBackOffice();\n        u.UseWebsite();\n    })\n    .WithEndpoints(u =>\n    {\n        u.UseBackOfficeEndpoints();\n        u.UseWebsiteEndpoints();\n    });\n\nawait app.RunAsync();", G = class extends e(P) {
 	constructor(...e) {
 		super(...e), this._result = null, this._loading = !0;
 	}
@@ -1675,17 +1811,75 @@ var Ue = "/umbraco/management/api/v1/sinners", K = class extends e(I) {
             color: var(--uui-color-text-alt, #888);
             font-family: monospace;
         }
+
+        .diff-block {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            align-items: flex-start;
+        }
+
+        .diff-side {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .diff-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 6px;
+        }
+
+        .diff-label.before { color: var(--uui-color-danger-standalone, #d42054); }
+        .diff-label.after  { color: var(--uui-color-positive-standalone, #0d7a54); }
+
+        .diff-arrow {
+            font-size: 24px;
+            padding-top: 42px;
+            color: var(--uui-color-text-alt, #aaa);
+            flex-shrink: 0;
+        }
+
+        pre {
+            margin: 0;
+            padding: 12px 14px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        pre.before {
+            background: #fff0f3;
+            border: 1px solid #ffc0cb;
+            color: #6b0020;
+        }
+
+        pre.after {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            color: #1a4731;
+        }
+
+        .fix-btn {
+            margin: 0 16px 16px;
+        }
+
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), this.consumeContext(n, (e) => {
+		super.connectedCallback(), z.registerSteps("IV", [() => this.#n()]), this.consumeContext(n, (e) => {
 			this.#e = e, this.#t();
 		});
 	}
 	async #t() {
 		this._loading = !0;
 		try {
-			let e = await this.#e?.getLatestToken(), t = await fetch(`${Ue}/program-cs-audit`, { headers: e ? { Authorization: `Bearer ${e}` } : {} });
+			let e = await this.#e?.getLatestToken(), t = await fetch(`${Qe}/program-cs-audit`, { headers: e ? { Authorization: `Bearer ${e}` } : {} });
 			t.ok && (this._result = await t.json());
 			let n = this._result ? +!!this._result.useUmbracoSavedToVariable + this._result.extraMiddleware.length + this._result.extraEndpoints.length : 0;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -1700,12 +1894,15 @@ var Ue = "/umbraco/management/api/v1/sinners", K = class extends e(I) {
 			this._loading = !1;
 		}
 	}
-	#n(e) {
+	async #n() {
+		let e = await this.#e?.getLatestToken();
+		await fetch(`${Qe}/fix-program-cs`, {
+			method: "POST",
+			headers: e ? { Authorization: `Bearer ${e}` } : {}
+		}), Ze(() => void this.#t());
+	}
+	#r(e) {
 		let t = [];
-		e.useUmbracoSavedToVariable && t.push({
-			title: "UseUmbraco() result is assigned to a variable",
-			detail: "Chain it directly: app.UseUmbraco().WithMiddleware(...).WithEndpoints(...)"
-		});
 		for (let n of e.extraMiddleware) t.push({
 			title: "Non-standard middleware registered",
 			detail: `u.${n}()  — found inside .WithMiddleware(...)`
@@ -1714,33 +1911,51 @@ var Ue = "/umbraco/management/api/v1/sinners", K = class extends e(I) {
 			title: "Non-standard endpoint registered",
 			detail: `u.${n}()  — found inside .WithEndpoints(...)`
 		});
-		return D`
-            <div class="issue-list">
-                ${t.map((e) => D`
-                    <div class="issue-row">
-                        <span class="issue-icon">✕</span>
-                        <div class="issue-body">
-                            <span class="issue-title">${e.title}</span>
-                            <span class="issue-detail">${e.detail}</span>
-                        </div>
+		return T`
+            ${e.useUmbracoSavedToVariable ? T`
+                <div class="diff-block">
+                    <div class="diff-side">
+                        <div class="diff-label before">Before — thy sin</div>
+                        <pre class="before">${$e}</pre>
                     </div>
-                `)}
-            </div>
+                    <div class="diff-arrow">→</div>
+                    <div class="diff-side">
+                        <div class="diff-label after">After — absolved</div>
+                        <pre class="after">${et}</pre>
+                    </div>
+                </div>
+                <uui-button class="fix-btn" look="secondary" @click=${() => void this.#n()}>
+                    ✨ Apply the fix
+                </uui-button>
+            ` : ""}
+            ${t.length > 0 ? T`
+                <div class="issue-list">
+                    ${t.map((e) => T`
+                        <div class="issue-row">
+                            <span class="issue-icon">✕</span>
+                            <div class="issue-body">
+                                <span class="issue-title">${e.title}</span>
+                                <span class="issue-detail">${e.detail}</span>
+                            </div>
+                        </div>
+                    `)}
+                </div>
+            ` : ""}
         `;
 	}
 	render() {
 		let e = this._result;
-		return D`
+		return T`
             <uui-box headline="IV — Program.cs is clean">
-                ${this._loading ? D`<uui-loader-bar></uui-loader-bar>` : !e || !e.found ? D`<div class="not-found">Program.cs not found at the application root.</div>` : e.isClean ? D`<div class="clean">✓ Program.cs looks clean.</div>` : this.#n(e)}
+                ${this._loading ? T`<uui-loader-bar></uui-loader-bar>` : !e || !e.found ? T`<div class="not-found">Program.cs not found at the application root.</div>` : e.isClean ? T`<div class="clean">✓ Program.cs looks clean.</div>` : this.#r(e)}
             </uui-box>
         `;
 	}
 };
-z([R()], K.prototype, "_result", void 0), z([R()], K.prototype, "_loading", void 0), K = z([L("sinners-program-cs-clean")], K);
+B([I()], G.prototype, "_result", void 0), B([I()], G.prototype, "_loading", void 0), G = B([F("sinners-program-cs-clean")], G);
 //#endregion
 //#region src/penance/commandments/production-settings.element.ts
-var We = "/umbraco/management/api/v1/sinners", q = class extends e(I) {
+var tt = "/umbraco/management/api/v1/sinners", K = class extends e(P) {
 	constructor(...e) {
 		super(...e), this._result = null, this._loading = !0, this._blessing = /* @__PURE__ */ new Set();
 	}
@@ -1866,7 +2081,7 @@ var We = "/umbraco/management/api/v1/sinners", q = class extends e(I) {
 	async #n() {
 		this._loading = !0;
 		try {
-			let e = await this.#t(`${We}/production-readiness`);
+			let e = await this.#t(`${tt}/production-readiness`);
 			e.ok && (this._result = await e.json());
 			let t = this._result?.missingSettings.filter((e) => !e.isBlessed).length ?? 0;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -1884,7 +2099,7 @@ var We = "/umbraco/management/api/v1/sinners", q = class extends e(I) {
 	async #r(e, t) {
 		this._blessing = new Set([...this._blessing, e.key]);
 		try {
-			await this.#t(`${We}/bless-production-setting`, {
+			await this.#t(`${tt}/bless-production-setting`, {
 				method: "POST",
 				body: JSON.stringify({
 					settingKey: e.key,
@@ -1896,13 +2111,13 @@ var We = "/umbraco/management/api/v1/sinners", q = class extends e(I) {
 		}
 	}
 	render() {
-		let e = this._result, t = e ? D`<div class="scanned">Scanned: ${e.scannedFiles.join(", ")}</div>` : null;
-		return D`
+		let e = this._result, t = e ? T`<div class="scanned">Scanned: ${e.scannedFiles.join(", ")}</div>` : null;
+		return T`
             <uui-box headline="V — Live environment is production-ready">
-                ${this._loading ? D`<uui-loader-bar></uui-loader-bar>` : e ? e.isReady ? D`
+                ${this._loading ? T`<uui-loader-bar></uui-loader-bar>` : e ? e.isReady ? T`
                               <div class="clean">✓ Production settings found across your appsettings files.</div>
                               ${t}
-                          ` : D`
+                          ` : T`
                               <div class="warning-header">⚠ You better have a pipeline somewhere that sets these</div>
                               <div class="warning-sub">
                                   Scanned ${e.scannedFiles.join(", ")} — the following production settings were not found
@@ -1910,7 +2125,7 @@ var We = "/umbraco/management/api/v1/sinners", q = class extends e(I) {
                               </div>
                               ${e.missingSettings.map((e) => {
 			let t = this._blessing.has(e.key);
-			return D`
+			return T`
                                       <div class="setting-row ${e.isBlessed ? "blessed" : ""}">
                                           <span class="setting-key">${e.key}</span>
                                           <span class="setting-value">${e.expectedValue}</span>
@@ -1930,10 +2145,10 @@ var We = "/umbraco/management/api/v1/sinners", q = class extends e(I) {
         `;
 	}
 };
-z([R()], q.prototype, "_result", void 0), z([R()], q.prototype, "_loading", void 0), z([R()], q.prototype, "_blessing", void 0), q = z([L("sinners-production-settings")], q);
+B([I()], K.prototype, "_result", void 0), B([I()], K.prototype, "_loading", void 0), B([I()], K.prototype, "_blessing", void 0), K = B([F("sinners-production-settings")], K);
 //#endregion
 //#region src/penance/commandments/alias-audit.element.ts
-var Ge = "/umbraco/management/api/v1/sinners", J = class extends e(I) {
+var nt = "/umbraco/management/api/v1/sinners", q = class extends e(P) {
 	constructor(...e) {
 		super(...e), this._items = [], this._loading = !0, this._blessing = /* @__PURE__ */ new Set();
 	}
@@ -2069,7 +2284,7 @@ var Ge = "/umbraco/management/api/v1/sinners", J = class extends e(I) {
 	async #n() {
 		this._loading = !0;
 		try {
-			let e = await this.#t(`${Ge}/alias-issues`);
+			let e = await this.#t(`${nt}/alias-issues`);
 			e.ok && (this._items = await e.json());
 			let t = this._items.filter((e) => !e.isBlessed && !e.isCamelCase).length, n = this._items.filter((e) => !e.isBlessed && e.isCamelCase && e.unrecognizedWords.length > 0).length, r = t + n, i = t > 0 ? "error" : n > 0 ? "warning" : "ok";
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -2087,7 +2302,7 @@ var Ge = "/umbraco/management/api/v1/sinners", J = class extends e(I) {
 	async #r(e, t) {
 		this._blessing = new Set([...this._blessing, e.contentTypeAlias]);
 		try {
-			await this.#t(`${Ge}/bless-alias`, {
+			await this.#t(`${nt}/bless-alias`, {
 				method: "POST",
 				body: JSON.stringify({
 					contentTypeAlias: e.contentTypeAlias,
@@ -2100,15 +2315,15 @@ var Ge = "/umbraco/management/api/v1/sinners", J = class extends e(I) {
 	}
 	#i(e) {
 		let t = this._blessing.has(e.contentTypeAlias);
-		return D`
+		return T`
             <div class="issue-row ${e.isBlessed ? "blessed" : ""}">
                 <div class="name-block">
                     <span class="name">${e.contentTypeName}</span>
                     <span class="alias">${e.contentTypeAlias}</span>
                     <span class="path">${e.folderPath}</span>
                     <div class="tags">
-                        ${e.isCamelCase ? k : D`<span class="tag error">✕ Not camelCase</span>`}
-                        ${e.unrecognizedWords.map((e) => D`
+                        ${e.isCamelCase ? D : T`<span class="tag error">✕ Not camelCase</span>`}
+                        ${e.unrecognizedWords.map((e) => T`
                             <span class="tag warning">? <code>${e}</code></span>
                         `)}
                     </div>
@@ -2124,17 +2339,17 @@ var Ge = "/umbraco/management/api/v1/sinners", J = class extends e(I) {
         `;
 	}
 	render() {
-		return D`
+		return T`
             <uui-box headline="VI — Document type aliases are camelCase English">
-                ${this._loading ? D`<uui-loader-bar></uui-loader-bar>` : this._items.length === 0 ? D`<div class="clean">✓ All document type aliases are valid camelCase English.</div>` : D`${this._items.map((e) => this.#i(e))}`}
+                ${this._loading ? T`<uui-loader-bar></uui-loader-bar>` : this._items.length === 0 ? T`<div class="clean">✓ All document type aliases are valid camelCase English.</div>` : T`${this._items.map((e) => this.#i(e))}`}
             </uui-box>
         `;
 	}
 };
-z([R()], J.prototype, "_items", void 0), z([R()], J.prototype, "_loading", void 0), z([R()], J.prototype, "_blessing", void 0), J = z([L("sinners-alias-audit")], J);
+B([I()], q.prototype, "_items", void 0), B([I()], q.prototype, "_loading", void 0), B([I()], q.prototype, "_blessing", void 0), q = B([F("sinners-alias-audit")], q);
 //#endregion
 //#region src/penance/commandments/translation-audit.element.ts
-var Ke = "/umbraco/management/api/v1/sinners", Y = class extends e(I) {
+var J = "/umbraco/management/api/v1/sinners", Y = class extends e(P) {
 	constructor(...e) {
 		super(...e), this._result = null, this._loading = !0, this._blessing = /* @__PURE__ */ new Set(), this._grouping = /* @__PURE__ */ new Set();
 	}
@@ -2269,8 +2484,8 @@ var Ke = "/umbraco/management/api/v1/sinners", Y = class extends e(I) {
             font-size: 11px;
             font-weight: 700;
             border: none;
-            background: var(--uui-color-interactive, #1b264f);
-            color: white;
+            background: var(--sinners-action-btn-bg, #1b264f);
+            color: var(--sinners-action-btn-color, white);
             cursor: pointer;
             white-space: nowrap;
             flex-shrink: 0;
@@ -2299,7 +2514,7 @@ var Ke = "/umbraco/management/api/v1/sinners", Y = class extends e(I) {
 	async #n() {
 		this._loading = !0;
 		try {
-			let e = await this.#t(`${Ke}/translation-audit`);
+			let e = await this.#t(`${J}/translation-audit`);
 			e.ok && (this._result = await e.json());
 			let t = this._result, n = t?.issues.filter((e) => !e.isBlessed && !e.isPascalCase).length ?? 0, r = t?.issues.filter((e) => !e.isBlessed && e.isPascalCase && e.unrecognizedWords.length > 0).length ?? 0, i = t?.groupSuggestions.length ?? 0, a = n + r + i, o = n > 0 ? "error" : a > 0 ? "warning" : "ok";
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -2317,7 +2532,7 @@ var Ke = "/umbraco/management/api/v1/sinners", Y = class extends e(I) {
 	async #r(e, t) {
 		this._blessing = new Set([...this._blessing, e.itemKey]);
 		try {
-			await this.#t(`${Ke}/bless-translation`, {
+			await this.#t(`${J}/bless-translation`, {
 				method: "POST",
 				body: JSON.stringify({
 					itemKey: e.itemKey,
@@ -2331,7 +2546,7 @@ var Ke = "/umbraco/management/api/v1/sinners", Y = class extends e(I) {
 	async #i(e) {
 		this._grouping = new Set([...this._grouping, e.proposedParentKey]);
 		try {
-			await this.#t(`${Ke}/create-translation-group`, {
+			await this.#t(`${J}/create-translation-group`, {
 				method: "POST",
 				body: JSON.stringify({
 					parentKey: e.proposedParentKey,
@@ -2343,16 +2558,16 @@ var Ke = "/umbraco/management/api/v1/sinners", Y = class extends e(I) {
 		}
 	}
 	#a(e) {
-		return e.length === 0 ? k : D`
+		return e.length === 0 ? D : T`
             ${e.map((e) => {
 			let t = this._blessing.has(e.itemKey);
-			return D`
+			return T`
                     <div class="issue-row ${e.isBlessed ? "blessed" : ""}">
                         <div>
                             <span class="key">${e.itemKey}</span>
                             <div class="tags">
-                                ${e.isPascalCase ? k : D`<span class="tag error">✕ Not PascalCase</span>`}
-                                ${e.unrecognizedWords.map((e) => D`
+                                ${e.isPascalCase ? D : T`<span class="tag error">✕ Not PascalCase</span>`}
+                                ${e.unrecognizedWords.map((e) => T`
                                     <span class="tag warning">? <code>${e}</code></span>
                                 `)}
                             </div>
@@ -2370,16 +2585,16 @@ var Ke = "/umbraco/management/api/v1/sinners", Y = class extends e(I) {
         `;
 	}
 	#o(e) {
-		return e.length === 0 ? k : D`
+		return e.length === 0 ? D : T`
             <div class="section-divider">Ungrouped keys</div>
             ${e.map((e) => {
 			let t = this._grouping.has(e.proposedParentKey);
-			return D`
+			return T`
                     <div class="group-row">
                         <div>
                             <span class="proposed-parent">${e.proposedParentKey}</span>
                             <div class="group-children">
-                                ${e.children.map((e) => D`<span class="child-chip">${e.itemKey}</span>`)}
+                                ${e.children.map((e) => T`<span class="child-chip">${e.itemKey}</span>`)}
                             </div>
                         </div>
                         <button
@@ -2396,20 +2611,20 @@ var Ke = "/umbraco/management/api/v1/sinners", Y = class extends e(I) {
 	}
 	render() {
 		let e = this._result, t = (e?.issues.length ?? 0) > 0, n = (e?.groupSuggestions.length ?? 0) > 0;
-		return D`
+		return T`
             <uui-box headline="VII — Translation keys are PascalCase English">
-                ${this._loading ? D`<uui-loader-bar></uui-loader-bar>` : !t && !n ? D`<div class="clean">✓ All translation keys are valid camelCase English with no grouping suggestions.</div>` : D`
-                            ${e ? this.#a(e.issues) : k}
-                            ${e ? this.#o(e.groupSuggestions) : k}
+                ${this._loading ? T`<uui-loader-bar></uui-loader-bar>` : !t && !n ? T`<div class="clean">✓ All translation keys are valid camelCase English with no grouping suggestions.</div>` : T`
+                            ${e ? this.#a(e.issues) : D}
+                            ${e ? this.#o(e.groupSuggestions) : D}
                         `}
             </uui-box>
         `;
 	}
 };
-z([R()], Y.prototype, "_result", void 0), z([R()], Y.prototype, "_loading", void 0), z([R()], Y.prototype, "_blessing", void 0), z([R()], Y.prototype, "_grouping", void 0), Y = z([L("sinners-translation-audit")], Y);
+B([I()], Y.prototype, "_result", void 0), B([I()], Y.prototype, "_loading", void 0), B([I()], Y.prototype, "_blessing", void 0), B([I()], Y.prototype, "_grouping", void 0), Y = B([F("sinners-translation-audit")], Y);
 //#endregion
 //#region src/penance/commandments/root-media.element.ts
-var qe = "/umbraco/management/api/v1/sinners", X = class extends e(I) {
+var rt = "/umbraco/management/api/v1/sinners", X = class extends e(P) {
 	constructor(...e) {
 		super(...e), this._items = [], this._loading = !0;
 	}
@@ -2474,7 +2689,7 @@ var qe = "/umbraco/management/api/v1/sinners", X = class extends e(I) {
 	async #t() {
 		this._loading = !0;
 		try {
-			let e = await this.#e?.getLatestToken(), t = await fetch(`${qe}/root-media`, { headers: e ? { Authorization: `Bearer ${e}` } : {} });
+			let e = await this.#e?.getLatestToken(), t = await fetch(`${rt}/root-media`, { headers: e ? { Authorization: `Bearer ${e}` } : {} });
 			t.ok && (this._items = await t.json());
 			let n = this._items.length;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -2490,14 +2705,14 @@ var qe = "/umbraco/management/api/v1/sinners", X = class extends e(I) {
 		}
 	}
 	render() {
-		return D`
+		return T`
             <uui-box headline="VIII — No media items at root">
-                ${this._loading ? D`<uui-loader-bar></uui-loader-bar>` : this._items.length === 0 ? D`<div class="clean">✓ No media items loose at root — everything is in a folder.</div>` : D`
+                ${this._loading ? T`<uui-loader-bar></uui-loader-bar>` : this._items.length === 0 ? T`<div class="clean">✓ No media items loose at root — everything is in a folder.</div>` : T`
                             <div class="info">
                                 ${this._items.length} media item(s) are sitting directly at root.
                                 Move them into a folder.
                             </div>
-                            ${this._items.map((e) => D`
+                            ${this._items.map((e) => T`
                                 <div class="item-row">
                                     <span class="item-name">${e.name}</span>
                                     <span class="item-type">${e.mediaTypeAlias}</span>
@@ -2509,10 +2724,10 @@ var qe = "/umbraco/management/api/v1/sinners", X = class extends e(I) {
         `;
 	}
 };
-z([R()], X.prototype, "_items", void 0), z([R()], X.prototype, "_loading", void 0), X = z([L("sinners-root-media")], X);
+B([I()], X.prototype, "_items", void 0), B([I()], X.prototype, "_loading", void 0), X = B([F("sinners-root-media")], X);
 //#endregion
 //#region src/penance/commandments/root-content.element.ts
-var Je = "/umbraco/management/api/v1/sinners", Z = class extends e(I) {
+var it = "/umbraco/management/api/v1/sinners", Z = class extends e(P) {
 	constructor(...e) {
 		super(...e), this._result = null, this._loading = !0, this._seeking = !1, this._sanctuaryMessage = null;
 	}
@@ -2597,8 +2812,8 @@ var Je = "/umbraco/management/api/v1/sinners", Z = class extends e(I) {
             font-size: 13px;
             font-weight: 700;
             border: none;
-            background: var(--uui-color-interactive, #1b264f);
-            color: white;
+            background: var(--sinners-action-btn-bg, #1b264f);
+            color: var(--sinners-action-btn-color, white);
             cursor: pointer;
         }
 
@@ -2646,7 +2861,7 @@ var Je = "/umbraco/management/api/v1/sinners", Z = class extends e(I) {
 	async #n() {
 		this._loading = !0;
 		try {
-			let e = await this.#t(`${Je}/root-content-audit`);
+			let e = await this.#t(`${it}/root-content-audit`);
 			e.ok && (this._result = await e.json());
 			let t = this._result?.rootNodes.filter((e) => !e.isRepository).length ?? 0;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -2664,7 +2879,7 @@ var Je = "/umbraco/management/api/v1/sinners", Z = class extends e(I) {
 	async #r() {
 		this._seeking = !0, this._sanctuaryMessage = null;
 		try {
-			let e = await this.#t(`${Je}/seek-repository-sanctuary`, { method: "POST" });
+			let e = await this.#t(`${it}/seek-repository-sanctuary`, { method: "POST" });
 			if (e.ok) {
 				let t = await e.json();
 				this._sanctuaryMessage = t.success ? t.message : `⚠ ${t.message}`, t.success && await this.#n();
@@ -2675,14 +2890,14 @@ var Je = "/umbraco/management/api/v1/sinners", Z = class extends e(I) {
 	}
 	render() {
 		let e = this._result, t = e?.rootNodes.filter((e) => !e.isRepository) ?? [];
-		return D`
+		return T`
             <uui-box headline="IX — Root nodes are Repositories">
-                ${this._loading ? D`<uui-loader-bar></uui-loader-bar>` : e?.isClean ? D`<div class="clean">✓ All root content nodes dwell within a Repository. The structure is righteous.</div>` : D`
+                ${this._loading ? T`<uui-loader-bar></uui-loader-bar>` : e?.isClean ? T`<div class="clean">✓ All root content nodes dwell within a Repository. The structure is righteous.</div>` : T`
                             <div class="info">
                                 ${t.length} root node(s) exist outside a Repository. A site without a Repository at its root
                                 cannot serve multiple masters. Seek sanctuary below.
                             </div>
-                            ${e?.rootNodes.map((e) => D`
+                            ${e?.rootNodes.map((e) => T`
                                 <div class="item-row">
                                     <span class="item-name">${e.name}</span>
                                     <span class="item-type">${e.contentTypeAlias}</span>
@@ -2691,7 +2906,7 @@ var Je = "/umbraco/management/api/v1/sinners", Z = class extends e(I) {
                                     </span>
                                 </div>
                             `)}
-                            ${this._sanctuaryMessage ? D`<div class="sanctuary-message">${this._sanctuaryMessage}</div>` : D`
+                            ${this._sanctuaryMessage ? T`<div class="sanctuary-message">${this._sanctuaryMessage}</div>` : T`
                                     <div class="action-row">
                                         <button
                                             class="sanctuary-btn"
@@ -2706,10 +2921,10 @@ var Je = "/umbraco/management/api/v1/sinners", Z = class extends e(I) {
         `;
 	}
 };
-z([R()], Z.prototype, "_result", void 0), z([R()], Z.prototype, "_loading", void 0), z([R()], Z.prototype, "_seeking", void 0), z([R()], Z.prototype, "_sanctuaryMessage", void 0), Z = z([L("sinners-root-content")], Z);
+B([I()], Z.prototype, "_result", void 0), B([I()], Z.prototype, "_loading", void 0), B([I()], Z.prototype, "_seeking", void 0), B([I()], Z.prototype, "_sanctuaryMessage", void 0), Z = B([F("sinners-root-content")], Z);
 //#endregion
 //#region src/penance/commandments/usync-audit.element.ts
-var Ye = "/umbraco/management/api/v1/sinners", Q = class extends e(I) {
+var at = "/umbraco/management/api/v1/sinners", Q = class extends e(P) {
 	constructor(...e) {
 		super(...e), this._result = null, this._loading = !0;
 	}
@@ -2758,6 +2973,11 @@ var Ye = "/umbraco/management/api/v1/sinners", Q = class extends e(I) {
             font-size: 13px;
             color: var(--uui-color-text-alt, #888);
         }
+
+        .pretend-btn {
+            margin: 16px;
+        }
+
     `;
 	}
 	connectedCallback() {
@@ -2768,7 +2988,7 @@ var Ye = "/umbraco/management/api/v1/sinners", Q = class extends e(I) {
 	async #t() {
 		this._loading = !0;
 		try {
-			let e = await this.#e?.getLatestToken(), t = await fetch(`${Ye}/usync-audit`, { headers: e ? { Authorization: `Bearer ${e}` } : {} });
+			let e = await this.#e?.getLatestToken(), t = await fetch(`${at}/usync-audit`, { headers: e ? { Authorization: `Bearer ${e}` } : {} });
 			t.ok && (this._result = await t.json());
 			let n = this._result, r = n?.csprojFound && !n.hasUSync && !n.hasUmbracoDeploy ? 1 : 0;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -2783,11 +3003,18 @@ var Ye = "/umbraco/management/api/v1/sinners", Q = class extends e(I) {
 			this._loading = !1;
 		}
 	}
+	async #n() {
+		let e = await this.#e?.getLatestToken();
+		await fetch(`${at}/inject-usync`, {
+			method: "POST",
+			headers: e ? { Authorization: `Bearer ${e}` } : {}
+		}), Ze(() => void this.#t());
+	}
 	render() {
 		let e = this._result;
-		return D`
+		return T`
             <uui-box headline="X — uSync is installed">
-                ${this._loading ? D`<uui-loader-bar></uui-loader-bar>` : e?.csprojFound ? e.hasUSync ? D`<div class="clean">✓ uSync is installed in <span class="code">${e.csprojName}</span> — thy schema walketh not alone.</div>` : e.hasUmbracoDeploy ? D`<div class="clean">✓ Umbraco.Deploy is installed in <span class="code">${e.csprojName}</span> — thy schema walketh not alone.</div>` : D`
+                ${this._loading ? T`<uui-loader-bar></uui-loader-bar>` : e?.csprojFound ? e.hasUSync ? T`<div class="clean">✓ uSync is installed in <span class="code">${e.csprojName}</span> — thy schema walketh not alone.</div>` : e.hasUmbracoDeploy ? T`<div class="clean">✓ Umbraco.Deploy is installed in <span class="code">${e.csprojName}</span> — thy schema walketh not alone.</div>` : T`
                                 <div class="error-block">
                                     <div class="error-heading">✕ No schema versioning tool is installed</div>
                                     <div class="error-body">
@@ -2800,15 +3027,18 @@ var Ye = "/umbraco/management/api/v1/sinners", Q = class extends e(I) {
                                         schema files to source control to be absolved.
                                     </div>
                                 </div>
-                            ` : D`<div class="warn-block">No .csproj file found at the content root — unable to inspect thy project.</div>`}
+                                <uui-button class="pretend-btn" look="secondary" @click=${() => void this.#n()}>
+                                    ✨ Let's pretend we have uSync
+                                </uui-button>
+                            ` : T`<div class="warn-block">No .csproj file found at the content root — unable to inspect thy project.</div>`}
             </uui-box>
         `;
 	}
 };
-z([R()], Q.prototype, "_result", void 0), z([R()], Q.prototype, "_loading", void 0), Q = z([L("sinners-usync-audit")], Q);
+B([I()], Q.prototype, "_result", void 0), B([I()], Q.prototype, "_loading", void 0), Q = B([F("sinners-usync-audit")], Q);
 //#endregion
 //#region src/penance/penance-dashboard.element.ts
-var Xe = [
+var ot = [
 	{
 		id: "I",
 		label: "I — Content is not composable"
@@ -2849,7 +3079,7 @@ var Xe = [
 		id: "X",
 		label: "X — uSync is installed"
 	}
-], Ze = {
+], st = {
 	0: "Righteous — thy backoffice is clean",
 	1: "A whisper of darkness",
 	2: "The shadows stir",
@@ -2861,7 +3091,7 @@ var Xe = [
 	8: "The damned rejoice",
 	9: "All is lost",
 	10: "THOU ART BEYOND ALL REDEMPTION"
-}, $ = class extends e(I) {
+}, $ = class extends e(P) {
 	constructor(...e) {
 		super(...e), this.#t = new URLSearchParams(window.location.search).has("debug"), this._activeTab = "I", this._statuses = /* @__PURE__ */ new Map(), this._spookyFactor = 0;
 	}
@@ -3012,7 +3242,10 @@ var Xe = [
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), this.consumeContext(t, (e) => {
+		super.connectedCallback(), z.setActiveTab(this._activeTab), z.onNextTab(() => {
+			let e = ot.map((e) => e.id), t = e[(e.indexOf(this._activeTab) + 1) % e.length];
+			this._activeTab = t, z.setActiveTab(t);
+		}), this.consumeContext(t, (e) => {
 			this.#e = e, this.#i();
 		});
 	}
@@ -3027,7 +3260,7 @@ var Xe = [
 	}
 	#i() {
 		let e = this.#r;
-		this.#e?.setThemeByAlias(e > 0 ? ze(e) : "umb-light-theme");
+		this.#e?.setThemeByAlias(e > 0 ? Ve(e) : "umb-light-theme");
 	}
 	#a(e) {
 		this._spookyFactor = +e.target.value, this.#i();
@@ -3037,23 +3270,23 @@ var Xe = [
 	}
 	#s(e) {
 		let t = this._statuses.get(e);
-		return t ? t.issueCount === 0 ? D`<span class="status-badge ok">✓</span>` : D`<span class="status-badge ${t.severity}">${t.issueCount}</span>` : D`<span class="status-badge pending"></span>`;
+		return t ? t.issueCount === 0 ? T`<span class="status-badge ok">✓</span>` : T`<span class="status-badge ${t.severity}">${t.issueCount}</span>` : T`<span class="status-badge pending"></span>`;
 	}
 	render() {
-		return D`
+		return T`
             <div class="hero">
                 <h1>Penance Board</h1>
                 <p>Confess your sins. Audit your Umbraco installation against the Ten UmbraCommandments.</p>
-                ${this._statuses.size > 0 ? D`<p class="verdict">${Ze[this.#r]}</p>` : ""}
+                ${this._statuses.size > 0 ? T`<p class="verdict">${st[this.#r]}</p>` : ""}
             </div>
 
             <div class="layout">
             <div class="tab-strip">
-                ${Xe.map((e) => D`
+                ${ot.map((e) => T`
                     <button
                         class="tab-btn ${this._activeTab === e.id ? "active" : ""}"
                         @click=${() => {
-			this._activeTab = e.id;
+			this._activeTab = e.id, z.setActiveTab(e.id);
 		}}>
                         ${e.label}
                         ${this.#s(e.id)}
@@ -3115,10 +3348,10 @@ var Xe = [
             </div>
             </div>
 
-            ${this.#t ? D`
+            ${this.#t ? T`
                 <div class="debug-strip">
                     <label>Debug — Spooky Factor Override (auto: ${this.#n})</label>
-                    <div class="spooky-label">${this.#r} — ${Ze[this.#r]}</div>
+                    <div class="spooky-label">${this.#r} — ${st[this.#r]}</div>
                     <input
                         type="range"
                         min="0"
@@ -3129,10 +3362,10 @@ var Xe = [
         `;
 	}
 };
-z([R()], $.prototype, "_activeTab", void 0), z([R()], $.prototype, "_statuses", void 0), z([R()], $.prototype, "_spookyFactor", void 0), $ = z([L("sinners-penance-dashboard")], $);
+B([I()], $.prototype, "_activeTab", void 0), B([I()], $.prototype, "_statuses", void 0), B([I()], $.prototype, "_spookyFactor", void 0), $ = B([F("sinners-penance-dashboard")], $);
 //#endregion
 //#region src/index.ts
-var Qe = [
+var ct = [
 	"̀",
 	"́",
 	"̂",
@@ -3152,7 +3385,7 @@ var Qe = [
 	"ͦ",
 	"ͬ",
 	"ͯ"
-], $e = [
+], lt = [
 	"̖",
 	"̗",
 	"̘",
@@ -3173,32 +3406,43 @@ var Qe = [
 	"͓",
 	"͚"
 ];
-function et(e) {
+function ut(e) {
 	return [...e].map((e, t) => {
 		if (e === " ") return e;
 		let n = t * 7 + e.charCodeAt(0) * 13, r = 3 + n % 3, i = e;
-		for (let e = 0; e < r; e++) i += Qe[(n + e * 3) % Qe.length], i += $e[(n + e * 5 + 2) % $e.length];
+		for (let e = 0; e < r; e++) i += ct[(n + e * 3) % ct.length], i += lt[(n + e * 5 + 2) % lt.length];
 		return i;
 	}).join("");
 }
-var tt = [{
+var dt = [{
 	type: "dashboard",
 	alias: "Sinners.PenanceDashboard",
 	name: "Penance",
 	element: $,
 	weight: 100,
 	meta: {
-		label: et("Penance"),
+		label: ut("Penance"),
 		pathname: "penance"
 	},
 	conditions: [{
 		alias: "Umb.Condition.SectionAlias",
 		match: "Umb.Section.Settings"
 	}]
-}], nt = (e, t) => {
-	t.registerMany(tt), Be(t);
+}], ft = new Set([
+	"PageUp",
+	"PageDown",
+	"Escape",
+	"."
+]);
+function pt() {
+	window.addEventListener("keydown", (e) => {
+		ft.has(e.key) && (e.preventDefault(), e.stopPropagation(), console.log(`[POINTER] key="${e.key}"`), e.key === "PageDown" && z.next(), e.key === "PageUp" && z.nextTab());
+	}, !0);
+}
+var mt = (e, t) => {
+	t.registerMany(dt), He(t), pt();
 };
 //#endregion
-export { nt as onInit };
+export { mt as onInit };
 
 //# sourceMappingURL=dist.js.map

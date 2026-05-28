@@ -117,6 +117,12 @@ public class SinnersManagementApiController : ManagementApiControllerBase
     public IActionResult GetProgramCsAudit() =>
         Ok(_programCsAnalyzerService.Audit());
 
+    [HttpPost("fix-program-cs")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult FixProgramCs() =>
+        _programCsAnalyzerService.FixSavedVariable() ? Ok() : NotFound();
+
     [HttpGet("unorganized-data-types")]
     [ProducesResponseType<IEnumerable<UnorganizedDataTypeModel>>(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUnorganizedDataTypes() =>
@@ -193,6 +199,12 @@ public class SinnersManagementApiController : ManagementApiControllerBase
     [ProducesResponseType<USyncAuditResult>(StatusCodes.Status200OK)]
     public IActionResult GetUSyncAudit() =>
         Ok(_uSyncAuditService.Audit());
+
+    [HttpPost("inject-usync")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult InjectUSync() =>
+        _uSyncAuditService.InjectUSync() ? Ok() : NotFound();
 }
 
 public record SetClassificationRequest

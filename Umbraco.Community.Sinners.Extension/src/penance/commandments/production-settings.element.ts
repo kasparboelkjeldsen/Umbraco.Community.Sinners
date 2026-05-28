@@ -2,6 +2,7 @@ import { LitElement, html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
+import { presenter } from '../presenter.js';
 
 interface MissingProductionSetting {
     key: string;
@@ -128,10 +129,20 @@ export class ProductionSettingsElement extends UmbElementMixin(LitElement) {
 
     override connectedCallback() {
         super.connectedCallback();
+        presenter.registerSteps('V', [0, 1, 2, 3, 4].map((i) => () => this.#blessIndex(i)));
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;
             void this.#load();
         });
+    }
+
+    async #blessIndex(i: number) {
+        const settings = this._result?.missingSettings ?? [];
+        const unblessed = settings.filter((s) => !s.isBlessed);
+        const target = unblessed[0];
+        if (!target) { console.warn(`[RULE V] no unblessed setting at index ${i}`); return; }
+        console.log(`[RULE V] blessing "${target.key}"`);
+        await this.#bless(target, true);
     }
 
     async #fetchAuth(url: string, options: RequestInit = {}): Promise<Response> {

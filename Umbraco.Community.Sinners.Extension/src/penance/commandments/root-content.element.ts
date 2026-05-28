@@ -2,6 +2,7 @@ import { LitElement, html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
+import { presenter } from '../presenter.js';
 
 interface RootNodeModel {
     key: string;
@@ -143,6 +144,9 @@ export class RootContentElement extends UmbElementMixin(LitElement) {
 
     override connectedCallback() {
         super.connectedCallback();
+        presenter.registerSteps('IX', [
+            () => this.#seekSanctuary(),
+        ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;
             void this.#load();

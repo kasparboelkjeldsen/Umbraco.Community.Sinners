@@ -2,6 +2,8 @@ import { LitElement, html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
+import { showMagic } from '../magic.js';
+import { presenter } from '../presenter.js';
 
 interface USyncAuditResult {
     csprojFound: boolean;
@@ -62,10 +64,18 @@ export class USyncAuditElement extends UmbElementMixin(LitElement) {
             font-size: 13px;
             color: var(--uui-color-text-alt, #888);
         }
+
+        .pretend-btn {
+            margin: 16px;
+        }
+
     `;
 
     override connectedCallback() {
         super.connectedCallback();
+        presenter.registerSteps('X', [
+            () => this.#pretend(),
+        ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;
             void this.#load();
@@ -90,6 +100,15 @@ export class USyncAuditElement extends UmbElementMixin(LitElement) {
         } finally {
             this._loading = false;
         }
+    }
+
+    async #pretend() {
+        const token = await this.#authCtx?.getLatestToken();
+        await fetch(`${API_BASE}/inject-usync`, {
+            method: 'POST',
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        showMagic(() => void this.#load());
     }
 
     override render() {
@@ -118,6 +137,9 @@ export class USyncAuditElement extends UmbElementMixin(LitElement) {
                                         schema files to source control to be absolved.
                                     </div>
                                 </div>
+                                <uui-button class="pretend-btn" look="secondary" @click=${() => void this.#pretend()}>
+                                    ✨ Let's pretend we have uSync
+                                </uui-button>
                             `}
             </uui-box>
         `;
