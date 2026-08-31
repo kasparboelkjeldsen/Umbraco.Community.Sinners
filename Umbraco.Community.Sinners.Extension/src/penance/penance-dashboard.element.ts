@@ -242,6 +242,7 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
         this._statuses = new Map(this._statuses).set(tab, detail);
         if (this._spookyFactor === 0) this.#applyTheme();
         if (!this.#userNavigated && this._statuses.size === TABS.length) {
+            this.#userNavigated = true;
             const first = TABS.find((t) => (this._statuses.get(t.id)?.issueCount ?? 0) > 0);
             if (first) {
                 this._activeTab = first.id;
