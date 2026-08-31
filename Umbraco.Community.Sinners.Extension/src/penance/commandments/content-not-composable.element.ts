@@ -255,11 +255,11 @@ export class ContentNotComposableElement extends UmbElementMixin(LitElement) {
     override connectedCallback() {
         super.connectedCallback();
         presenter.registerSteps('I', [
-            () => this.#foldInByAlias('contentRows'),
-            () => this.#foldInByAlias('socialIconLinks'),
-            () => this.#blessByAlias('instructionMessage'),
-            () => this.#blessByAlias('successMessage'),
-            () => this.#blessByAlias('errorMessage'),
+            { label: 'Fold In contentRows', run: () => this.#foldInByAlias('contentRows') },
+            { label: 'Fold In socialIconLinks', run: () => this.#foldInByAlias('socialIconLinks') },
+            { label: 'Bless instructionMessage', run: () => this.#blessByAlias('instructionMessage') },
+            { label: 'Bless successMessage', run: () => this.#blessByAlias('successMessage') },
+            { label: 'Bless errorMessage', run: () => this.#blessByAlias('errorMessage') },
         ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;

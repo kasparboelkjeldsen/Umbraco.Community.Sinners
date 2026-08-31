@@ -3,6 +3,7 @@ import type { ManifestDashboard } from '@umbraco-cms/backoffice/dashboard';
 import { PenanceDashboardElement } from './penance/penance-dashboard.element.js';
 import { registerSpookyThemes } from './penance/spooky-themes.js';
 import { presenter } from './penance/presenter.js';
+import './penance/presenter-bar.element.js';
 
 const ZALGO_ABOVE = [
     '̀', '́', '̂', '̃', '̅', '̈',
@@ -67,8 +68,14 @@ function listenForPointer() {
     }, true);
 }
 
+function mountPresenterBar() {
+    if (document.querySelector('sinners-presenter-bar')) return;
+    document.body.appendChild(document.createElement('sinners-presenter-bar'));
+}
+
 export const onInit: UmbEntryPointOnInit = (_host, extensionRegistry) => {
     extensionRegistry.registerMany(manifests);
     registerSpookyThemes(extensionRegistry);
     listenForPointer();
+    mountPresenterBar();
 };

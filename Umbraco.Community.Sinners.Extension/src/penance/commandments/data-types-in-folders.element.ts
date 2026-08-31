@@ -130,7 +130,7 @@ export class DataTypesInFoldersElement extends UmbElementMixin(LitElement) {
     override connectedCallback() {
         super.connectedCallback();
         presenter.registerSteps('III', [
-            () => this.#organizeAll(),
+            { label: 'Organize data types', run: () => this.#organizeAll() },
         ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;

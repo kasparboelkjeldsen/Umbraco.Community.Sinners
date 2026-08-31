@@ -40,9 +40,32 @@ public class USyncAuditService(IWebHostEnvironment env)
         var content = File.ReadAllText(path);
         if (USyncRef.IsMatch(content)) return true;
 
-        var injection = "  <ItemGroup>\n    <PackageReference Include=\"uSync\" Version=\"15.0.0\" />\n  </ItemGroup>\n";
+        // Under Central Package Management a versioned PackageReference is an error (NU1008):
+        // the version belongs in Directory.Packages.props, the reference stays versionless.
+        var propsPath = Path.Combine(env.ContentRootPath, "Directory.Packages.props");
+        var usesCpm = File.Exists(propsPath);
+
+        var packageRef = usesCpm
+            ? "    <PackageReference Include=\"uSync\" />\n"
+            : "    <PackageReference Include=\"uSync\" Version=\"18.1.2\" />\n";
+        var injection = "  <ItemGroup>\n" + packageRef + "  </ItemGroup>\n";
         var updated = content.Replace("</Project>", injection + "</Project>");
         File.WriteAllText(path, updated);
+
+        if (usesCpm)
+        {
+            var props = File.ReadAllText(propsPath);
+            if (!Regex.IsMatch(props, @"<PackageVersion[^>]+Include=""uSync""", RegexOptions.IgnoreCase))
+            {
+                var versionLine = "    <PackageVersion Include=\"uSync\" Version=\"18.1.2\" />\n";
+                var idx = props.IndexOf("</ItemGroup>", StringComparison.OrdinalIgnoreCase);
+                var updatedProps = idx >= 0
+                    ? props.Insert(idx, versionLine + "  ")
+                    : props.Replace("</Project>", "  <ItemGroup>\n" + versionLine + "  </ItemGroup>\n</Project>");
+                File.WriteAllText(propsPath, updatedProps);
+            }
+        }
+
         return true;
     }
 }

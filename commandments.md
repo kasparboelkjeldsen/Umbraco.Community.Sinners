@@ -10,9 +10,9 @@ Meta-content, settings and the like are good composition candidates. CTAs, butto
 
 ---
 
-## 2. There are 6 document types. Data, Block, Composition, Page, Repository and Repository Item.
+## 2. There are 4 document types. Data, Block, Composition and Page.
 
-While strictly speaking there are only 2 document types in Umbraco (document and element), we think about them as 6.
+While strictly speaking there are only 2 document types in Umbraco (document and element), we think about them as 4.
 
 A **Page** is a document. It wants to be rendered. It can have compositions.
 
@@ -22,11 +22,9 @@ A **Block** is an element that wants to be rendered. It can have compositions bu
 
 A **Composition** is an element which only exists to be composed onto either a page, a block or some data. It should never render or have a view — it should never be pickable.
 
-A **Repository** is a document that will never be rendered. It exists purely as a container — a root node that holds either a site's page hierarchy or related Repository Items together. Your website root is a Repository. Your global settings node is a Repository. Because your site already lives inside a Repository, going multi-site is not an architectural change — it is a matter of adding another Page beneath your website Repository. You are by default ready to go multi-site.
+There used to be six. **Repositories** and **Repository Items** — never-rendered container documents holding shared, pickable content — served us faithfully, but with Umbraco 18 the Library has taken up their burden: shared content now lives as elements in the Library, pickable across the installation without ceremony. The Repositories have ascended. We do not mourn them; we count to four.
 
-A **Repository Item** is a document that will never be rendered. It lives inside a Repository and is the actual node — the site settings group, the external event record, the global configuration entry that editors need to pick from or administrators need to maintain. Unlike a Repository, it can be picked from directly.
-
-When building our solutions, we should strive to sort our document types into 6 folders: Data, Blocks, Compositions, Pages, Repositories, Repository Items. What you do from there can be project specific.
+When building our solutions, we should strive to sort our document types into 4 folders: Data, Blocks, Compositions, Pages. What you do from there can be project specific.
 
 ---
 
@@ -71,9 +69,10 @@ No more `@Artikel.Where(x => x.NogetPaaDansk == "this is silly")`
 
 ---
 
-## 9. A root node can only be a Repository
+## 9. A root node is not a rendering node
 
-The content tree root is not a free-for-all. Every root node must be a Repository. Pages live beneath a root Repository, never at the root themselves. This keeps the content tree intentional — editors know that what they see at the top level is structure, not content.
+The content tree root is not a free-for-all. Every root node must be a template-less shell that contains your actual site. 
+Pages live beneath a root node, never at the root themselves. This keeps the content tree intentional — editors know that what they see at the top level is structure, not content.
 
 ---
 

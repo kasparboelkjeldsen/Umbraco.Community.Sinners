@@ -190,9 +190,9 @@ public class SinnersManagementApiController : ManagementApiControllerBase
     public async Task<IActionResult> GetRootContentAudit() =>
         Ok(await _rootContentAuditService.AuditAsync());
 
-    [HttpPost("seek-repository-sanctuary")]
-    [ProducesResponseType<RepositorySanctuaryResult>(StatusCodes.Status200OK)]
-    public async Task<IActionResult> SeekRepositorySanctuary() =>
+    [HttpPost("seek-root-sanctuary")]
+    [ProducesResponseType<RootSanctuaryResult>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> SeekRootSanctuary() =>
         Ok(await _rootContentAuditService.SeekSanctuaryAsync());
 
     [HttpGet("usync-audit")]

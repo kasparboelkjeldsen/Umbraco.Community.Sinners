@@ -129,7 +129,10 @@ export class ProductionSettingsElement extends UmbElementMixin(LitElement) {
 
     override connectedCallback() {
         super.connectedCallback();
-        presenter.registerSteps('V', [0, 1, 2, 3, 4].map((i) => () => this.#blessIndex(i)));
+        presenter.registerSteps('V', [0, 1, 2, 3, 4].map((i) => ({
+            label: `Bless setting ${i + 1} of 5`,
+            run: () => this.#blessIndex(i),
+        })));
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;
             void this.#load();

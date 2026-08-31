@@ -137,9 +137,12 @@ export class AliasAuditElement extends UmbElementMixin(LitElement) {
     override connectedCallback() {
         super.connectedCallback();
         presenter.registerSteps('VI', [
-            () => {
-                const first = this._items.find((i) => !i.isBlessed);
-                if (first) return this.#bless(first, true);
+            {
+                label: 'Bless first alias',
+                run: () => {
+                    const first = this._items.find((i) => !i.isBlessed);
+                    if (first) return this.#bless(first, true);
+                },
             },
         ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {

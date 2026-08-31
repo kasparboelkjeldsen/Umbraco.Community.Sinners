@@ -80,7 +80,7 @@ export class RootMediaElement extends UmbElementMixin(LitElement) {
     override connectedCallback() {
         super.connectedCallback();
         presenter.registerSteps('VIII', [
-            () => this.#pretend(),
+            { label: 'Pretend to fix ✨', run: () => this.#pretend() },
         ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;

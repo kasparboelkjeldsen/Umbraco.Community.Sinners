@@ -165,7 +165,7 @@ export class ProgramCsCleanElement extends UmbElementMixin(LitElement) {
     override connectedCallback() {
         super.connectedCallback();
         presenter.registerSteps('IV', [
-            () => this.#fix(),
+            { label: 'Cleanse Program.cs', run: () => this.#fix() },
         ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;

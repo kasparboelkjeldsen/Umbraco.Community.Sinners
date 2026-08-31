@@ -1,9 +1,61 @@
-type Step = () => void | Promise<void>;
+type StepFn = () => void | Promise<void>;
 
-const _steps = new Map<string, Step[]>();
-const _indices = new Map<string, number>();
-let _activeTab = '';
+export interface PresenterStep {
+    label: string;
+    run: StepFn;
+}
+
+export type PresenterAction = 'next' | 'nextTab' | 'dot' | 'state';
+
+export const TAB_ORDER = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'] as const;
+
+export const TAB_SHORT: Record<string, string> = {
+    I: 'Compositions',
+    II: 'Sacred Types',
+    III: 'Data Types',
+    IV: 'Program.cs',
+    V: 'Production',
+    VI: 'Aliases',
+    VII: 'Translations',
+    VIII: 'Media',
+    IX: 'Root',
+    X: 'uSync',
+};
+
+const STORAGE_KEY = 'sinners-presenter-state';
+
+interface PersistedState {
+    activeTab: string;
+    indices: Record<string, number>;
+}
+
+function loadState(): PersistedState {
+    try {
+        const raw = sessionStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw) as PersistedState;
+    } catch { /* fresh state */ }
+    return { activeTab: '', indices: {} };
+}
+
+const _persisted = loadState();
+const _steps = new Map<string, PresenterStep[]>();
+const _indices = new Map<string, number>(Object.entries(_persisted.indices));
+let _activeTab = _persisted.activeTab;
 let _nextTabFn: (() => void) | null = null;
+const _listeners = new Set<(action: PresenterAction) => void>();
+
+function persist() {
+    try {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+            activeTab: _activeTab,
+            indices: Object.fromEntries(_indices),
+        } satisfies PersistedState));
+    } catch { /* storage unavailable — presenter still works, just forgets on reload */ }
+}
+
+function notify(action: PresenterAction) {
+    _listeners.forEach((fn) => fn(action));
+}
 
 const PENANCE_URL = '/umbraco/section/settings/dashboard/penance';
 
@@ -21,13 +73,47 @@ const ELSEWHERE_RULES: Array<{ match: string; target: string }> = [
 ];
 
 export const presenter = {
+    get activeTab(): string {
+        return _activeTab;
+    },
+
     setActiveTab(tabId: string) {
         _activeTab = tabId;
+        persist();
+        notify('state');
+    },
+
+    subscribe(fn: (action: PresenterAction) => void): () => void {
+        _listeners.add(fn);
+        return () => _listeners.delete(fn);
+    },
+
+    /** Info about the pending step on the active tab, or null when no steps are registered (e.g. away from the board). */
+    stepInfo(): { label: string; index: number; total: number } | null {
+        const steps = _steps.get(_activeTab);
+        if (!steps || steps.length === 0) return null;
+        const idx = _indices.get(_activeTab) ?? 0;
+        if (idx >= steps.length) return { label: '', index: idx, total: steps.length };
+        return { label: steps[idx].label, index: idx, total: steps.length };
+    },
+
+    nextTabId(): string {
+        const ids = TAB_ORDER as readonly string[];
+        const idx = ids.indexOf(_activeTab);
+        return ids[(idx + 1) % ids.length];
+    },
+
+    /** What dot() will do from the current location. */
+    dotIntent(): 'exhibit' | 'board-reload' | 'return' {
+        if (window.location.pathname.includes('/dashboard/penance'))
+            return TAB_URLS[_activeTab] ? 'exhibit' : 'board-reload';
+        return 'return';
     },
 
     dot() {
         const path = window.location.pathname;
         const onPenance = path.includes('/dashboard/penance');
+        notify('dot');
 
         if (onPenance) {
             const url = TAB_URLS[_activeTab] ?? PENANCE_URL;
@@ -46,26 +132,43 @@ export const presenter = {
         _nextTabFn = fn;
     },
 
+    get canNextTab(): boolean {
+        return _nextTabFn !== null;
+    },
+
     nextTab() {
         console.log('[PRESENTER] nextTab()');
         _nextTabFn?.();
+        notify('nextTab');
     },
 
-    registerSteps(tabId: string, steps: Step[]) {
+    registerSteps(tabId: string, steps: PresenterStep[]) {
         _steps.set(tabId, steps);
-        _indices.set(tabId, 0);
+        // Restore a persisted index (survives exhibit round-trips) but never point past the end
+        const stored = _indices.get(tabId) ?? 0;
+        _indices.set(tabId, Math.min(stored, steps.length));
+        notify('state');
     },
 
     async next() {
         const steps = _steps.get(_activeTab) ?? [];
         const idx = _indices.get(_activeTab) ?? 0;
         console.log(`[PRESENTER] next() — tab="${_activeTab}" step=${idx + 1}/${steps.length}`);
+        notify('next');
         if (idx >= steps.length) {
             console.log(`[PRESENTER] no more steps on tab "${_activeTab}"`);
             return;
         }
-        await steps[idx]();
+        await steps[idx].run();
         _indices.set(_activeTab, idx + 1);
+        persist();
+        notify('state');
         console.log(`[PRESENTER] step ${idx + 1} done`);
+    },
+
+    /** Wipe persisted presenter state and reload — the "0" panic reset. */
+    reset() {
+        try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+        window.location.href = PENANCE_URL;
     },
 };

@@ -4,8 +4,10 @@ Dev-time Umbraco package for a talk: "The 10 UmbraCommandments". Enforces opinio
 
 ## Target
 
-- Umbraco 17+ only — `net10.0` single target, no multi-targeting, no version guards.
-- Test site lives at `Umbraco/17.3.4/` (local, not in this repo).
+- Umbraco 17/18 — `net10.0` single target, no multi-targeting, no version guards. Backend references `Umbraco.Cms` `[17.0.0,19.0.0)` (compiles against 17.0.0, runs fine on 18 — verified end-to-end).
+- Test sites live under `Umbraco/` (local, not in this repo): `17.3.4/`, `17.4/`, and `18.1.1/` (current demo target, Clean 8.0.1 starter kit + uSync 18.1.2, admin@example.com / 1234567890).
+- The 18 site consumes Sinners via ProjectReference; a `CopySinnersUiAssets` target in its csproj copies `Backend/ui/**` into `wwwroot/App_Plugins/umbraco.community.sinners.frontend/` on every build.
+- Umbraco 18 auth note (for scripted Management API access): tokens are redacted into encrypted HttpOnly cookies (`__Host-umbAccessToken` etc.). Send `Authorization: Bearer [redacted]` (literal) plus the cookie jar — middleware substitutes the real token. Access tokens expire in ~5 min.
 
 ## Solution structure
 
@@ -68,6 +70,11 @@ Umbraco.Community.Sinners.Extension/ # Frontend package (Vite + Lit)
 - **One file per commandment** under `src/penance/commandments/`. Each is a self-contained custom element with its own styles, state, and API calls. `penance-dashboard.element.ts` is a thin shell that imports and renders them.
 - **Tab layout**: vertical tab strip (260px left column, `border-right`), content `flex: 1` on the right. All commandment elements always in DOM (`display:none` for inactive) so status events fire for all tabs on initial load. Do NOT use `uui-tab-group` — it has a 352px fixed shadow-DOM width that clips tabs.
 - **Status events**: each commandment dispatches `sinners-status` (`{ issueCount: number, severity: 'ok' | 'warning' | 'error' }`) with `bubbles: true, composed: true`. Dashboard renders a badge per tab.
+- **Presenter rig** (talk controls): `presenter.ts` + `presenter-bar.element.ts`.
+  - `sinners-presenter-bar` is appended to `<body>` from the entry point — a fixed 210px column on the right with 4 big numbered buttons; injected global CSS shrinks `body`/`umb-app` by that width.
+  - Keys `1`–`4` (and `0` = full state reset) are captured globally with `preventDefault` — they work even with an input focused (workspaces autofocus their name field) and never type into fields. Old pointer keys (PageDown/PageUp/`.`) still work as fallback.
+  - Button 1 = `presenter.next()` (label shows the pending step + n/total), 2 = `nextTab()` (shows next commandment), 3 = `dot()` (Exhibit the sin / Return to Board, contextual), 4 = reload.
+  - `registerSteps` takes `{ label, run }[]` — labels feed the bar. Presenter state (active tab + step indices) persists in sessionStorage so full-page exhibit round-trips resume where they left off; the dashboard prefers the persisted tab over its first-sinful-tab auto-jump.
 - Build: `npm run build` in `Umbraco.Community.Sinners.Extension/`.
 
 ### Spell checking (Rules VI & VII)
@@ -81,14 +88,14 @@ Umbraco.Community.Sinners.Extension/ # Frontend package (Vite + Lit)
 | # | Rule | Status |
 |---|------|--------|
 | I | Content is not composable — no BlockList/BlockGrid/RichText on compositions | ✅ Done |
-| II | The Six Sacred Types — classify all content types, enforce root folder naming | ✅ Done |
+| II | The Four Sacred Types — classify all content types, enforce root folder naming | ✅ Done |
 | III | Data types live in folders — auto-organize loose data types | ✅ Done |
 | IV | Program.cs is clean — no saved variable, no non-standard middleware/endpoints | ✅ Done |
 | V | Live environment is production-ready — scan appsettings for 5 required settings | ✅ Done |
 | VI | Document type aliases are camelCase English | ✅ Done |
 | VII | Translation keys are PascalCase English | ✅ Done |
 | VIII | No media items at root — list only, user fixes manually | ✅ Done |
-| IX | Root nodes are Repositories — every root content node must be under a Repository type | ✅ Done |
+| IX | The root shall not render — no root content node may bear a template | ✅ Done |
 | X | uSync is installed — schema must be version-controlled | ✅ Done |
 
 ### Rule I detail
@@ -126,19 +133,20 @@ Checks every dictionary item `ItemKey` is:
 - **Grouping helper**: finds root-level items with dot-notation keys that share a prefix (e.g. `Article.By` + `Article.On` → suggests creating `Article` parent). Children keep their full key after move.
 - Per-key blessing persisted in `SinnersTranslationBlessing` table
 
-### Rule IX detail
-Checks whether every root content node uses a content type classified as "Repository" in `SinnersDocTypeClassification`.
-- **Error**: any root node whose content type is not classified as Repository
-- **Seek Repository Sanctuary** button:
-  1. Finds or creates a root-level "Repositories" folder in Document Types
-  2. Creates a `siteRoot` content type (name "SiteRoot", `icon-globe`, `AllowedAsRoot = true`, `IsElement = false`) in that folder — or updates an existing one
-  3. Adds all non-repository root content types as `AllowedContentTypes` on SiteRoot
-  4. Classifies `siteRoot` as "Repository" in `SinnersDocTypeClassification`
-  5. Removes `AllowedAsRoot` from the non-repository root content types
-  6. Shows a message instructing the user to move their root content nodes under SiteRoot manually
+### Rule IX detail (Library era — Umbraco 18)
+Checks whether any root content node is *renderable*: sinner if the node has a template assigned (`TemplateId`), or its content type has a `DefaultTemplate` or any `AllowedTemplates`. Repository classification is no longer involved.
+- **Error**: any root node that beareth a template
+- **Seek Root Sanctuary** button:
+  1. Finds or creates a root-level "Pages" folder, then a "Roots" subfolder, in Document Types
+  2. Creates a `siteRoot` content type (name "SiteRoot", `icon-globe`, `AllowedAsRoot = true`, `IsElement = false`, no template) in `Pages/Roots` — or updates an existing one
+  3. Adds all template-bearing root content types as `AllowedContentTypes` on SiteRoot
+  4. Classifies `siteRoot` as "Page" in `SinnersDocTypeClassification`
+  5. Removes `AllowedAsRoot` from the template-bearing root content types
+  6. Shows a message instructing the user to create a SiteRoot node and move renderable roots under it manually
 - Content NODES are not moved automatically — the user must drag them in the Content section
-- Status badge remains error until content nodes have been moved (the content tree still has root nodes)
+- Status badge remains error until the template-bearing nodes have been moved off the root
 - Content type creation uses `contentTypeService.Save(newType)` (for the initial create) + `MoveAsync` to place it in the folder
+- Endpoint: `POST seek-root-sanctuary` (renamed from `seek-repository-sanctuary`)
 
 ### Rule X detail
 Inspects the project's `.csproj` file (found via `IWebHostEnvironment.ContentRootPath`) for a `PackageReference Include="uSync"` entry.
@@ -165,11 +173,10 @@ Inspects the project's `.csproj` file (found via `IWebHostEnvironment.ContentRoo
 Migration plan: `SinnersMigrationPlan` chains v1 → v2 → v3 → v4.
 
 ## Root folder mapping (Rule II auto-categorize)
+The Four Sacred Types (Umbraco 18's Library owns shared content now, so Repository/RepositoryItem are gone; legacy rows with those classifications are surfaced as unclassified and skipped by auto-categorize):
 | Classification | Expected root folder |
 |---|---|
 | Page | Pages |
 | Block | Blocks |
 | Data | Data |
 | Composition | Compositions |
-| Repository | Repositories |
-| RepositoryItem | Repository Items |

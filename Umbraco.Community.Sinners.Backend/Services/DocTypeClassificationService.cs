@@ -39,6 +39,10 @@ public class DocTypeClassificationService
             {
                 var folderPath = BuildFolderPath(ct.Path, containers);
                 var existingClassification = classifications.TryGetValue(ct.Alias, out var c) ? c.Classification : null;
+                // Legacy classifications (Repository/RepositoryItem) from before the Library era
+                // are treated as unclassified so they resurface for re-confession.
+                if (existingClassification is not null && !RootFolderByClassification.ContainsKey(existingClassification))
+                    existingClassification = null;
                 return new ContentTypeClassificationModel
                 {
                     ContentTypeAlias = ct.Alias,
@@ -90,14 +94,14 @@ public class DocTypeClassificationService
         return segments.Count > 0 ? "/" + string.Join("/", segments) : "/";
     }
 
+    // The Four Sacred Types. Repository/RepositoryItem ascended to the Library in Umbraco 18 —
+    // shared content is now Library elements, so those classifications no longer exist.
     private static readonly Dictionary<string, string> RootFolderByClassification = new(StringComparer.OrdinalIgnoreCase)
     {
         ["Page"] = "Pages",
         ["Block"] = "Blocks",
         ["Data"] = "Data",
         ["Composition"] = "Compositions",
-        ["Repository"] = "Repositories",
-        ["RepositoryItem"] = "Repository Items",
     };
 
     public async Task AutoCategorizeAsync()
@@ -112,7 +116,8 @@ public class DocTypeClassificationService
 
         foreach (var item in classified)
         {
-            var expectedRoot = RootFolderByClassification[item.Classification!];
+            if (!RootFolderByClassification.TryGetValue(item.Classification!, out var expectedRoot))
+                continue;
             var currentSegments = item.FolderPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
             if (currentSegments.Length > 0 &&
@@ -161,10 +166,6 @@ public class DocTypeClassificationService
             return "Block";
         if (Contains(lower, "data"))
             return "Data";
-        if (Contains(lower, "repository item", "repository items", "repositoryitem", "repositoryitems"))
-            return "RepositoryItem";
-        if (Contains(lower, "repository", "repositories"))
-            return "Repository";
 
         return null;
     }
