@@ -31,6 +31,12 @@ export class PresenterBarElement extends LitElement {
             position: fixed;
             top: 0;
             right: 0;
+            left: auto;
+            bottom: auto;
+            margin: 0;
+            padding: 0;
+            border: none;
+            overflow: visible;
             width: ${BAR_WIDTH}px;
             height: 100vh;
             z-index: 100000;
@@ -216,18 +222,44 @@ export class PresenterBarElement extends LitElement {
         this.#unsubscribe = presenter.subscribe((action) => this.#onPresenterAction(action));
         this.#unsubscribeVoice = voice.subscribe((snap) => { this._voice = snap; });
         window.addEventListener('keydown', this.#onKeyDown, true);
+        // Umbraco workspace modals are native <dialog>.showModal() — top layer, above any
+        // z-index. Join the top layer ourselves via the Popover API so the bar stays visible.
+        try {
+            this.setAttribute('popover', 'manual');
+            this.showPopover();
+        } catch { /* no popover support — z-index does its best */ }
+        this.#promoteSoon();
         // The backoffice router pushState()s around without telling anyone — poll the path
         this.#lastPath = window.location.pathname;
         this.#pathTimer = window.setInterval(() => {
             if (window.location.pathname !== this.#lastPath) {
                 this.#lastPath = window.location.pathname;
+                if (window.location.pathname.includes('/modal')) this.#promoteSoon();
                 this.requestUpdate();
             }
         }, 400);
     }
 
+    /**
+     * Top-layer order is entry order — a dialog opening after us covers us. On modal
+     * routes, re-enter the top layer a few times (dialogs open async after the route).
+     */
+    #promoteSoon() {
+        for (const delay of [300, 1000, 2500, 5000]) {
+            setTimeout(() => {
+                try {
+                    if (this.matches(':popover-open')) {
+                        this.hidePopover();
+                        this.showPopover();
+                    }
+                } catch { /* fine */ }
+            }, delay);
+        }
+    }
+
     override disconnectedCallback() {
         super.disconnectedCallback();
+        try { this.hidePopover(); } catch { /* fine */ }
         this.#unsubscribe?.();
         this.#unsubscribeVoice?.();
         window.removeEventListener('keydown', this.#onKeyDown, true);
@@ -241,7 +273,10 @@ export class PresenterBarElement extends LitElement {
      */
     #syncVisibility() {
         const visible = presenter.barVisible;
+        const wasBanished = this.classList.contains('banished');
         this.classList.toggle('banished', !visible);
+        // Re-summoning re-enters the top layer — the live fix if a dialog out-stacks us
+        if (visible && wasBanished) this.#promoteSoon();
         const existing = document.getElementById(LAYOUT_STYLE_ID);
         if (visible && !existing) {
             const style = document.createElement('style');

@@ -7,6 +7,7 @@ Dev-time Umbraco package for a talk: "The 10 UmbraCommandments". Enforces opinio
 - Umbraco 17/18 — `net10.0` single target, no multi-targeting, no version guards. Backend references `Umbraco.Cms` `[17.0.0,19.0.0)` (compiles against 17.0.0, runs fine on 18 — verified end-to-end).
 - Test sites live under `Umbraco/` (local, not in this repo): `17.3.4/`, `17.4/`, and `18.1.1/` (current demo target, Clean 8.0.1 starter kit + uSync 18.1.2, admin@example.com / 1234567890).
 - The 18 site consumes Sinners via ProjectReference; a `CopySinnersUiAssets` target in its csproj copies `Backend/ui/**` into `wwwroot/App_Plugins/umbraco.community.sinners.frontend/` on every build.
+- **Demo reset ritual**: `.\reset.ps1 -Version 18.1.1` (deletes `Umbraco/18.1.1/umbraco` data folder, strips uSync from csproj/props, overwrites Program.cs with the zalgo sin) → `dotnet build` → boot (unattended install + Clean import, ~90s) → press `0` in the backoffice (clears browser demo state) → upload one image at media root (Rule VIII sin).
 - Umbraco 18 auth note (for scripted Management API access): tokens are redacted into encrypted HttpOnly cookies (`__Host-umbAccessToken` etc.). Send `Authorization: Bearer [redacted]` (literal) plus the cookie jar — middleware substitutes the real token. Access tokens expire in ~5 min.
 
 ## Solution structure

@@ -129,23 +129,24 @@ export class ProductionSettingsElement extends UmbElementMixin(LitElement) {
 
     override connectedCallback() {
         super.connectedCallback();
-        presenter.registerSteps('V', [0, 1, 2, 3, 4].map((i) => ({
-            label: `Bless setting ${i + 1} of 5`,
-            run: () => this.#blessIndex(i),
-        })));
+        presenter.registerSteps('V', [
+            { label: 'Bless all settings', run: () => this.#blessAll() },
+        ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;
             void this.#load();
         });
     }
 
-    async #blessIndex(i: number) {
-        const settings = this._result?.missingSettings ?? [];
-        const unblessed = settings.filter((s) => !s.isBlessed);
-        const target = unblessed[0];
-        if (!target) { console.warn(`[RULE V] no unblessed setting at index ${i}`); return; }
-        console.log(`[RULE V] blessing "${target.key}"`);
-        await this.#bless(target, true);
+    async #blessAll() {
+        // Bless whatever is unblessed, one at a time (each #bless refreshes _result),
+        // with a hard cap so a misbehaving server can't loop us forever.
+        for (let guard = 0; guard < 10; guard++) {
+            const target = (this._result?.missingSettings ?? []).find((s) => !s.isBlessed);
+            if (!target) break;
+            console.log(`[RULE V] blessing "${target.key}"`);
+            await this.#bless(target, true);
+        }
     }
 
     async #fetchAuth(url: string, options: RequestInit = {}): Promise<Response> {

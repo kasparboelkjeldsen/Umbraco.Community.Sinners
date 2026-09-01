@@ -10,6 +10,23 @@ if (-not (Test-Path $root)) {
     exit 1
 }
 
+# --- Wipe the umbraco data folder (DB, logs, models) so the next boot reinstalls fresh ---
+
+$umbracoData = Join-Path $root "umbraco"
+if (Test-Path $umbracoData) {
+    try {
+        Remove-Item $umbracoData -Recurse -Force -ErrorAction Stop
+        Write-Host "Deleted $umbracoData -- next boot reinstalls Umbraco + Clean starter kit"
+    }
+    catch {
+        Write-Error "Could not delete $umbracoData -- is the site still running? Stop it and re-run."
+        exit 1
+    }
+}
+else {
+    Write-Host "No umbraco data folder found -- already blank"
+}
+
 # --- Remove uSync from .csproj ---
 
 $csproj = Get-ChildItem -Path $root -Filter "*.csproj" | Select-Object -First 1
@@ -102,3 +119,8 @@ await app.RunAsync();
 
 [System.IO.File]::WriteAllText($programCs, $programContent, [System.Text.Encoding]::UTF8)
 Write-Host "Overwrote Program.cs"
+
+Write-Host ""
+Write-Host "Server-side sin is maximised. Browser-side state (Rule VIII pretend flag," -ForegroundColor Yellow
+Write-Host "presenter progress, magic-word rotation) auto-invalidates on fresh installs" -ForegroundColor Yellow
+Write-Host "-- or press 0 in the backoffice for a full demo-state reset." -ForegroundColor Yellow

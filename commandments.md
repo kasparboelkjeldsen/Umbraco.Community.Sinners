@@ -1,5 +1,8 @@
 # The Ten UmbraCommandments
 
+*The doctrine behind the talk. The Sinners package enforces these — as a bit.
+Take the rules seriously; take the package nowhere near anything you love.*
+
 ## 1. Content is not composable
 
 Compositions in Umbraco, while they are a very handy feature, come with caveats that are unacceptable for the preservation of content. Removing a composition from a document-type will result in ALL content contained within the scope of that composition to be deleted. Permanently without being recoverable through content revisions.

@@ -30,7 +30,7 @@ export interface VoiceSnapshot {
  */
 const MAGIC_WORDS: Array<{ display: string; rx: RegExp }> = [
     { display: 'pineapple', rx: /\bpine\s?apple\b/i },
-    { display: 'walrus', rx: /\bwalrus\b/i },
+    { display: 'banana', rx: /\bbananas?\b/i },
     { display: 'banjo', rx: /\bbanjo\b/i },
     { display: 'tuxedo', rx: /\btuxedo\b/i },
     { display: 'flamingo', rx: /\bflamingo\b/i },
@@ -66,7 +66,7 @@ const MAGIC_WORDS: Array<{ display: string; rx: RegExp }> = [
     { display: 'jellyfish', rx: /\bjelly\s?fish\b/i },
     { display: 'hedgehog', rx: /\bhedge\s?hog\b/i },
     { display: 'lasagna', rx: /\b(?:lasagna|lasagne)\b/i },
-    { display: 'bagpipes', rx: /\bbag\s?pipes?\b/i },
+    { display: 'dinosaur', rx: /\bdinosaurs?\b/i },
     { display: 'coconut', rx: /\bcoconut\b/i },
     { display: 'submarine', rx: /\bsubmarine\b/i },
     { display: 'avalanche', rx: /\bavalanche\b/i },

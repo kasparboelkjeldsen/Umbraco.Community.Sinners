@@ -20,7 +20,7 @@ export class RootMediaElement extends UmbElementMixin(LitElement) {
 
     @state() private _items: RootMediaItem[] = [];
     @state() private _loading = true;
-    @state() private _pretending = localStorage.getItem('sinners-media-pretend') === '1';
+    @state() private _pretending = false; // decided in #load, validated against actual media
 
     static override styles = css`
         .clean {
@@ -97,6 +97,22 @@ export class RootMediaElement extends UmbElementMixin(LitElement) {
             });
             if (res.ok) this._items = (await res.json()) as RootMediaItem[];
 
+            // The pretend flag stores the keys it pretended away. If the actual root
+            // media differs (fresh install, new upload), the pretense collapses —
+            // a wiped site never inherits an old browser's magic.
+            const stored = localStorage.getItem('sinners-media-pretend');
+            if (stored) {
+                let pretendedKeys: string[] = [];
+                try { pretendedKeys = JSON.parse(stored) as string[]; } catch { /* legacy '1' → stale */ }
+                const currentKeys = this._items.map((i) => i.key).sort().join(',');
+                if (Array.isArray(pretendedKeys) && pretendedKeys.slice().sort().join(',') === currentKeys) {
+                    this._pretending = true;
+                } else {
+                    localStorage.removeItem('sinners-media-pretend');
+                    this._pretending = false;
+                }
+            }
+
             const count = this._pretending ? 0 : this._items.length;
             this.dispatchEvent(new CustomEvent('sinners-status', {
                 bubbles: true, composed: true,
@@ -110,7 +126,7 @@ export class RootMediaElement extends UmbElementMixin(LitElement) {
     #pretend() {
         showMagic(() => {
             this._pretending = true;
-            localStorage.setItem('sinners-media-pretend', '1');
+            localStorage.setItem('sinners-media-pretend', JSON.stringify(this._items.map((i) => i.key)));
             this.dispatchEvent(new CustomEvent('sinners-status', {
                 bubbles: true, composed: true,
                 detail: { issueCount: 0, severity: 'ok' },

@@ -814,7 +814,7 @@ var nt = "/umbraco/section/settings/dashboard/penance", rt = "sinners-bar-visibl
 	},
 	reset() {
 		try {
-			sessionStorage.removeItem(Ye);
+			sessionStorage.removeItem(Ye), sessionStorage.removeItem("sinners-voice-words"), sessionStorage.removeItem(rt), localStorage.removeItem("sinners-media-pretend");
 		} catch {}
 		window.location.href = nt;
 	}
@@ -1039,28 +1039,12 @@ var z = "/umbraco/management/api/v1/sinners", ot = {
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), L.registerSteps("I", [
-			{
-				label: "Fold In contentRows",
-				run: () => this.#r("contentRows")
-			},
-			{
-				label: "Fold In socialIconLinks",
-				run: () => this.#r("socialIconLinks")
-			},
-			{
-				label: "Bless instructionMessage",
-				run: () => this.#i("instructionMessage")
-			},
-			{
-				label: "Bless successMessage",
-				run: () => this.#i("successMessage")
-			},
-			{
-				label: "Bless errorMessage",
-				run: () => this.#i("errorMessage")
+		super.connectedCallback(), L.registerSteps("I", [{
+			label: "Fold In & bless everything",
+			run: async () => {
+				await this.#r("contentRows"), await this.#r("socialIconLinks"), await this.#i("instructionMessage"), await this.#i("successMessage"), await this.#i("errorMessage");
 			}
-		]), this.consumeContext(n, (e) => {
+		}]), this.consumeContext(n, (e) => {
 			this.#e = e, this.#n();
 		});
 	}
@@ -2187,26 +2171,19 @@ var gt = "/umbraco/management/api/v1/sinners", W = class extends e(A) {
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), L.registerSteps("V", [
-			0,
-			1,
-			2,
-			3,
-			4
-		].map((e) => ({
-			label: `Bless setting ${e + 1} of 5`,
-			run: () => this.#t(e)
-		}))), this.consumeContext(n, (e) => {
+		super.connectedCallback(), L.registerSteps("V", [{
+			label: "Bless all settings",
+			run: () => this.#t()
+		}]), this.consumeContext(n, (e) => {
 			this.#e = e, this.#r();
 		});
 	}
-	async #t(e) {
-		let t = (this._result?.missingSettings ?? []).filter((e) => !e.isBlessed)[0];
-		if (!t) {
-			console.warn(`[RULE V] no unblessed setting at index ${e}`);
-			return;
+	async #t() {
+		for (let e = 0; e < 10; e++) {
+			let e = (this._result?.missingSettings ?? []).find((e) => !e.isBlessed);
+			if (!e) break;
+			console.log(`[RULE V] blessing "${e.key}"`), await this.#i(e, !0);
 		}
-		console.log(`[RULE V] blessing "${t.key}"`), await this.#i(t, !0);
 	}
 	async #n(e, t = {}) {
 		let n = await this.#e?.getLatestToken();
@@ -2786,7 +2763,7 @@ R([M()], K.prototype, "_result", void 0), R([M()], K.prototype, "_loading", void
 //#region src/penance/commandments/root-media.element.ts
 var yt = "/umbraco/management/api/v1/sinners", q = class extends e(A) {
 	constructor(...e) {
-		super(...e), this._items = [], this._loading = !0, this._pretending = localStorage.getItem("sinners-media-pretend") === "1";
+		super(...e), this._items = [], this._loading = !0, this._pretending = !1;
 	}
 	#e;
 	static {
@@ -2858,13 +2835,22 @@ var yt = "/umbraco/management/api/v1/sinners", q = class extends e(A) {
 		try {
 			let e = await this.#e?.getLatestToken(), t = await fetch(`${yt}/root-media`, { headers: e ? { Authorization: `Bearer ${e}` } : {} });
 			t.ok && (this._items = await t.json());
-			let n = this._pretending ? 0 : this._items.length;
+			let n = localStorage.getItem("sinners-media-pretend");
+			if (n) {
+				let e = [];
+				try {
+					e = JSON.parse(n);
+				} catch {}
+				let t = this._items.map((e) => e.key).sort().join(",");
+				Array.isArray(e) && e.slice().sort().join(",") === t ? this._pretending = !0 : (localStorage.removeItem("sinners-media-pretend"), this._pretending = !1);
+			}
+			let r = this._pretending ? 0 : this._items.length;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
 				bubbles: !0,
 				composed: !0,
 				detail: {
-					issueCount: n,
-					severity: n > 0 ? "error" : "ok"
+					issueCount: r,
+					severity: r > 0 ? "error" : "ok"
 				}
 			}));
 		} finally {
@@ -2873,7 +2859,7 @@ var yt = "/umbraco/management/api/v1/sinners", q = class extends e(A) {
 	}
 	#n() {
 		ft(() => {
-			this._pretending = !0, localStorage.setItem("sinners-media-pretend", "1"), this.dispatchEvent(new CustomEvent("sinners-status", {
+			this._pretending = !0, localStorage.setItem("sinners-media-pretend", JSON.stringify(this._items.map((e) => e.key))), this.dispatchEvent(new CustomEvent("sinners-status", {
 				bubbles: !0,
 				composed: !0,
 				detail: {
@@ -3568,8 +3554,8 @@ var Z = [
 		rx: /\bpine\s?apple\b/i
 	},
 	{
-		display: "walrus",
-		rx: /\bwalrus\b/i
+		display: "banana",
+		rx: /\bbananas?\b/i
 	},
 	{
 		display: "banjo",
@@ -3712,8 +3698,8 @@ var Z = [
 		rx: /\b(?:lasagna|lasagne)\b/i
 	},
 	{
-		display: "bagpipes",
-		rx: /\bbag\s?pipes?\b/i
+		display: "dinosaur",
+		rx: /\bdinosaurs?\b/i
 	},
 	{
 		display: "coconut",
@@ -3950,7 +3936,7 @@ var Q = new class {
 window.sinnersVoice = Q;
 var Mt = "sinners-presenter-bar-layout", $ = class extends A {
 	constructor(...e) {
-		super(...e), this._flash = null, this._voice = Q.snapshot, this.#r = "", this.#c = (e) => {
+		super(...e), this._flash = null, this._voice = Q.snapshot, this.#r = "", this.#l = (e) => {
 			[
 				"1",
 				"2",
@@ -3958,7 +3944,7 @@ var Mt = "sinners-presenter-bar-layout", $ = class extends A {
 				"4",
 				"5",
 				"0"
-			].includes(e.key) && (!L.barVisible && !["5", "0"].includes(e.key) || (e.preventDefault(), e.stopPropagation(), e.key === "1" ? L.next() : e.key === "2" ? L.nextTab() : e.key === "3" ? L.dot() : e.key === "4" ? (this.#s(4), window.location.reload()) : e.key === "5" ? L.toggleBar() : e.key === "0" && L.reset()));
+			].includes(e.key) && (!L.barVisible && !["5", "0"].includes(e.key) || (e.preventDefault(), e.stopPropagation(), e.key === "1" ? L.next() : e.key === "2" ? L.nextTab() : e.key === "3" ? L.dot() : e.key === "4" ? (this.#c(4), window.location.reload()) : e.key === "5" ? L.toggleBar() : e.key === "0" && L.reset()));
 		};
 	}
 	#e;
@@ -3972,6 +3958,12 @@ var Mt = "sinners-presenter-bar-layout", $ = class extends A {
             position: fixed;
             top: 0;
             right: 0;
+            left: auto;
+            bottom: auto;
+            margin: 0;
+            padding: 0;
+            border: none;
+            overflow: visible;
             width: ${210}px;
             height: 100vh;
             z-index: 100000;
@@ -4152,35 +4144,55 @@ var Mt = "sinners-presenter-bar-layout", $ = class extends A {
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), this.#a(), this.#t = L.subscribe((e) => this.#o(e)), this.#e = Q.subscribe((e) => {
+		super.connectedCallback(), this.#o(), this.#t = L.subscribe((e) => this.#s(e)), this.#e = Q.subscribe((e) => {
 			this._voice = e;
-		}), window.addEventListener("keydown", this.#c, !0), this.#r = window.location.pathname, this.#n = window.setInterval(() => {
-			window.location.pathname !== this.#r && (this.#r = window.location.pathname, this.requestUpdate());
+		}), window.addEventListener("keydown", this.#l, !0);
+		try {
+			this.setAttribute("popover", "manual"), this.showPopover();
+		} catch {}
+		this.#a(), this.#r = window.location.pathname, this.#n = window.setInterval(() => {
+			window.location.pathname !== this.#r && (this.#r = window.location.pathname, window.location.pathname.includes("/modal") && this.#a(), this.requestUpdate());
 		}, 400);
 	}
-	disconnectedCallback() {
-		super.disconnectedCallback(), this.#t?.(), this.#e?.(), window.removeEventListener("keydown", this.#c, !0), this.#n && clearInterval(this.#n), document.getElementById(Mt)?.remove();
-	}
 	#a() {
-		let e = L.barVisible;
-		this.classList.toggle("banished", !e);
-		let t = document.getElementById(Mt);
-		if (e && !t) {
+		for (let e of [
+			300,
+			1e3,
+			2500,
+			5e3
+		]) setTimeout(() => {
+			try {
+				this.matches(":popover-open") && (this.hidePopover(), this.showPopover());
+			} catch {}
+		}, e);
+	}
+	disconnectedCallback() {
+		super.disconnectedCallback();
+		try {
+			this.hidePopover();
+		} catch {}
+		this.#t?.(), this.#e?.(), window.removeEventListener("keydown", this.#l, !0), this.#n && clearInterval(this.#n), document.getElementById(Mt)?.remove();
+	}
+	#o() {
+		let e = L.barVisible, t = this.classList.contains("banished");
+		this.classList.toggle("banished", !e), e && t && this.#a();
+		let n = document.getElementById(Mt);
+		if (e && !n) {
 			let e = document.createElement("style");
 			e.id = Mt, e.textContent = "\n                body { width: calc(100vw - 210px) !important; }\n                umb-app { width: calc(100vw - 210px) !important; }\n            ", document.head.appendChild(e);
-		} else !e && t && t.remove();
-	}
-	#o(e) {
-		e === "next" ? this.#s(1) : e === "nextTab" ? this.#s(2) : e === "dot" && this.#s(3), this.#a(), this.requestUpdate();
+		} else !e && n && n.remove();
 	}
 	#s(e) {
+		e === "next" ? this.#c(1) : e === "nextTab" ? this.#c(2) : e === "dot" && this.#c(3), this.#o(), this.requestUpdate();
+	}
+	#c(e) {
 		this._flash = e, this.#i && clearTimeout(this.#i), this.#i = window.setTimeout(() => {
 			this._flash = null;
 		}, 350);
 	}
-	#c;
-	#l(e, t) {
-		t.currentTarget.blur(), e === 1 ? L.next() : e === 2 ? L.nextTab() : e === 3 ? L.dot() : (this.#s(4), window.location.reload());
+	#l;
+	#u(e, t) {
+		t.currentTarget.blur(), e === 1 ? L.next() : e === 2 ? L.nextTab() : e === 3 ? L.dot() : (this.#c(4), window.location.reload());
 	}
 	render() {
 		let e = L.activeTab, t = L.stepInfo(), n = window.location.pathname.includes("/dashboard/penance"), r = "Do penance", i = "", a = !1;
@@ -4188,34 +4200,34 @@ var Mt = "sinners-presenter-bar-layout", $ = class extends A {
 		let o = L.nextTabId(), s = !n || !L.canNextTab, c = L.dotIntent(), l = c === "exhibit" ? "Exhibit the sin" : c === "return" ? "Return to Board" : "Reload the Board", u = c === "exhibit" ? Je[e] ?? "" : "", d = this._voice.state === "listening" || this._voice.state === "armed", f = (e) => d ? w`<span class="magic-word">🎤 “${this._voice.magicWords[e - 1]}”</span>` : "";
 		return w`
             <div class="title">Penance<span class="tab">${n && e ? e : "—"}</span></div>
-            <button class="btn ${this._flash === 1 ? "flash" : ""}" ?disabled=${a} @click=${(e) => this.#l(1, e)}>
+            <button class="btn ${this._flash === 1 ? "flash" : ""}" ?disabled=${a} @click=${(e) => this.#u(1, e)}>
                 <span class="num">1</span>
                 <span class="verb">${r}</span>
                 <span class="detail">${i}</span>
                 ${f(1)}
             </button>
-            <button class="btn ${this._flash === 2 ? "flash" : ""}" ?disabled=${s} @click=${(e) => this.#l(2, e)}>
+            <button class="btn ${this._flash === 2 ? "flash" : ""}" ?disabled=${s} @click=${(e) => this.#u(2, e)}>
                 <span class="num">2</span>
                 <span class="verb">Next commandment</span>
                 <span class="detail">${o} — ${Je[o] ?? ""}</span>
                 ${f(2)}
             </button>
-            <button class="btn ${this._flash === 3 ? "flash" : ""}" @click=${(e) => this.#l(3, e)}>
+            <button class="btn ${this._flash === 3 ? "flash" : ""}" @click=${(e) => this.#u(3, e)}>
                 <span class="num">3</span>
                 <span class="verb">${l}</span>
                 <span class="detail">${u}</span>
                 ${f(3)}
             </button>
-            <button class="btn ${this._flash === 4 ? "flash" : ""}" @click=${(e) => this.#l(4, e)}>
+            <button class="btn ${this._flash === 4 ? "flash" : ""}" @click=${(e) => this.#u(4, e)}>
                 <span class="num">4</span>
                 <span class="verb">Reload</span>
                 <span class="detail">when all else fails</span>
                 ${f(4)}
             </button>
-            ${this.#u()}
+            ${this.#d()}
         `;
 	}
-	#u() {
+	#d() {
 		let e = this._voice;
 		return e.state === "unsupported" ? w`<div class="voice"><span class="voice-heard">🎤 voice not supported here</span></div>` : e.state === "off" ? w`
                 <div class="voice">
