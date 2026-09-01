@@ -32,11 +32,11 @@ var r = globalThis, i = r.ShadowRoot && (r.ShadyCSS === void 0 || r.ShadyCSS.nat
 	let t = "";
 	for (let n of e.cssRules) t += n.cssText;
 	return c(t);
-})(e) : e, { is: ee, defineProperty: te, getOwnPropertyDescriptor: ne, getOwnPropertyNames: re, getOwnPropertySymbols: ie, getPrototypeOf: ae } = Object, f = globalThis, oe = f.trustedTypes, se = oe ? oe.emptyScript : "", ce = f.reactiveElementPolyfillSupport, p = (e, t) => e, m = {
+})(e) : e, { is: f, defineProperty: ee, getOwnPropertyDescriptor: te, getOwnPropertyNames: ne, getOwnPropertySymbols: re, getPrototypeOf: ie } = Object, p = globalThis, ae = p.trustedTypes, oe = ae ? ae.emptyScript : "", se = p.reactiveElementPolyfillSupport, m = (e, t) => e, h = {
 	toAttribute(e, t) {
 		switch (t) {
 			case Boolean:
-				e = e ? se : null;
+				e = e ? oe : null;
 				break;
 			case Object:
 			case Array: e = e == null ? e : JSON.stringify(e);
@@ -61,30 +61,30 @@ var r = globalThis, i = r.ShadowRoot && (r.ShadyCSS === void 0 || r.ShadyCSS.nat
 		}
 		return n;
 	}
-}, le = (e, t) => !ee(e, t), ue = {
+}, ce = (e, t) => !f(e, t), le = {
 	attribute: !0,
 	type: String,
-	converter: m,
+	converter: h,
 	reflect: !1,
 	useDefault: !1,
-	hasChanged: le
+	hasChanged: ce
 };
-Symbol.metadata ??= Symbol("metadata"), f.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
-var h = class extends HTMLElement {
+Symbol.metadata ??= Symbol("metadata"), p.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
+var g = class extends HTMLElement {
 	static addInitializer(e) {
 		this._$Ei(), (this.l ??= []).push(e);
 	}
 	static get observedAttributes() {
 		return this.finalize(), this._$Eh && [...this._$Eh.keys()];
 	}
-	static createProperty(e, t = ue) {
+	static createProperty(e, t = le) {
 		if (t.state && (t.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(e) && ((t = Object.create(t)).wrapped = !0), this.elementProperties.set(e, t), !t.noAccessor) {
 			let n = Symbol(), r = this.getPropertyDescriptor(e, n, t);
-			r !== void 0 && te(this.prototype, e, r);
+			r !== void 0 && ee(this.prototype, e, r);
 		}
 	}
 	static getPropertyDescriptor(e, t, n) {
-		let { get: r, set: i } = ne(this.prototype, e) ?? {
+		let { get: r, set: i } = te(this.prototype, e) ?? {
 			get() {
 				return this[t];
 			},
@@ -103,17 +103,17 @@ var h = class extends HTMLElement {
 		};
 	}
 	static getPropertyOptions(e) {
-		return this.elementProperties.get(e) ?? ue;
+		return this.elementProperties.get(e) ?? le;
 	}
 	static _$Ei() {
-		if (this.hasOwnProperty(p("elementProperties"))) return;
-		let e = ae(this);
+		if (this.hasOwnProperty(m("elementProperties"))) return;
+		let e = ie(this);
 		e.finalize(), e.l !== void 0 && (this.l = [...e.l]), this.elementProperties = new Map(e.elementProperties);
 	}
 	static finalize() {
-		if (this.hasOwnProperty(p("finalized"))) return;
-		if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(p("properties"))) {
-			let e = this.properties, t = [...re(e), ...ie(e)];
+		if (this.hasOwnProperty(m("finalized"))) return;
+		if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(m("properties"))) {
+			let e = this.properties, t = [...ne(e), ...re(e)];
 			for (let n of t) this.createProperty(n, e[n]);
 		}
 		let e = this[Symbol.metadata];
@@ -174,14 +174,14 @@ var h = class extends HTMLElement {
 	_$ET(e, t) {
 		let n = this.constructor.elementProperties.get(e), r = this.constructor._$Eu(e, n);
 		if (r !== void 0 && !0 === n.reflect) {
-			let i = (n.converter?.toAttribute === void 0 ? m : n.converter).toAttribute(t, n.type);
+			let i = (n.converter?.toAttribute === void 0 ? h : n.converter).toAttribute(t, n.type);
 			this._$Em = e, i == null ? this.removeAttribute(r) : this.setAttribute(r, i), this._$Em = null;
 		}
 	}
 	_$AK(e, t) {
 		let n = this.constructor, r = n._$Eh.get(e);
 		if (r !== void 0 && this._$Em !== r) {
-			let e = n.getPropertyOptions(r), i = typeof e.converter == "function" ? { fromAttribute: e.converter } : e.converter?.fromAttribute === void 0 ? m : e.converter;
+			let e = n.getPropertyOptions(r), i = typeof e.converter == "function" ? { fromAttribute: e.converter } : e.converter?.fromAttribute === void 0 ? h : e.converter;
 			this._$Em = r;
 			let a = i.fromAttribute(t, e.type);
 			this[r] = a ?? this._$Ej?.get(r) ?? a, this._$Em = null;
@@ -190,7 +190,7 @@ var h = class extends HTMLElement {
 	requestUpdate(e, t, n, r = !1, i) {
 		if (e !== void 0) {
 			let a = this.constructor;
-			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? le)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
+			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? ce)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
 			this.C(e, t, n);
 		}
 		!1 === this.isUpdatePending && (this._$ES = this._$EP());
@@ -254,10 +254,10 @@ var h = class extends HTMLElement {
 	updated(e) {}
 	firstUpdated(e) {}
 };
-h.elementStyles = [], h.shadowRootOptions = { mode: "open" }, h[p("elementProperties")] = /* @__PURE__ */ new Map(), h[p("finalized")] = /* @__PURE__ */ new Map(), ce?.({ ReactiveElement: h }), (f.reactiveElementVersions ??= []).push("2.1.2");
+g.elementStyles = [], g.shadowRootOptions = { mode: "open" }, g[m("elementProperties")] = /* @__PURE__ */ new Map(), g[m("finalized")] = /* @__PURE__ */ new Map(), se?.({ ReactiveElement: g }), (p.reactiveElementVersions ??= []).push("2.1.2");
 //#endregion
 //#region node_modules/lit-html/lit-html.js
-var g = globalThis, de = (e) => e, _ = g.trustedTypes, fe = _ ? _.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, pe = "$lit$", v = `lit$${Math.random().toFixed(9).slice(2)}$`, me = "?" + v, he = `<${me}>`, y = document, b = () => y.createComment(""), x = (e) => e === null || typeof e != "object" && typeof e != "function", ge = Array.isArray, _e = (e) => ge(e) || typeof e?.[Symbol.iterator] == "function", ve = "[ 	\n\f\r]", S = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ye = /-->/g, be = />/g, C = RegExp(`>|${ve}(?:([^\\s"'>=/]+)(${ve}*=${ve}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), xe = /'/g, Se = /"/g, Ce = /^(?:script|style|textarea|title)$/i, w = ((e) => (t, ...n) => ({
+var ue = globalThis, de = (e) => e, _ = ue.trustedTypes, fe = _ ? _.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, pe = "$lit$", v = `lit$${Math.random().toFixed(9).slice(2)}$`, me = "?" + v, he = `<${me}>`, y = document, b = () => y.createComment(""), x = (e) => e === null || typeof e != "object" && typeof e != "function", ge = Array.isArray, _e = (e) => ge(e) || typeof e?.[Symbol.iterator] == "function", ve = "[ 	\n\f\r]", S = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ye = /-->/g, be = />/g, C = RegExp(`>|${ve}(?:([^\\s"'>=/]+)(${ve}*=${ve}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), xe = /'/g, Se = /"/g, Ce = /^(?:script|style|textarea|title)$/i, w = ((e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
 	values: n
@@ -275,7 +275,7 @@ var Ee = (e, t) => {
 		a += o === S ? n + he : l >= 0 ? (r.push(s), n.slice(0, l) + pe + n.slice(l) + v + d) : n + v + (l === -2 ? t : d);
 	}
 	return [Te(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
-}, O = class e {
+}, De = class e {
 	constructor({ strings: t, _$litType$: n }, r) {
 		let i;
 		this.parts = [];
@@ -293,7 +293,7 @@ var Ee = (e, t) => {
 						index: a,
 						name: r[2],
 						strings: n,
-						ctor: r[1] === "." ? ke : r[1] === "?" ? Ae : r[1] === "@" ? je : A
+						ctor: r[1] === "." ? Ae : r[1] === "?" ? je : r[1] === "@" ? Me : k
 					}), i.removeAttribute(e);
 				} else e.startsWith(v) && (c.push({
 					type: 6,
@@ -329,12 +329,12 @@ var Ee = (e, t) => {
 		return n.innerHTML = e, n;
 	}
 };
-function k(e, t, n = e, r) {
+function O(e, t, n = e, r) {
 	if (t === T) return t;
 	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = x(t) ? void 0 : t._$litDirective$;
-	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = k(e, i._$AS(e, t.values), i, r)), t;
+	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = O(e, i._$AS(e, t.values), i, r)), t;
 }
-var De = class {
+var Oe = class {
 	constructor(e, t) {
 		this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
 	}
@@ -351,7 +351,7 @@ var De = class {
 		for (; s !== void 0;) {
 			if (a === s.index) {
 				let t;
-				s.type === 2 ? t = new Oe(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new Me(i, this, e)), this._$AV.push(t), s = n[++o];
+				s.type === 2 ? t = new ke(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new Ne(i, this, e)), this._$AV.push(t), s = n[++o];
 			}
 			a !== s?.index && (i = D.nextNode(), a++);
 		}
@@ -361,7 +361,7 @@ var De = class {
 		let t = 0;
 		for (let n of this._$AV) n !== void 0 && (n.strings === void 0 ? n._$AI(e[t]) : (n._$AI(e, n, t), t += n.strings.length - 2)), t++;
 	}
-}, Oe = class e {
+}, ke = class e {
 	get _$AU() {
 		return this._$AM?._$AU ?? this._$Cv;
 	}
@@ -379,7 +379,7 @@ var De = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = k(this, e, t), x(e) ? e === E || e == null || e === "" ? (this._$AH !== E && this._$AR(), this._$AH = E) : e !== this._$AH && e !== T && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? _e(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = O(this, e, t), x(e) ? e === E || e == null || e === "" ? (this._$AH !== E && this._$AR(), this._$AH = E) : e !== this._$AH && e !== T && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? _e(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -391,16 +391,16 @@ var De = class {
 		this._$AH !== E && x(this._$AH) ? this._$AA.nextSibling.data = e : this.T(y.createTextNode(e)), this._$AH = e;
 	}
 	$(e) {
-		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = O.createElement(Te(n.h, n.h[0]), this.options)), n);
+		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = De.createElement(Te(n.h, n.h[0]), this.options)), n);
 		if (this._$AH?._$AD === r) this._$AH.p(t);
 		else {
-			let e = new De(r, this), n = e.u(this.options);
+			let e = new Oe(r, this), n = e.u(this.options);
 			e.p(t), this.T(n), this._$AH = e;
 		}
 	}
 	_$AC(e) {
 		let t = we.get(e.strings);
-		return t === void 0 && we.set(e.strings, t = new O(e)), t;
+		return t === void 0 && we.set(e.strings, t = new De(e)), t;
 	}
 	k(t) {
 		ge(this._$AH) || (this._$AH = [], this._$AR());
@@ -417,7 +417,7 @@ var De = class {
 	setConnected(e) {
 		this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
 	}
-}, A = class {
+}, k = class {
 	get tagName() {
 		return this.element.tagName;
 	}
@@ -429,43 +429,43 @@ var De = class {
 	}
 	_$AI(e, t = this, n, r) {
 		let i = this.strings, a = !1;
-		if (i === void 0) e = k(this, e, t, 0), a = !x(e) || e !== this._$AH && e !== T, a && (this._$AH = e);
+		if (i === void 0) e = O(this, e, t, 0), a = !x(e) || e !== this._$AH && e !== T, a && (this._$AH = e);
 		else {
 			let r = e, o, s;
-			for (e = i[0], o = 0; o < i.length - 1; o++) s = k(this, r[n + o], t, o), s === T && (s = this._$AH[o]), a ||= !x(s) || s !== this._$AH[o], s === E ? e = E : e !== E && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
+			for (e = i[0], o = 0; o < i.length - 1; o++) s = O(this, r[n + o], t, o), s === T && (s = this._$AH[o]), a ||= !x(s) || s !== this._$AH[o], s === E ? e = E : e !== E && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
 		}
 		a && !r && this.j(e);
 	}
 	j(e) {
 		e === E ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
 	}
-}, ke = class extends A {
+}, Ae = class extends k {
 	constructor() {
 		super(...arguments), this.type = 3;
 	}
 	j(e) {
 		this.element[this.name] = e === E ? void 0 : e;
 	}
-}, Ae = class extends A {
+}, je = class extends k {
 	constructor() {
 		super(...arguments), this.type = 4;
 	}
 	j(e) {
 		this.element.toggleAttribute(this.name, !!e && e !== E);
 	}
-}, je = class extends A {
+}, Me = class extends k {
 	constructor(e, t, n, r, i) {
 		super(e, t, n, r, i), this.type = 5;
 	}
 	_$AI(e, t = this) {
-		if ((e = k(this, e, t, 0) ?? E) === T) return;
+		if ((e = O(this, e, t, 0) ?? E) === T) return;
 		let n = this._$AH, r = e === E && n !== E || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== E && (n === E || r);
 		r && this.element.removeEventListener(this.name, this, n), i && this.element.addEventListener(this.name, this, e), this._$AH = e;
 	}
 	handleEvent(e) {
 		typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
 	}
-}, Me = class {
+}, Ne = class {
 	constructor(e, t, n) {
 		this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
 	}
@@ -473,18 +473,18 @@ var De = class {
 		return this._$AM._$AU;
 	}
 	_$AI(e) {
-		k(this, e);
+		O(this, e);
 	}
-}, Ne = g.litHtmlPolyfillSupport;
-Ne?.(O, Oe), (g.litHtmlVersions ??= []).push("3.3.2");
-var Pe = (e, t, n) => {
+}, Pe = ue.litHtmlPolyfillSupport;
+Pe?.(De, ke), (ue.litHtmlVersions ??= []).push("3.3.2");
+var Fe = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
-		r._$litPart$ = i = new Oe(t.insertBefore(b(), e), e, void 0, n ?? {});
+		r._$litPart$ = i = new ke(t.insertBefore(b(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, Fe = globalThis, j = class extends h {
+}, Ie = globalThis, A = class extends g {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -494,7 +494,7 @@ var Pe = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Pe(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Fe(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -506,22 +506,22 @@ var Pe = (e, t, n) => {
 		return T;
 	}
 };
-j._$litElement$ = !0, j.finalized = !0, Fe.litElementHydrateSupport?.({ LitElement: j });
-var Ie = Fe.litElementPolyfillSupport;
-Ie?.({ LitElement: j }), (Fe.litElementVersions ??= []).push("4.2.2");
+A._$litElement$ = !0, A.finalized = !0, Ie.litElementHydrateSupport?.({ LitElement: A });
+var Le = Ie.litElementPolyfillSupport;
+Le?.({ LitElement: A }), (Ie.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/custom-element.js
-var M = (e) => (t, n) => {
+var j = (e) => (t, n) => {
 	n === void 0 ? customElements.define(e, t) : n.addInitializer(() => {
 		customElements.define(e, t);
 	});
-}, Le = {
+}, Re = {
 	attribute: !0,
 	type: String,
-	converter: m,
+	converter: h,
 	reflect: !1,
-	hasChanged: le
-}, Re = (e = Le, t, n) => {
+	hasChanged: ce
+}, ze = (e = Re, t, n) => {
 	let { kind: r, metadata: i } = n, a = globalThis.litPropertyMetadata.get(i);
 	if (a === void 0 && globalThis.litPropertyMetadata.set(i, a = /* @__PURE__ */ new Map()), r === "setter" && ((e = Object.create(e)).wrapped = !0), a.set(n.name, e), r === "accessor") {
 		let { name: r } = n;
@@ -544,16 +544,16 @@ var M = (e) => (t, n) => {
 	}
 	throw Error("Unsupported decorator location: " + r);
 };
-function ze(e) {
-	return (t, n) => typeof n == "object" ? Re(e, t, n) : ((e, t, n) => {
+function Be(e) {
+	return (t, n) => typeof n == "object" ? ze(e, t, n) : ((e, t, n) => {
 		let r = t.hasOwnProperty(n);
 		return t.constructor.createProperty(n, e), r ? Object.getOwnPropertyDescriptor(t, n) : void 0;
 	})(e, t, n);
 }
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/state.js
-function N(e) {
-	return ze({
+function M(e) {
+	return Be({
 		...e,
 		state: !0,
 		attribute: !1
@@ -561,12 +561,12 @@ function N(e) {
 }
 //#endregion
 //#region src/penance/spooky-themes.ts
-function Be(e, t, n) {
+function Ve(e, t, n) {
 	if (e.length !== 7 || t.length !== 7) return e;
 	let r = parseInt(e.slice(1, 3), 16), i = parseInt(e.slice(3, 5), 16), a = parseInt(e.slice(5, 7), 16), o = parseInt(t.slice(1, 3), 16), s = parseInt(t.slice(3, 5), 16), c = parseInt(t.slice(5, 7), 16);
 	return `#${Math.round(r + (o - r) * n).toString(16).padStart(2, "0")}${Math.round(i + (s - i) * n).toString(16).padStart(2, "0")}${Math.round(a + (c - a) * n).toString(16).padStart(2, "0")}`;
 }
-var Ve = {
+var He = {
 	"--uui-color-selected": "#316dca",
 	"--uui-color-selected-emphasis": "#3e79d0",
 	"--uui-color-selected-standalone": "#5b8dd7",
@@ -612,7 +612,7 @@ var Ve = {
 	"--uui-color-positive-emphasis": "#347d39",
 	"--uui-color-positive-standalone": "#347d39",
 	"--uui-color-positive-contrast": "#eeeeef"
-}, He = {
+}, Ue = {
 	"--uui-color-selected": "#8b1a1a",
 	"--uui-color-selected-emphasis": "#a52020",
 	"--uui-color-selected-standalone": "#c84040",
@@ -659,17 +659,17 @@ var Ve = {
 	"--uui-color-positive-standalone": "#2d8c36",
 	"--uui-color-positive-contrast": "#f0e0e0"
 };
-function Ue(e) {
-	let t = (e - 1) / 9, n = Object.keys(Ve).map((e) => `    ${e}: ${Be(Ve[e], He[e], t)};`);
+function We(e) {
+	let t = (e - 1) / 9, n = Object.keys(He).map((e) => `    ${e}: ${Ve(He[e], Ue[e], t)};`);
 	return n.push("    --uui-color-scheme: dark;"), n.push("    --sinners-action-btn-bg: #e64241;"), n.push("    --sinners-action-btn-color: #ffffff;"), `:root {\n${n.join("\n")}\n}`;
 }
-var We = (e) => `sinners-spooky-${e}`;
-function Ge(e) {
+var Ge = (e) => `sinners-spooky-${e}`;
+function Ke(e) {
 	for (let t = 1; t <= 10; t++) {
-		let n = Ue(t);
+		let n = We(t);
 		e.register({
 			type: "theme",
-			alias: We(t),
+			alias: Ge(t),
 			name: `☠ Sinners: Abyss (Level ${t})`,
 			css: () => Promise.resolve({ default: n }),
 			weight: 50 - t
@@ -678,7 +678,7 @@ function Ge(e) {
 }
 //#endregion
 //#region src/penance/presenter.ts
-var Ke = [
+var qe = [
 	"I",
 	"II",
 	"III",
@@ -689,7 +689,7 @@ var Ke = [
 	"VIII",
 	"IX",
 	"X"
-], qe = {
+], Je = {
 	I: "Compositions",
 	II: "Sacred Types",
 	III: "Data Types",
@@ -700,10 +700,10 @@ var Ke = [
 	VIII: "Media",
 	IX: "Root",
 	X: "uSync"
-}, Je = "sinners-presenter-state";
-function Ye() {
+}, Ye = "sinners-presenter-state";
+function Xe() {
 	try {
-		let e = sessionStorage.getItem(Je);
+		let e = sessionStorage.getItem(Ye);
 		if (e) return JSON.parse(e);
 	} catch {}
 	return {
@@ -711,42 +711,58 @@ function Ye() {
 		indices: {}
 	};
 }
-var Xe = Ye(), Ze = /* @__PURE__ */ new Map(), P = new Map(Object.entries(Xe.indices)), F = Xe.activeTab, Qe = null, $e = /* @__PURE__ */ new Set();
-function et() {
+var Ze = Xe(), Qe = /* @__PURE__ */ new Map(), N = new Map(Object.entries(Ze.indices)), P = Ze.activeTab, $e = null, et = /* @__PURE__ */ new Set();
+function tt() {
 	try {
-		sessionStorage.setItem(Je, JSON.stringify({
-			activeTab: F,
-			indices: Object.fromEntries(P)
+		sessionStorage.setItem(Ye, JSON.stringify({
+			activeTab: P,
+			indices: Object.fromEntries(N)
 		}));
 	} catch {}
 }
-function I(e) {
-	$e.forEach((t) => t(e));
+function F(e) {
+	et.forEach((t) => t(e));
 }
-var tt = "/umbraco/section/settings/dashboard/penance", nt = {
+var nt = "/umbraco/section/settings/dashboard/penance", rt = "sinners-bar-visible", I = (() => {
+	try {
+		return sessionStorage.getItem(rt) === "1";
+	} catch {
+		return !1;
+	}
+})(), it = {
 	I: "/umbraco/section/content/workspace/document/edit/704a66de-b213-44fe-815a-f988c0707bbf/invariant/view/info/modal/umb-modal-workspace/invariant/general/document-type/edit/b871f83c-2395-4894-be0f-5422c1a71e48/tab/content",
 	II: "/umbraco/section/settings/workspace/document-type/edit/a95360e8-ff04-40b1-8f46-7aa4b5983096/tab/content",
 	III: "/umbraco/section/settings/workspace/data-type/edit/b5922818-d8d8-43df-88ed-4582a24c0fa6",
 	VII: "/umbraco/section/translation",
 	VIII: "/umbraco/section/media/collection",
 	IX: "/umbraco/section/content"
-}, rt = [{
+}, at = [{
 	match: "/umbraco/section/content",
 	target: "/umbraco/section/settings"
 }], L = {
 	get activeTab() {
-		return F;
+		return P;
+	},
+	get barVisible() {
+		return I;
+	},
+	toggleBar() {
+		I = !I;
+		try {
+			sessionStorage.setItem(rt, I ? "1" : "0");
+		} catch {}
+		return F("state"), I;
 	},
 	setActiveTab(e) {
-		F = e, et(), I("state");
+		P = e, tt(), F("state");
 	},
 	subscribe(e) {
-		return $e.add(e), () => $e.delete(e);
+		return et.add(e), () => et.delete(e);
 	},
 	stepInfo() {
-		let e = Ze.get(F);
+		let e = Qe.get(P);
 		if (!e || e.length === 0) return null;
-		let t = P.get(F) ?? 0;
+		let t = N.get(P) ?? 0;
 		return t >= e.length ? {
 			label: "",
 			index: t,
@@ -758,49 +774,49 @@ var tt = "/umbraco/section/settings/dashboard/penance", nt = {
 		};
 	},
 	nextTabId() {
-		let e = Ke;
-		return e[(e.indexOf(F) + 1) % e.length];
+		let e = qe;
+		return e[(e.indexOf(P) + 1) % e.length];
 	},
 	dotIntent() {
-		return window.location.pathname.includes("/dashboard/penance") ? nt[F] ? "exhibit" : "board-reload" : "return";
+		return window.location.pathname.includes("/dashboard/penance") ? it[P] ? "exhibit" : "board-reload" : "return";
 	},
 	dot() {
 		let e = window.location.pathname, t = e.includes("/dashboard/penance");
-		if (I("dot"), t) {
-			let e = nt[F] ?? tt;
-			console.log(`[PRESENTER] dot() on penance tab="${F}" → ${e}`), window.location.href = e;
+		if (F("dot"), t) {
+			let e = it[P] ?? nt;
+			console.log(`[PRESENTER] dot() on penance tab="${P}" → ${e}`), window.location.href = e;
 			return;
 		}
-		let n = rt.find((t) => e === t.match), r = n ? n.target : tt;
+		let n = at.find((t) => e === t.match), r = n ? n.target : nt;
 		console.log(`[PRESENTER] dot() elsewhere path="${e}" → ${r}`), window.location.href = r;
 	},
 	onNextTab(e) {
-		Qe = e;
+		$e = e;
 	},
 	get canNextTab() {
-		return Qe !== null;
+		return $e !== null;
 	},
 	nextTab() {
-		console.log("[PRESENTER] nextTab()"), Qe?.(), I("nextTab");
+		console.log("[PRESENTER] nextTab()"), $e?.(), F("nextTab");
 	},
 	registerSteps(e, t) {
-		Ze.set(e, t);
-		let n = P.get(e) ?? 0;
-		P.set(e, Math.min(n, t.length)), I("state");
+		Qe.set(e, t);
+		let n = N.get(e) ?? 0;
+		N.set(e, Math.min(n, t.length)), F("state");
 	},
 	async next() {
-		let e = Ze.get(F) ?? [], t = P.get(F) ?? 0;
-		if (console.log(`[PRESENTER] next() — tab="${F}" step=${t + 1}/${e.length}`), I("next"), t >= e.length) {
-			console.log(`[PRESENTER] no more steps on tab "${F}"`);
+		let e = Qe.get(P) ?? [], t = N.get(P) ?? 0;
+		if (console.log(`[PRESENTER] next() — tab="${P}" step=${t + 1}/${e.length}`), F("next"), t >= e.length) {
+			console.log(`[PRESENTER] no more steps on tab "${P}"`);
 			return;
 		}
-		await e[t].run(), P.set(F, t + 1), et(), I("state"), console.log(`[PRESENTER] step ${t + 1} done`);
+		await e[t].run(), N.set(P, t + 1), tt(), F("state"), console.log(`[PRESENTER] step ${t + 1} done`);
 	},
 	reset() {
 		try {
-			sessionStorage.removeItem(Je);
+			sessionStorage.removeItem(Ye);
 		} catch {}
-		window.location.href = tt;
+		window.location.href = nt;
 	}
 };
 //#endregion
@@ -813,11 +829,11 @@ function R(e, t, n, r) {
 }
 //#endregion
 //#region src/penance/commandments/content-not-composable.element.ts
-var z = "/umbraco/management/api/v1/sinners", it = {
+var z = "/umbraco/management/api/v1/sinners", ot = {
 	"Umbraco.BlockList": "Block List",
 	"Umbraco.BlockGrid": "Block Grid",
 	"Umbraco.RichText": "Rich Text"
-}, B = class extends e(j) {
+}, B = class extends e(A) {
 	constructor(...e) {
 		super(...e), this._items = [], this._emptyItems = [], this._loading = !0, this._folding = /* @__PURE__ */ new Set(), this._blessing = /* @__PURE__ */ new Set(), this._deleting = /* @__PURE__ */ new Set(), this._lastResult = null;
 	}
@@ -1198,7 +1214,7 @@ var z = "/umbraco/management/api/v1/sinners", it = {
 			let n = `${e.contentTypeAlias}:${t.propertyAlias}`, r = this._folding.has(n), i = this._blessing.has(n);
 			return w`
                                 <span class="prop-chip ${t.isBlessed ? "blessed" : ""}">
-                                    ${it[t.editorAlias] ?? t.editorAlias}
+                                    ${ot[t.editorAlias] ?? t.editorAlias}
                                     <code>${t.propertyAlias}</code>
                                     <button
                                         class="fold-btn"
@@ -1263,15 +1279,15 @@ var z = "/umbraco/management/api/v1/sinners", it = {
         `;
 	}
 };
-R([N()], B.prototype, "_items", void 0), R([N()], B.prototype, "_emptyItems", void 0), R([N()], B.prototype, "_loading", void 0), R([N()], B.prototype, "_folding", void 0), R([N()], B.prototype, "_blessing", void 0), R([N()], B.prototype, "_deleting", void 0), R([N()], B.prototype, "_lastResult", void 0), B = R([M("sinners-content-not-composable")], B);
+R([M()], B.prototype, "_items", void 0), R([M()], B.prototype, "_emptyItems", void 0), R([M()], B.prototype, "_loading", void 0), R([M()], B.prototype, "_folding", void 0), R([M()], B.prototype, "_blessing", void 0), R([M()], B.prototype, "_deleting", void 0), R([M()], B.prototype, "_lastResult", void 0), B = R([j("sinners-content-not-composable")], B);
 //#endregion
 //#region src/penance/commandments/four-sacred-types.element.ts
-var at = [
+var st = [
 	"Page",
 	"Block",
 	"Data",
 	"Composition"
-], ot = "/umbraco/management/api/v1/sinners", V = class extends e(j) {
+], ct = "/umbraco/management/api/v1/sinners", V = class extends e(A) {
 	constructor(...e) {
 		super(...e), this._items = [], this._loading = !0, this._saving = !1, this._categorizing = !1, this._pendingChanges = /* @__PURE__ */ new Map();
 	}
@@ -1481,7 +1497,7 @@ var at = [
 	async #n() {
 		this._loading = !0;
 		try {
-			let e = await this.#t(`${ot}/content-type-classifications`);
+			let e = await this.#t(`${ct}/content-type-classifications`);
 			e.ok && (this._items = await e.json());
 			let t = this._items.filter((e) => !e.classification).length;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -1516,7 +1532,7 @@ var at = [
 	async #o() {
 		this._categorizing = !0;
 		try {
-			(await this.#t(`${ot}/auto-categorize`, { method: "POST" })).ok && await this.#n();
+			(await this.#t(`${ct}/auto-categorize`, { method: "POST" })).ok && await this.#n();
 		} finally {
 			this._categorizing = !1;
 		}
@@ -1525,7 +1541,7 @@ var at = [
 		if (this._pendingChanges.size !== 0) {
 			this._saving = !0;
 			try {
-				for (let [e, t] of this._pendingChanges) if ((await this.#t(`${ot}/content-type-classifications`, {
+				for (let [e, t] of this._pendingChanges) if ((await this.#t(`${ct}/content-type-classifications`, {
 					method: "POST",
 					body: JSON.stringify({
 						contentTypeAlias: e,
@@ -1567,7 +1583,7 @@ var at = [
                         @change=${(t) => this.#r(e.contentTypeAlias, t.target.value)}
                     >
                         <option value="">— Unclassified —</option>
-                        ${at.map((e) => w`<option value=${e} ?selected=${t === e}>${e}</option>`)}
+                        ${st.map((e) => w`<option value=${e} ?selected=${t === e}>${e}</option>`)}
                     </select>
                     ${e.suggestedClassification && !n ? w`<span
                               class="suggestion"
@@ -1603,14 +1619,14 @@ var at = [
                                     ${this._categorizing ? "Categorizing…" : "Auto Categorize"}
                                 </uui-button>
                                 ${n > 0 ? w`<span class="stat-chip sinful">⚠ ${n} unclassified</span>` : w`<span class="stat-chip clean">✓ All classified</span>`}
-                                ${at.map((e) => {
+                                ${st.map((e) => {
 			let n = t(e).length;
 			return n > 0 ? w`<span class="stat-chip">${e}: ${n}</span>` : E;
 		})}
                             </div>
 
                             ${this.#u("Unclassified", e, !0)}
-                            ${at.map((e) => this.#u(e, t(e)))}
+                            ${st.map((e) => this.#u(e, t(e)))}
                             <div class="save-bar">
                                 <uui-button
                                     look="primary"
@@ -1625,10 +1641,10 @@ var at = [
         `;
 	}
 };
-R([N()], V.prototype, "_items", void 0), R([N()], V.prototype, "_loading", void 0), R([N()], V.prototype, "_saving", void 0), R([N()], V.prototype, "_categorizing", void 0), R([N()], V.prototype, "_pendingChanges", void 0), V = R([M("sinners-four-sacred-types")], V);
+R([M()], V.prototype, "_items", void 0), R([M()], V.prototype, "_loading", void 0), R([M()], V.prototype, "_saving", void 0), R([M()], V.prototype, "_categorizing", void 0), R([M()], V.prototype, "_pendingChanges", void 0), V = R([j("sinners-four-sacred-types")], V);
 //#endregion
 //#region src/penance/commandments/data-types-in-folders.element.ts
-var st = "/umbraco/management/api/v1/sinners", H = class extends e(j) {
+var lt = "/umbraco/management/api/v1/sinners", H = class extends e(A) {
 	constructor(...e) {
 		super(...e), this._items = [], this._loading = !0, this._organizing = !1, this._lastMessage = null;
 	}
@@ -1760,7 +1776,7 @@ var st = "/umbraco/management/api/v1/sinners", H = class extends e(j) {
 	async #n() {
 		this._loading = !0;
 		try {
-			let e = await this.#t(`${st}/unorganized-data-types`);
+			let e = await this.#t(`${lt}/unorganized-data-types`);
 			e.ok && (this._items = await e.json());
 			let t = this._items.length;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -1778,7 +1794,7 @@ var st = "/umbraco/management/api/v1/sinners", H = class extends e(j) {
 	async #r() {
 		this._organizing = !0, this._lastMessage = null;
 		try {
-			let e = await this.#t(`${st}/organize-data-types`, { method: "POST" });
+			let e = await this.#t(`${lt}/organize-data-types`, { method: "POST" });
 			if (e.ok) {
 				let t = await e.json();
 				this._lastMessage = {
@@ -1837,17 +1853,17 @@ var st = "/umbraco/management/api/v1/sinners", H = class extends e(j) {
         `;
 	}
 };
-R([N()], H.prototype, "_items", void 0), R([N()], H.prototype, "_loading", void 0), R([N()], H.prototype, "_organizing", void 0), R([N()], H.prototype, "_lastMessage", void 0), H = R([M("sinners-data-types-in-folders")], H);
+R([M()], H.prototype, "_items", void 0), R([M()], H.prototype, "_loading", void 0), R([M()], H.prototype, "_organizing", void 0), R([M()], H.prototype, "_lastMessage", void 0), H = R([j("sinners-data-types-in-folders")], H);
 //#endregion
 //#region src/penance/magic.ts
-var ct = !1;
-function lt() {
-	if (ct) return;
+var ut = !1;
+function dt() {
+	if (ut) return;
 	let e = document.createElement("style");
-	e.textContent = "\n        @keyframes sinners-magic-fade {\n            0%   { opacity: 0; }\n            20%  { opacity: 1; }\n            80%  { opacity: 1; }\n            100% { opacity: 0; }\n        }\n        .sinners-magic-overlay {\n            position: fixed !important;\n            top: 0 !important;\n            left: 0 !important;\n            width: 100vw !important;\n            height: 100vh !important;\n            z-index: 2147483647 !important;\n            background: rgba(0, 0, 0, 0.85) !important;\n            display: flex !important;\n            align-items: center !important;\n            justify-content: center !important;\n            pointer-events: none !important;\n            animation: sinners-magic-fade 1.8s ease forwards !important;\n        }\n        .sinners-magic-word {\n            font-size: 96px !important;\n            font-weight: 900 !important;\n            font-style: italic !important;\n            background: linear-gradient(90deg, #ff6b35, #f7c59f, #efefd0, #00b4d8, #9b5de5) !important;\n            -webkit-background-clip: text !important;\n            -webkit-text-fill-color: transparent !important;\n            background-clip: text !important;\n            white-space: nowrap !important;\n        }\n    ", document.head.appendChild(e), ct = !0;
+	e.textContent = "\n        @keyframes sinners-magic-fade {\n            0%   { opacity: 0; }\n            20%  { opacity: 1; }\n            80%  { opacity: 1; }\n            100% { opacity: 0; }\n        }\n        .sinners-magic-overlay {\n            position: fixed !important;\n            top: 0 !important;\n            left: 0 !important;\n            width: 100vw !important;\n            height: 100vh !important;\n            z-index: 2147483647 !important;\n            background: rgba(0, 0, 0, 0.85) !important;\n            display: flex !important;\n            align-items: center !important;\n            justify-content: center !important;\n            pointer-events: none !important;\n            animation: sinners-magic-fade 1.8s ease forwards !important;\n        }\n        .sinners-magic-word {\n            font-size: 96px !important;\n            font-weight: 900 !important;\n            font-style: italic !important;\n            background: linear-gradient(90deg, #ff6b35, #f7c59f, #efefd0, #00b4d8, #9b5de5) !important;\n            -webkit-background-clip: text !important;\n            -webkit-text-fill-color: transparent !important;\n            background-clip: text !important;\n            white-space: nowrap !important;\n        }\n    ", document.head.appendChild(e), ut = !0;
 }
-function ut(e) {
-	lt();
+function ft(e) {
+	dt();
 	let t = document.createElement("div");
 	t.className = "sinners-magic-overlay";
 	let n = document.createElement("span");
@@ -1857,7 +1873,7 @@ function ut(e) {
 }
 //#endregion
 //#region src/penance/commandments/program-cs-clean.element.ts
-var dt = "/umbraco/management/api/v1/sinners", ft = "var i̸̖l̷̼l̴̮i̵̗g̸̫a̷̮l̶̼ = app.UseUmbraco();\n\ni̸̖l̷̼l̴̮i̵̗g̸̫a̷̮l̶̼.WithMiddleware(u =>\n    {\n        u.UseBackOffice();\n        u.UseWebsite();\n    })\n    .WithEndpoints(u =>\n    {\n        u.UseBackOfficeEndpoints();\n        u.UseWebsiteEndpoints();\n    });", pt = "app.UseUmbraco()\n    .WithMiddleware(u =>\n    {\n        u.UseBackOffice();\n        u.UseWebsite();\n    })\n    .WithEndpoints(u =>\n    {\n        u.UseBackOfficeEndpoints();\n        u.UseWebsiteEndpoints();\n    });\n\nawait app.RunAsync();", U = class extends e(j) {
+var pt = "/umbraco/management/api/v1/sinners", mt = "var i̸̖l̷̼l̴̮i̵̗g̸̫a̷̮l̶̼ = app.UseUmbraco();\n\ni̸̖l̷̼l̴̮i̵̗g̸̫a̷̮l̶̼.WithMiddleware(u =>\n    {\n        u.UseBackOffice();\n        u.UseWebsite();\n    })\n    .WithEndpoints(u =>\n    {\n        u.UseBackOfficeEndpoints();\n        u.UseWebsiteEndpoints();\n    });", ht = "app.UseUmbraco()\n    .WithMiddleware(u =>\n    {\n        u.UseBackOffice();\n        u.UseWebsite();\n    })\n    .WithEndpoints(u =>\n    {\n        u.UseBackOfficeEndpoints();\n        u.UseWebsiteEndpoints();\n    });\n\nawait app.RunAsync();", U = class extends e(A) {
 	constructor(...e) {
 		super(...e), this._result = null, this._loading = !0;
 	}
@@ -1987,7 +2003,7 @@ var dt = "/umbraco/management/api/v1/sinners", ft = "var i̸̖l̷̼l̴̮i̵̗g̸
 	async #t() {
 		this._loading = !0;
 		try {
-			let e = await this.#e?.getLatestToken(), t = await fetch(`${dt}/program-cs-audit`, { headers: e ? { Authorization: `Bearer ${e}` } : {} });
+			let e = await this.#e?.getLatestToken(), t = await fetch(`${pt}/program-cs-audit`, { headers: e ? { Authorization: `Bearer ${e}` } : {} });
 			t.ok && (this._result = await t.json());
 			let n = this._result ? +!!this._result.useUmbracoSavedToVariable + this._result.extraMiddleware.length + this._result.extraEndpoints.length : 0;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -2004,10 +2020,10 @@ var dt = "/umbraco/management/api/v1/sinners", ft = "var i̸̖l̷̼l̴̮i̵̗g̸
 	}
 	async #n() {
 		let e = await this.#e?.getLatestToken();
-		await fetch(`${dt}/fix-program-cs`, {
+		await fetch(`${pt}/fix-program-cs`, {
 			method: "POST",
 			headers: e ? { Authorization: `Bearer ${e}` } : {}
-		}), ut(() => void this.#t());
+		}), ft(() => void this.#t());
 	}
 	#r(e) {
 		let t = [];
@@ -2024,12 +2040,12 @@ var dt = "/umbraco/management/api/v1/sinners", ft = "var i̸̖l̷̼l̴̮i̵̗g̸
                 <div class="diff-block">
                     <div class="diff-side">
                         <div class="diff-label before">Before — thy sin</div>
-                        <pre class="before">${ft}</pre>
+                        <pre class="before">${mt}</pre>
                     </div>
                     <div class="diff-arrow">→</div>
                     <div class="diff-side">
                         <div class="diff-label after">After — absolved</div>
-                        <pre class="after">${pt}</pre>
+                        <pre class="after">${ht}</pre>
                     </div>
                 </div>
                 <uui-button class="fix-btn" look="secondary" @click=${() => void this.#n()}>
@@ -2060,10 +2076,10 @@ var dt = "/umbraco/management/api/v1/sinners", ft = "var i̸̖l̷̼l̴̮i̵̗g̸
         `;
 	}
 };
-R([N()], U.prototype, "_result", void 0), R([N()], U.prototype, "_loading", void 0), U = R([M("sinners-program-cs-clean")], U);
+R([M()], U.prototype, "_result", void 0), R([M()], U.prototype, "_loading", void 0), U = R([j("sinners-program-cs-clean")], U);
 //#endregion
 //#region src/penance/commandments/production-settings.element.ts
-var mt = "/umbraco/management/api/v1/sinners", W = class extends e(j) {
+var gt = "/umbraco/management/api/v1/sinners", W = class extends e(A) {
 	constructor(...e) {
 		super(...e), this._result = null, this._loading = !0, this._blessing = /* @__PURE__ */ new Set();
 	}
@@ -2206,7 +2222,7 @@ var mt = "/umbraco/management/api/v1/sinners", W = class extends e(j) {
 	async #r() {
 		this._loading = !0;
 		try {
-			let e = await this.#n(`${mt}/production-readiness`);
+			let e = await this.#n(`${gt}/production-readiness`);
 			e.ok && (this._result = await e.json());
 			let t = this._result?.missingSettings.filter((e) => !e.isBlessed).length ?? 0;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -2224,7 +2240,7 @@ var mt = "/umbraco/management/api/v1/sinners", W = class extends e(j) {
 	async #i(e, t) {
 		this._blessing = new Set([...this._blessing, e.key]);
 		try {
-			await this.#n(`${mt}/bless-production-setting`, {
+			await this.#n(`${gt}/bless-production-setting`, {
 				method: "POST",
 				body: JSON.stringify({
 					settingKey: e.key,
@@ -2270,10 +2286,10 @@ var mt = "/umbraco/management/api/v1/sinners", W = class extends e(j) {
         `;
 	}
 };
-R([N()], W.prototype, "_result", void 0), R([N()], W.prototype, "_loading", void 0), R([N()], W.prototype, "_blessing", void 0), W = R([M("sinners-production-settings")], W);
+R([M()], W.prototype, "_result", void 0), R([M()], W.prototype, "_loading", void 0), R([M()], W.prototype, "_blessing", void 0), W = R([j("sinners-production-settings")], W);
 //#endregion
 //#region src/penance/commandments/alias-audit.element.ts
-var ht = "/umbraco/management/api/v1/sinners", G = class extends e(j) {
+var _t = "/umbraco/management/api/v1/sinners", G = class extends e(A) {
 	constructor(...e) {
 		super(...e), this._items = [], this._loading = !0, this._blessing = /* @__PURE__ */ new Set();
 	}
@@ -2415,7 +2431,7 @@ var ht = "/umbraco/management/api/v1/sinners", G = class extends e(j) {
 	async #n() {
 		this._loading = !0;
 		try {
-			let e = await this.#t(`${ht}/alias-issues`);
+			let e = await this.#t(`${_t}/alias-issues`);
 			e.ok && (this._items = await e.json());
 			let t = this._items.filter((e) => !e.isBlessed && !e.isCamelCase).length, n = this._items.filter((e) => !e.isBlessed && e.isCamelCase && e.unrecognizedWords.length > 0).length, r = t + n, i = t > 0 ? "error" : n > 0 ? "warning" : "ok";
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -2433,7 +2449,7 @@ var ht = "/umbraco/management/api/v1/sinners", G = class extends e(j) {
 	async #r(e, t) {
 		this._blessing = new Set([...this._blessing, e.contentTypeAlias]);
 		try {
-			await this.#t(`${ht}/bless-alias`, {
+			await this.#t(`${_t}/bless-alias`, {
 				method: "POST",
 				body: JSON.stringify({
 					contentTypeAlias: e.contentTypeAlias,
@@ -2477,10 +2493,10 @@ var ht = "/umbraco/management/api/v1/sinners", G = class extends e(j) {
         `;
 	}
 };
-R([N()], G.prototype, "_items", void 0), R([N()], G.prototype, "_loading", void 0), R([N()], G.prototype, "_blessing", void 0), G = R([M("sinners-alias-audit")], G);
+R([M()], G.prototype, "_items", void 0), R([M()], G.prototype, "_loading", void 0), R([M()], G.prototype, "_blessing", void 0), G = R([j("sinners-alias-audit")], G);
 //#endregion
 //#region src/penance/commandments/translation-audit.element.ts
-var gt = "/umbraco/management/api/v1/sinners", K = class extends e(j) {
+var vt = "/umbraco/management/api/v1/sinners", K = class extends e(A) {
 	constructor(...e) {
 		super(...e), this._result = null, this._loading = !0, this._blessing = /* @__PURE__ */ new Set(), this._grouping = /* @__PURE__ */ new Set();
 	}
@@ -2658,7 +2674,7 @@ var gt = "/umbraco/management/api/v1/sinners", K = class extends e(j) {
 	async #n() {
 		this._loading = !0;
 		try {
-			let e = await this.#t(`${gt}/translation-audit`);
+			let e = await this.#t(`${vt}/translation-audit`);
 			e.ok && (this._result = await e.json());
 			let t = this._result, n = t?.issues.filter((e) => !e.isBlessed && !e.isPascalCase).length ?? 0, r = t?.issues.filter((e) => !e.isBlessed && e.isPascalCase && e.unrecognizedWords.length > 0).length ?? 0, i = t?.groupSuggestions.length ?? 0, a = n + r + i, o = n > 0 ? "error" : a > 0 ? "warning" : "ok";
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -2676,7 +2692,7 @@ var gt = "/umbraco/management/api/v1/sinners", K = class extends e(j) {
 	async #r(e, t) {
 		this._blessing = new Set([...this._blessing, e.itemKey]);
 		try {
-			await this.#t(`${gt}/bless-translation`, {
+			await this.#t(`${vt}/bless-translation`, {
 				method: "POST",
 				body: JSON.stringify({
 					itemKey: e.itemKey,
@@ -2690,7 +2706,7 @@ var gt = "/umbraco/management/api/v1/sinners", K = class extends e(j) {
 	async #i(e) {
 		this._grouping = new Set([...this._grouping, e.proposedParentKey]);
 		try {
-			await this.#t(`${gt}/create-translation-group`, {
+			await this.#t(`${vt}/create-translation-group`, {
 				method: "POST",
 				body: JSON.stringify({
 					parentKey: e.proposedParentKey,
@@ -2756,7 +2772,7 @@ var gt = "/umbraco/management/api/v1/sinners", K = class extends e(j) {
 	render() {
 		let e = this._result, t = (e?.issues.length ?? 0) > 0, n = (e?.groupSuggestions.length ?? 0) > 0;
 		return w`
-            <uui-box headline="VII — Translation keys are PascalCase English">
+            <uui-box headline="VII — Translation keys are PascalCase English and nested in folders">
                 ${this._loading ? w`<uui-loader-bar></uui-loader-bar>` : !t && !n ? w`<div class="clean">✓ All translation keys are valid camelCase English with no grouping suggestions.</div>` : w`
                             ${e ? this.#a(e.issues) : E}
                             ${e ? this.#o(e.groupSuggestions) : E}
@@ -2765,10 +2781,10 @@ var gt = "/umbraco/management/api/v1/sinners", K = class extends e(j) {
         `;
 	}
 };
-R([N()], K.prototype, "_result", void 0), R([N()], K.prototype, "_loading", void 0), R([N()], K.prototype, "_blessing", void 0), R([N()], K.prototype, "_grouping", void 0), K = R([M("sinners-translation-audit")], K);
+R([M()], K.prototype, "_result", void 0), R([M()], K.prototype, "_loading", void 0), R([M()], K.prototype, "_blessing", void 0), R([M()], K.prototype, "_grouping", void 0), K = R([j("sinners-translation-audit")], K);
 //#endregion
 //#region src/penance/commandments/root-media.element.ts
-var _t = "/umbraco/management/api/v1/sinners", q = class extends e(j) {
+var yt = "/umbraco/management/api/v1/sinners", q = class extends e(A) {
 	constructor(...e) {
 		super(...e), this._items = [], this._loading = !0, this._pretending = localStorage.getItem("sinners-media-pretend") === "1";
 	}
@@ -2840,7 +2856,7 @@ var _t = "/umbraco/management/api/v1/sinners", q = class extends e(j) {
 	async #t() {
 		this._loading = !0;
 		try {
-			let e = await this.#e?.getLatestToken(), t = await fetch(`${_t}/root-media`, { headers: e ? { Authorization: `Bearer ${e}` } : {} });
+			let e = await this.#e?.getLatestToken(), t = await fetch(`${yt}/root-media`, { headers: e ? { Authorization: `Bearer ${e}` } : {} });
 			t.ok && (this._items = await t.json());
 			let n = this._pretending ? 0 : this._items.length;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -2856,7 +2872,7 @@ var _t = "/umbraco/management/api/v1/sinners", q = class extends e(j) {
 		}
 	}
 	#n() {
-		ut(() => {
+		ft(() => {
 			this._pretending = !0, localStorage.setItem("sinners-media-pretend", "1"), this.dispatchEvent(new CustomEvent("sinners-status", {
 				bubbles: !0,
 				composed: !0,
@@ -2891,10 +2907,10 @@ var _t = "/umbraco/management/api/v1/sinners", q = class extends e(j) {
         `;
 	}
 };
-R([N()], q.prototype, "_items", void 0), R([N()], q.prototype, "_loading", void 0), R([N()], q.prototype, "_pretending", void 0), q = R([M("sinners-root-media")], q);
+R([M()], q.prototype, "_items", void 0), R([M()], q.prototype, "_loading", void 0), R([M()], q.prototype, "_pretending", void 0), q = R([j("sinners-root-media")], q);
 //#endregion
 //#region src/penance/commandments/root-content.element.ts
-var vt = "/umbraco/management/api/v1/sinners", J = class extends e(j) {
+var bt = "/umbraco/management/api/v1/sinners", J = class extends e(A) {
 	constructor(...e) {
 		super(...e), this._result = null, this._loading = !0, this._seeking = !1, this._sanctuaryMessage = null;
 	}
@@ -3031,7 +3047,7 @@ var vt = "/umbraco/management/api/v1/sinners", J = class extends e(j) {
 	async #n() {
 		this._loading = !0;
 		try {
-			let e = await this.#t(`${vt}/root-content-audit`);
+			let e = await this.#t(`${bt}/root-content-audit`);
 			e.ok && (this._result = await e.json());
 			let t = this._result?.rootNodes.filter((e) => e.hasTemplate).length ?? 0;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -3049,7 +3065,7 @@ var vt = "/umbraco/management/api/v1/sinners", J = class extends e(j) {
 	async #r() {
 		this._seeking = !0, this._sanctuaryMessage = null;
 		try {
-			let e = await this.#t(`${vt}/seek-root-sanctuary`, { method: "POST" });
+			let e = await this.#t(`${bt}/seek-root-sanctuary`, { method: "POST" });
 			if (e.ok) {
 				let t = await e.json();
 				this._sanctuaryMessage = t.success ? t.message : `⚠ ${t.message}`, t.success && await this.#n();
@@ -3091,10 +3107,10 @@ var vt = "/umbraco/management/api/v1/sinners", J = class extends e(j) {
         `;
 	}
 };
-R([N()], J.prototype, "_result", void 0), R([N()], J.prototype, "_loading", void 0), R([N()], J.prototype, "_seeking", void 0), R([N()], J.prototype, "_sanctuaryMessage", void 0), J = R([M("sinners-root-content")], J);
+R([M()], J.prototype, "_result", void 0), R([M()], J.prototype, "_loading", void 0), R([M()], J.prototype, "_seeking", void 0), R([M()], J.prototype, "_sanctuaryMessage", void 0), J = R([j("sinners-root-content")], J);
 //#endregion
 //#region src/penance/commandments/usync-audit.element.ts
-var yt = "/umbraco/management/api/v1/sinners", Y = class extends e(j) {
+var xt = "/umbraco/management/api/v1/sinners", St = class extends e(A) {
 	constructor(...e) {
 		super(...e), this._result = null, this._loading = !0;
 	}
@@ -3161,7 +3177,7 @@ var yt = "/umbraco/management/api/v1/sinners", Y = class extends e(j) {
 	async #t() {
 		this._loading = !0;
 		try {
-			let e = await this.#e?.getLatestToken(), t = await fetch(`${yt}/usync-audit`, { headers: e ? { Authorization: `Bearer ${e}` } : {} });
+			let e = await this.#e?.getLatestToken(), t = await fetch(`${xt}/usync-audit`, { headers: e ? { Authorization: `Bearer ${e}` } : {} });
 			t.ok && (this._result = await t.json());
 			let n = this._result, r = n?.csprojFound && !n.hasUSync && !n.hasUmbracoDeploy ? 1 : 0;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -3178,10 +3194,10 @@ var yt = "/umbraco/management/api/v1/sinners", Y = class extends e(j) {
 	}
 	async #n() {
 		let e = await this.#e?.getLatestToken();
-		await fetch(`${yt}/inject-usync`, {
+		await fetch(`${xt}/inject-usync`, {
 			method: "POST",
 			headers: e ? { Authorization: `Bearer ${e}` } : {}
-		}), ut(() => void this.#t());
+		}), ft(() => void this.#t());
 	}
 	render() {
 		let e = this._result;
@@ -3208,10 +3224,10 @@ var yt = "/umbraco/management/api/v1/sinners", Y = class extends e(j) {
         `;
 	}
 };
-R([N()], Y.prototype, "_result", void 0), R([N()], Y.prototype, "_loading", void 0), Y = R([M("sinners-usync-audit")], Y);
+R([M()], St.prototype, "_result", void 0), R([M()], St.prototype, "_loading", void 0), St = R([j("sinners-usync-audit")], St);
 //#endregion
 //#region src/penance/penance-dashboard.element.ts
-var X = [
+var Y = [
 	{
 		id: "I",
 		label: "I — Content is not composable"
@@ -3238,7 +3254,7 @@ var X = [
 	},
 	{
 		id: "VII",
-		label: "VII — Translation keys are PascalCase"
+		label: "VII — Translation keys are PascalCase and nested"
 	},
 	{
 		id: "VIII",
@@ -3252,7 +3268,7 @@ var X = [
 		id: "X",
 		label: "X — uSync is installed"
 	}
-], bt = {
+], Ct = {
 	0: "Righteous — thy backoffice is clean",
 	1: "A whisper of darkness",
 	2: "The shadows stir",
@@ -3264,7 +3280,7 @@ var X = [
 	8: "The damned rejoice",
 	9: "All is lost",
 	10: "THOU ART BEYOND ALL REDEMPTION"
-}, Z = class extends e(j) {
+}, X = class extends e(A) {
 	constructor(...e) {
 		super(...e), this.#t = new URLSearchParams(window.location.search).has("debug"), this._activeTab = "I", this._statuses = /* @__PURE__ */ new Map(), this._spookyFactor = 0, this.#n = !1;
 	}
@@ -3418,9 +3434,9 @@ var X = [
 	connectedCallback() {
 		super.connectedCallback();
 		let e = L.activeTab;
-		e && X.some((t) => t.id === e) && (this._activeTab = e, this.#n = !0), L.setActiveTab(this._activeTab), L.onNextTab(() => {
+		e && Y.some((t) => t.id === e) && (this._activeTab = e, this.#n = !0), L.setActiveTab(this._activeTab), L.onNextTab(() => {
 			this.#n = !0;
-			let e = X.map((e) => e.id), t = e[(e.indexOf(this._activeTab) + 1) % e.length];
+			let e = Y.map((e) => e.id), t = e[(e.indexOf(this._activeTab) + 1) % e.length];
 			this._activeTab = t, L.setActiveTab(t);
 		}), this.consumeContext(t, (e) => {
 			this.#e = e, this.#a();
@@ -3437,15 +3453,15 @@ var X = [
 	}
 	#a() {
 		let e = this.#i;
-		this.#e?.setThemeByAlias(e > 0 ? We(e) : "umb-light-theme");
+		this.#e?.setThemeByAlias(e > 0 ? Ge(e) : "umb-light-theme");
 	}
 	#o(e) {
 		this._spookyFactor = +e.target.value, this.#a();
 	}
 	#s(e, t) {
-		if (this._statuses = new Map(this._statuses).set(e, t), this._spookyFactor === 0 && this.#a(), !this.#n && this._statuses.size === X.length) {
+		if (this._statuses = new Map(this._statuses).set(e, t), this._spookyFactor === 0 && this.#a(), !this.#n && this._statuses.size === Y.length) {
 			this.#n = !0;
-			let e = X.find((e) => (this._statuses.get(e.id)?.issueCount ?? 0) > 0);
+			let e = Y.find((e) => (this._statuses.get(e.id)?.issueCount ?? 0) > 0);
 			e && (this._activeTab = e.id, L.setActiveTab(e.id));
 		}
 	}
@@ -3458,12 +3474,12 @@ var X = [
             <div class="hero">
                 <h1>Penance Board</h1>
                 <p>Confess your sins. Audit your Umbraco installation against the Ten UmbraCommandments.</p>
-                ${this._statuses.size > 0 ? w`<p class="verdict">${bt[this.#i]}</p>` : ""}
+                ${this._statuses.size > 0 ? w`<p class="verdict">${Ct[this.#i]}</p>` : ""}
             </div>
 
             <div class="layout">
             <div class="tab-strip">
-                ${X.map((e) => w`
+                ${Y.map((e) => w`
                     <button
                         class="tab-btn ${this._activeTab === e.id ? "active" : ""}"
                         @click=${() => {
@@ -3532,7 +3548,7 @@ var X = [
             ${this.#t ? w`
                 <div class="debug-strip">
                     <label>Debug — Spooky Factor Override (auto: ${this.#r})</label>
-                    <div class="spooky-label">${this.#i} — ${bt[this.#i]}</div>
+                    <div class="spooky-label">${this.#i} — ${Ct[this.#i]}</div>
                     <input
                         type="range"
                         min="0"
@@ -3543,23 +3559,413 @@ var X = [
         `;
 	}
 };
-R([N()], Z.prototype, "_activeTab", void 0), R([N()], Z.prototype, "_statuses", void 0), R([N()], Z.prototype, "_spookyFactor", void 0), Z = R([M("sinners-penance-dashboard")], Z);
-var Q = "sinners-presenter-bar-layout", $ = class extends j {
+R([M()], X.prototype, "_activeTab", void 0), R([M()], X.prototype, "_statuses", void 0), R([M()], X.prototype, "_spookyFactor", void 0), X = R([j("sinners-penance-dashboard")], X);
+//#endregion
+//#region src/penance/voice.ts
+var Z = [
+	{
+		display: "pineapple",
+		rx: /\bpine\s?apple\b/i
+	},
+	{
+		display: "walrus",
+		rx: /\bwalrus\b/i
+	},
+	{
+		display: "banjo",
+		rx: /\bbanjo\b/i
+	},
+	{
+		display: "tuxedo",
+		rx: /\btuxedo\b/i
+	},
+	{
+		display: "flamingo",
+		rx: /\bflamingo\b/i
+	},
+	{
+		display: "spaghetti",
+		rx: /\bspaghetti\b/i
+	},
+	{
+		display: "unicorn",
+		rx: /\bunicorn\b/i
+	},
+	{
+		display: "volcano",
+		rx: /\bvolcano\b/i
+	},
+	{
+		display: "kangaroo",
+		rx: /\bkangaroo\b/i
+	},
+	{
+		display: "bubblegum",
+		rx: /\bbubble\s?gum\b/i
+	},
+	{
+		display: "helicopter",
+		rx: /\bhelicopter\b/i
+	},
+	{
+		display: "mustache",
+		rx: /\b(?:mustache|moustache)\b/i
+	},
+	{
+		display: "penguin",
+		rx: /\bpenguin\b/i
+	},
+	{
+		display: "pickle",
+		rx: /\bpickle\b/i
+	},
+	{
+		display: "waffle",
+		rx: /\bwaffle\b/i
+	},
+	{
+		display: "zombie",
+		rx: /\bzombie\b/i
+	},
+	{
+		display: "cactus",
+		rx: /\bcactus\b/i
+	},
+	{
+		display: "marshmallow",
+		rx: /\bmarsh\s?mallow\b/i
+	},
+	{
+		display: "tornado",
+		rx: /\btornado\b/i
+	},
+	{
+		display: "octopus",
+		rx: /\boctopus\b/i
+	},
+	{
+		display: "disco",
+		rx: /\bdisco\b/i
+	},
+	{
+		display: "karate",
+		rx: /\bkarate\b/i
+	},
+	{
+		display: "mango",
+		rx: /\bmango\b/i
+	},
+	{
+		display: "iceberg",
+		rx: /\bice\s?berg\b/i
+	},
+	{
+		display: "hammock",
+		rx: /\bhammock\b/i
+	},
+	{
+		display: "yogurt",
+		rx: /\b(?:yogurt|yoghurt)\b/i
+	},
+	{
+		display: "trampoline",
+		rx: /\btrampoline\b/i
+	},
+	{
+		display: "lobster",
+		rx: /\blobster\b/i
+	},
+	{
+		display: "saxophone",
+		rx: /\bsaxophone\b/i
+	},
+	{
+		display: "tumbleweed",
+		rx: /\btumble\s?weed\b/i
+	},
+	{
+		display: "meatball",
+		rx: /\bmeat\s?ball\b/i
+	},
+	{
+		display: "giraffe",
+		rx: /\bgiraffe\b/i
+	},
+	{
+		display: "lighthouse",
+		rx: /\blight\s?house\b/i
+	},
+	{
+		display: "popcorn",
+		rx: /\bpop\s?corn\b/i
+	},
+	{
+		display: "jellyfish",
+		rx: /\bjelly\s?fish\b/i
+	},
+	{
+		display: "hedgehog",
+		rx: /\bhedge\s?hog\b/i
+	},
+	{
+		display: "lasagna",
+		rx: /\b(?:lasagna|lasagne)\b/i
+	},
+	{
+		display: "bagpipes",
+		rx: /\bbag\s?pipes?\b/i
+	},
+	{
+		display: "coconut",
+		rx: /\bcoconut\b/i
+	},
+	{
+		display: "submarine",
+		rx: /\bsubmarine\b/i
+	},
+	{
+		display: "avalanche",
+		rx: /\bavalanche\b/i
+	},
+	{
+		display: "butterscotch",
+		rx: /\bbutter\s?scotch\b/i
+	},
+	{
+		display: "wheelbarrow",
+		rx: /\bwheel\s?barrow\b/i
+	},
+	{
+		display: "platypus",
+		rx: /\bplatypus\b/i
+	},
+	{
+		display: "accordion",
+		rx: /\baccordion\b/i
+	},
+	{
+		display: "snorkel",
+		rx: /\bsnorkel\b/i
+	},
+	{
+		display: "bulldozer",
+		rx: /\bbull\s?dozer\b/i
+	},
+	{
+		display: "catapult",
+		rx: /\bcatapult\b/i
+	},
+	{
+		display: "ketchup",
+		rx: /\bketchup\b/i
+	},
+	{
+		display: "moonwalk",
+		rx: /\bmoon\s?walk\b/i
+	}
+], wt = "sinners-voice-words";
+function Tt() {
+	try {
+		let e = sessionStorage.getItem(wt);
+		if (e) return JSON.parse(e);
+	} catch {}
+	return {
+		active: [
+			0,
+			1,
+			2,
+			3
+		],
+		next: 4
+	};
+}
+var Et = /\b(?:hey|hej|hay|hei|okay|ok)[,.!?\s]+(?:umbraco|umbrako|umbracco|um\s?braco|um\s?brako|umbra\s?co|umbra|umbrella|braco)\b/i, Dt = /\b(?:site|sight|side|cite|sit)[\s-]?(?:core|call|cor|corps|coal|cole|col|kor|gore|corn)s?\b|\b(?:psycho|cycle)\b/i, Ot = [
+	{
+		pattern: /\b(?:one|won|1|penance|confess)\b/i,
+		action: 1
+	},
+	{
+		pattern: /\b(?:two|to|too|2|next)\b/i,
+		action: 2
+	},
+	{
+		pattern: /\b(?:three|tree|free|3|exhibit|show)\b/i,
+		action: 3
+	},
+	{
+		pattern: /\b(?:four|for|fore|4|reload)\b/i,
+		action: 4
+	}
+], kt = 6e3, At = "sinners-voice-enabled";
+function jt() {
+	let e = window;
+	return e.SpeechRecognition ?? e.webkitSpeechRecognition ?? null;
+}
+var Q = new class {
+	#e = jt() ? "off" : "unsupported";
+	#t = "";
+	#n = "";
+	#r = Tt();
+	#i = null;
+	#a;
+	#o = 0;
+	#s = /* @__PURE__ */ new Set();
+	#c = null;
+	#l = !1;
+	constructor() {
+		this.#e !== "unsupported" && localStorage.getItem(At) === "1" && this.enable();
+	}
+	get snapshot() {
+		return {
+			state: this.#e,
+			lastHeard: this.#t,
+			detail: this.#n,
+			magicWords: this.#r.active.map((e) => Z[e].display)
+		};
+	}
+	subscribe(e) {
+		return this.#s.add(e), () => this.#s.delete(e);
+	}
+	#u() {
+		let e = this.snapshot;
+		this.#s.forEach((t) => t(e));
+	}
+	#d(e, t = "") {
+		this.#e = e, this.#n = t, this.#u();
+	}
+	async enable() {
+		let e = jt();
+		if (e) {
+			localStorage.setItem(At, "1"), this.#d("starting");
+			try {
+				if (e.available) {
+					let t = await e.available({
+						langs: ["en-US"],
+						processLocally: !0
+					});
+					t === "available" ? this.#l = !0 : t === "downloadable" && e.install && e.install({
+						langs: ["en-US"],
+						processLocally: !0
+					});
+				}
+			} catch {}
+			this.#f();
+		}
+	}
+	disable() {
+		localStorage.setItem(At, "0"), this.#a && clearTimeout(this.#a);
+		let e = this.#i;
+		this.#i = null;
+		try {
+			e?.abort();
+		} catch {}
+		this.#d("off");
+	}
+	#f() {
+		let e = jt();
+		if (!e) return;
+		try {
+			this.#i?.abort();
+		} catch {}
+		let t = new e();
+		if (t.lang = "en-US", t.continuous = !0, t.interimResults = !0, t.maxAlternatives = 3, this.#l) try {
+			t.processLocally = !0;
+		} catch {}
+		t.onresult = (e) => {
+			for (let t = e.resultIndex; t < e.results.length; t++) {
+				let n = e.results[t];
+				for (let e = 0; e < n.length; e++) this.#m(n[e].transcript);
+			}
+		}, t.onerror = (e) => {
+			e.error === "not-allowed" || e.error === "service-not-allowed" ? (this.#i = null, this.#d("error", "microphone blocked — allow it and re-enable")) : e.error === "network" && this.#d("error", "speech service unreachable (venue wifi?) — retrying");
+		}, t.onend = () => {
+			this.#i === t && setTimeout(() => {
+				if (this.#i === t) try {
+					t.start();
+				} catch {
+					this.#f();
+				}
+			}, 250);
+		}, this.#i = t;
+		try {
+			t.start(), this.#d("listening");
+		} catch {
+			this.#d("error", "could not start recognition");
+		}
+	}
+	simulate(e) {
+		(this.#e === "off" || this.#e === "error") && this.#d("listening"), this.#m(e);
+	}
+	#p = "";
+	#m(e) {
+		let t = e.trim();
+		if (!t || (t !== this.#p && (this.#p = t, console.log(`[VOICE] heard: "${t}" (state=${this.#e}, hot=[${this.#r.active.map((e) => Z[e].display).join(", ")}])`)), this.#t = t, this.#u(), Date.now() < this.#o)) return;
+		if (Dt.test(t)) {
+			this.#o = Date.now() + 1500;
+			let e = L.toggleBar();
+			console.log(`[VOICE] SUMMON — the forbidden name was spoken, bar ${e ? "manifested" : "banished"}`), e ? (this.#y(660), setTimeout(() => this.#y(990), 130)) : this.#y(330, .18);
+			return;
+		}
+		if (!L.barVisible || this.#e === "armed" && this.#v(t) || this.#e === "listening" && this.#h(t)) return;
+		let n = Et.exec(t);
+		if (n && this.#e === "listening") {
+			this.#_();
+			let e = t.slice(n.index + n[0].length);
+			e && this.#v(e);
+		}
+	}
+	#h(e) {
+		for (let t = 0; t < 4; t++) {
+			let n = Z[this.#r.active[t]];
+			if (n.rx.test(e)) {
+				console.log(`[VOICE] magic word "${n.display}" → button ${t + 1}`), this.#o = Date.now() + 1500, this.#y(1320), this.#r.active[t] = this.#r.next, this.#r.next = (this.#r.next + 1) % Z.length;
+				try {
+					sessionStorage.setItem(wt, JSON.stringify(this.#r));
+				} catch {}
+				return this.#u(), this.#g(t + 1), !0;
+			}
+		}
+		return !1;
+	}
+	#g(e) {
+		e === 1 ? L.next() : e === 2 ? L.nextTab() : e === 3 ? L.dot() : window.location.reload();
+	}
+	#_() {
+		this.#y(880), this.#d("armed"), this.#a && clearTimeout(this.#a), this.#a = window.setTimeout(() => {
+			this.#e === "armed" && (this.#y(220, .2), this.#d("listening"));
+		}, kt);
+	}
+	#v(e) {
+		let t = Ot.find((t) => t.pattern.test(e));
+		return t ? (this.#a && clearTimeout(this.#a), this.#o = Date.now() + 1500, this.#y(1320), this.#d("listening"), console.log(`[VOICE] command ${t.action} from "${e}"`), this.#g(t.action), !0) : !1;
+	}
+	#y(e, t = .12) {
+		try {
+			this.#c ??= new AudioContext();
+			let n = this.#c, r = n.createOscillator(), i = n.createGain();
+			r.frequency.value = e, r.type = "sine", i.gain.setValueAtTime(.15, n.currentTime), i.gain.exponentialRampToValueAtTime(.001, n.currentTime + t), r.connect(i).connect(n.destination), r.start(), r.stop(n.currentTime + t);
+		} catch {}
+	}
+}();
+window.sinnersVoice = Q;
+var Mt = "sinners-presenter-bar-layout", $ = class extends A {
 	constructor(...e) {
-		super(...e), this._flash = null, this.#n = "", this.#s = (e) => {
+		super(...e), this._flash = null, this._voice = Q.snapshot, this.#r = "", this.#c = (e) => {
 			[
 				"1",
 				"2",
 				"3",
 				"4",
+				"5",
 				"0"
-			].includes(e.key) && (e.preventDefault(), e.stopPropagation(), e.key === "1" ? L.next() : e.key === "2" ? L.nextTab() : e.key === "3" ? L.dot() : e.key === "4" ? (this.#o(4), window.location.reload()) : e.key === "0" && L.reset());
+			].includes(e.key) && (!L.barVisible && !["5", "0"].includes(e.key) || (e.preventDefault(), e.stopPropagation(), e.key === "1" ? L.next() : e.key === "2" ? L.nextTab() : e.key === "3" ? L.dot() : e.key === "4" ? (this.#s(4), window.location.reload()) : e.key === "5" ? L.toggleBar() : e.key === "0" && L.reset()));
 		};
 	}
 	#e;
 	#t;
 	#n;
 	#r;
+	#i;
 	static {
 		this.styles = l`
         :host {
@@ -3574,6 +3980,11 @@ var Q = "sinners-presenter-bar-layout", $ = class extends j {
             background: #12061f;
             border-left: 3px solid #d42054;
             font-family: inherit;
+            transition: transform 0.35s ease;
+        }
+
+        :host(.banished) {
+            transform: translateX(105%);
         }
 
         .title {
@@ -3661,66 +4072,173 @@ var Q = "sinners-presenter-bar-layout", $ = class extends j {
         }
 
         .btn.flash .detail { color: #ffd7e2; }
+
+        .voice {
+            border-top: 2px solid rgba(212, 32, 84, 0.35);
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+            text-align: center;
+            min-height: 74px;
+            justify-content: center;
+            user-select: none;
+        }
+
+        .voice-toggle {
+            border: 1px solid #d42054;
+            background: transparent;
+            color: #ff5e8a;
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .voice-toggle:hover { background: rgba(212, 32, 84, 0.18); }
+
+        .voice-status {
+            font-size: 12px;
+            font-weight: 700;
+            color: #cdaebf;
+            line-height: 1.3;
+        }
+
+        .voice-heard {
+            font-size: 10px;
+            font-style: italic;
+            color: #8a6f80;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .voice.armed {
+            background: rgba(212, 32, 84, 0.28);
+            animation: sinners-voice-pulse 0.9s ease-in-out infinite;
+        }
+
+        .voice.armed .voice-status {
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        @keyframes sinners-voice-pulse {
+            0%, 100% { background: rgba(212, 32, 84, 0.28); }
+            50%      { background: rgba(212, 32, 84, 0.55); }
+        }
+
+        .voice-error { color: #ffb84d; }
+
+        .magic-word {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+            padding: 6px 14px;
+            border-radius: 18px;
+            border: 2px dashed #a86bc4;
+            font-size: 18px;
+            font-style: italic;
+            font-weight: 800;
+            color: #e2bdf5;
+            letter-spacing: 0.03em;
+        }
+
+        .btn.flash .magic-word { color: #fff; border-color: #fff; }
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), this.#i(), this.#e = L.subscribe((e) => this.#a(e)), window.addEventListener("keydown", this.#s, !0), this.#n = window.location.pathname, this.#t = window.setInterval(() => {
-			window.location.pathname !== this.#n && (this.#n = window.location.pathname, this.requestUpdate());
+		super.connectedCallback(), this.#a(), this.#t = L.subscribe((e) => this.#o(e)), this.#e = Q.subscribe((e) => {
+			this._voice = e;
+		}), window.addEventListener("keydown", this.#c, !0), this.#r = window.location.pathname, this.#n = window.setInterval(() => {
+			window.location.pathname !== this.#r && (this.#r = window.location.pathname, this.requestUpdate());
 		}, 400);
 	}
 	disconnectedCallback() {
-		super.disconnectedCallback(), this.#e?.(), window.removeEventListener("keydown", this.#s, !0), this.#t && clearInterval(this.#t), document.getElementById(Q)?.remove();
+		super.disconnectedCallback(), this.#t?.(), this.#e?.(), window.removeEventListener("keydown", this.#c, !0), this.#n && clearInterval(this.#n), document.getElementById(Mt)?.remove();
 	}
-	#i() {
-		if (document.getElementById(Q)) return;
-		let e = document.createElement("style");
-		e.id = Q, e.textContent = "\n            body { width: calc(100vw - 210px) !important; }\n            umb-app { width: calc(100vw - 210px) !important; }\n        ", document.head.appendChild(e);
-	}
-	#a(e) {
-		e === "next" ? this.#o(1) : e === "nextTab" ? this.#o(2) : e === "dot" && this.#o(3), this.requestUpdate();
+	#a() {
+		let e = L.barVisible;
+		this.classList.toggle("banished", !e);
+		let t = document.getElementById(Mt);
+		if (e && !t) {
+			let e = document.createElement("style");
+			e.id = Mt, e.textContent = "\n                body { width: calc(100vw - 210px) !important; }\n                umb-app { width: calc(100vw - 210px) !important; }\n            ", document.head.appendChild(e);
+		} else !e && t && t.remove();
 	}
 	#o(e) {
-		this._flash = e, this.#r && clearTimeout(this.#r), this.#r = window.setTimeout(() => {
+		e === "next" ? this.#s(1) : e === "nextTab" ? this.#s(2) : e === "dot" && this.#s(3), this.#a(), this.requestUpdate();
+	}
+	#s(e) {
+		this._flash = e, this.#i && clearTimeout(this.#i), this.#i = window.setTimeout(() => {
 			this._flash = null;
 		}, 350);
 	}
-	#s;
-	#c(e, t) {
-		t.currentTarget.blur(), e === 1 ? L.next() : e === 2 ? L.nextTab() : e === 3 ? L.dot() : (this.#o(4), window.location.reload());
+	#c;
+	#l(e, t) {
+		t.currentTarget.blur(), e === 1 ? L.next() : e === 2 ? L.nextTab() : e === 3 ? L.dot() : (this.#s(4), window.location.reload());
 	}
 	render() {
 		let e = L.activeTab, t = L.stepInfo(), n = window.location.pathname.includes("/dashboard/penance"), r = "Do penance", i = "", a = !1;
 		!n || !t ? (a = !0, i = n ? "no steps here" : "return to the Board first") : t.index >= t.total ? (a = !0, r = "Penance done", i = `all ${t.total} steps atoned`) : i = `${t.label} · ${t.index + 1}/${t.total}`;
-		let o = L.nextTabId(), s = !n || !L.canNextTab, c = L.dotIntent(), l = c === "exhibit" ? "Exhibit the sin" : c === "return" ? "Return to Board" : "Reload the Board", u = c === "exhibit" ? qe[e] ?? "" : "";
+		let o = L.nextTabId(), s = !n || !L.canNextTab, c = L.dotIntent(), l = c === "exhibit" ? "Exhibit the sin" : c === "return" ? "Return to Board" : "Reload the Board", u = c === "exhibit" ? Je[e] ?? "" : "", d = this._voice.state === "listening" || this._voice.state === "armed", f = (e) => d ? w`<span class="magic-word">🎤 “${this._voice.magicWords[e - 1]}”</span>` : "";
 		return w`
             <div class="title">Penance<span class="tab">${n && e ? e : "—"}</span></div>
-            <button class="btn ${this._flash === 1 ? "flash" : ""}" ?disabled=${a} @click=${(e) => this.#c(1, e)}>
+            <button class="btn ${this._flash === 1 ? "flash" : ""}" ?disabled=${a} @click=${(e) => this.#l(1, e)}>
                 <span class="num">1</span>
                 <span class="verb">${r}</span>
                 <span class="detail">${i}</span>
+                ${f(1)}
             </button>
-            <button class="btn ${this._flash === 2 ? "flash" : ""}" ?disabled=${s} @click=${(e) => this.#c(2, e)}>
+            <button class="btn ${this._flash === 2 ? "flash" : ""}" ?disabled=${s} @click=${(e) => this.#l(2, e)}>
                 <span class="num">2</span>
                 <span class="verb">Next commandment</span>
-                <span class="detail">${o} — ${qe[o] ?? ""}</span>
+                <span class="detail">${o} — ${Je[o] ?? ""}</span>
+                ${f(2)}
             </button>
-            <button class="btn ${this._flash === 3 ? "flash" : ""}" @click=${(e) => this.#c(3, e)}>
+            <button class="btn ${this._flash === 3 ? "flash" : ""}" @click=${(e) => this.#l(3, e)}>
                 <span class="num">3</span>
                 <span class="verb">${l}</span>
                 <span class="detail">${u}</span>
+                ${f(3)}
             </button>
-            <button class="btn ${this._flash === 4 ? "flash" : ""}" @click=${(e) => this.#c(4, e)}>
+            <button class="btn ${this._flash === 4 ? "flash" : ""}" @click=${(e) => this.#l(4, e)}>
                 <span class="num">4</span>
                 <span class="verb">Reload</span>
                 <span class="detail">when all else fails</span>
+                ${f(4)}
             </button>
+            ${this.#u()}
         `;
 	}
+	#u() {
+		let e = this._voice;
+		return e.state === "unsupported" ? w`<div class="voice"><span class="voice-heard">🎤 voice not supported here</span></div>` : e.state === "off" ? w`
+                <div class="voice">
+                    <button class="voice-toggle" @click=${() => void Q.enable()}>🎤 Enable voice</button>
+                </div>` : e.state === "error" ? w`
+                <div class="voice">
+                    <span class="voice-status voice-error">⚠ ${e.detail}</span>
+                    <button class="voice-toggle" @click=${() => void Q.enable()}>retry</button>
+                </div>` : e.state === "armed" ? w`
+                <div class="voice armed">
+                    <span class="voice-status">🔴 LISTENING<br>say 1 · 2 · 3 · 4</span>
+                </div>` : w`
+            <div class="voice">
+                <span class="voice-status">🎤 Say "Hey Umbraco"</span>
+                ${e.lastHeard ? w`<span class="voice-heard" title=${e.lastHeard}>“${e.lastHeard}”</span>` : ""}
+                <button class="voice-toggle" @click=${() => Q.disable()}>mute</button>
+            </div>`;
+	}
 };
-R([N()], $.prototype, "_flash", void 0), $ = R([M("sinners-presenter-bar")], $);
+R([M()], $.prototype, "_flash", void 0), R([M()], $.prototype, "_voice", void 0), $ = R([j("sinners-presenter-bar")], $);
 //#endregion
 //#region src/index.ts
-var xt = [
+var Nt = [
 	"̀",
 	"́",
 	"̂",
@@ -3740,7 +4258,7 @@ var xt = [
 	"ͦ",
 	"ͬ",
 	"ͯ"
-], St = [
+], Pt = [
 	"̖",
 	"̗",
 	"̘",
@@ -3761,46 +4279,46 @@ var xt = [
 	"͓",
 	"͚"
 ];
-function Ct(e) {
+function Ft(e) {
 	return [...e].map((e, t) => {
 		if (e === " ") return e;
 		let n = t * 7 + e.charCodeAt(0) * 13, r = 3 + n % 3, i = e;
-		for (let e = 0; e < r; e++) i += xt[(n + e * 3) % xt.length], i += St[(n + e * 5 + 2) % St.length];
+		for (let e = 0; e < r; e++) i += Nt[(n + e * 3) % Nt.length], i += Pt[(n + e * 5 + 2) % Pt.length];
 		return i;
 	}).join("");
 }
-var wt = [{
+var It = [{
 	type: "dashboard",
 	alias: "Sinners.PenanceDashboard",
 	name: "Penance",
-	element: Z,
+	element: X,
 	weight: 100,
 	meta: {
-		label: Ct("Penance"),
+		label: Ft("Penance"),
 		pathname: "penance"
 	},
 	conditions: [{
 		alias: "Umb.Condition.SectionAlias",
 		match: "Umb.Section.Settings"
 	}]
-}], Tt = new Set([
+}], Lt = new Set([
 	"PageUp",
 	"PageDown",
 	"Escape",
 	"."
 ]);
-function Et() {
+function Rt() {
 	window.addEventListener("keydown", (e) => {
-		Tt.has(e.key) && (e.preventDefault(), e.stopPropagation(), console.log(`[POINTER] key="${e.key}"`), e.key === "PageDown" && L.next(), e.key === "PageUp" && L.nextTab(), e.key === "." && L.dot());
+		Lt.has(e.key) && (e.preventDefault(), e.stopPropagation(), console.log(`[POINTER] key="${e.key}"`), e.key === "PageDown" && L.next(), e.key === "PageUp" && L.nextTab(), e.key === "." && L.dot());
 	}, !0);
 }
-function Dt() {
+function zt() {
 	document.querySelector("sinners-presenter-bar") || document.body.appendChild(document.createElement("sinners-presenter-bar"));
 }
-var Ot = (e, t) => {
-	t.registerMany(wt), Ge(t), Et(), Dt();
+var Bt = (e, t) => {
+	t.registerMany(It), Ke(t), Rt(), zt();
 };
 //#endregion
-export { Ot as onInit };
+export { Bt as onInit };
 
 //# sourceMappingURL=dist.js.map

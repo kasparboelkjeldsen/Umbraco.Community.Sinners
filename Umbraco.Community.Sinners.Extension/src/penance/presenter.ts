@@ -59,6 +59,13 @@ function notify(action: PresenterAction) {
 
 const PENANCE_URL = '/umbraco/section/settings/dashboard/penance';
 
+// The bar starts hidden — the first view of Umbraco is completely vanilla.
+// It is summoned by speaking the forbidden name ("Sitecore") or pressing 5.
+const BAR_VISIBLE_KEY = 'sinners-bar-visible';
+let _barVisible = (() => {
+    try { return sessionStorage.getItem(BAR_VISIBLE_KEY) === '1'; } catch { return false; }
+})();
+
 const TAB_URLS: Partial<Record<string, string>> = {
     'I':    '/umbraco/section/content/workspace/document/edit/704a66de-b213-44fe-815a-f988c0707bbf/invariant/view/info/modal/umb-modal-workspace/invariant/general/document-type/edit/b871f83c-2395-4894-be0f-5422c1a71e48/tab/content',
     'II':   '/umbraco/section/settings/workspace/document-type/edit/a95360e8-ff04-40b1-8f46-7aa4b5983096/tab/content',
@@ -75,6 +82,18 @@ const ELSEWHERE_RULES: Array<{ match: string; target: string }> = [
 export const presenter = {
     get activeTab(): string {
         return _activeTab;
+    },
+
+    get barVisible(): boolean {
+        return _barVisible;
+    },
+
+    /** Returns the new visibility. */
+    toggleBar(): boolean {
+        _barVisible = !_barVisible;
+        try { sessionStorage.setItem(BAR_VISIBLE_KEY, _barVisible ? '1' : '0'); } catch { /* fine */ }
+        notify('state');
+        return _barVisible;
     },
 
     setActiveTab(tabId: string) {

@@ -27,7 +27,7 @@ const TABS = [
     { id: 'IV',  label: 'IV — Program.cs is clean' },
     { id: 'V',   label: 'V — Live environment is production-ready' },
     { id: 'VI',  label: 'VI — Aliases are camelCase English' },
-    { id: 'VII', label: 'VII — Translation keys are PascalCase' },
+    { id: 'VII', label: 'VII — Translation keys are PascalCase and nested' },
     { id: 'VIII', label: 'VIII — No media items at root' },
     { id: 'IX',   label: 'IX — The root shall not render' },
     { id: 'X',    label: 'X — uSync is installed' },

@@ -75,6 +75,9 @@ Umbraco.Community.Sinners.Extension/ # Frontend package (Vite + Lit)
   - Keys `1`–`4` (and `0` = full state reset) are captured globally with `preventDefault` — they work even with an input focused (workspaces autofocus their name field) and never type into fields. Old pointer keys (PageDown/PageUp/`.`) still work as fallback.
   - Button 1 = `presenter.next()` (label shows the pending step + n/total), 2 = `nextTab()` (shows next commandment), 3 = `dot()` (Exhibit the sin / Return to Board, contextual), 4 = reload.
   - `registerSteps` takes `{ label, run }[]` — labels feed the bar. Presenter state (active tab + step indices) persists in sessionStorage so full-page exhibit round-trips resume where they left off; the dashboard prefers the persisted tab over its first-sinful-tab auto-jump.
+  - **Voice control** (`voice.ts`): Web Speech API, wake phrase "Hey Umbraco" (fuzzy: umbrella/um braco/hej accepted, `hey` prefix required) → 6s armed window (bar strip pulses red) → command word presses a button: one/won/penance=1, two/to/next=2, three/tree/free/exhibit=3, four/for/reload=4. Beeps: 880Hz wake, 1320Hz command, 220Hz timeout. Opt-in via mic strip at bar bottom; enabled flag in localStorage survives reloads. Prefers Chrome's on-device recognition (`processLocally`) when available so venue wifi isn't trusted; auto-restarts on Chrome's silence timeouts; 1.5s refractory prevents interim-result double-fires. Debug/test hook: `window.sinnersVoice.simulate('hey umbraco two')`.
+  - **Magic words** (`MAGIC_WORDS` in `voice.ts`): 50-word pool (pineapple, walrus, banjo, tuxedo, …) deliberately unrelated to the buttons — that's the joke. Always hot while the mic is on, no wake phrase: speaking one IS the keypress. Each button shows its current word as a chip (only while listening); firing a word rotates that button to the next pool word, so fired words go cold instantly (no interim-transcript double-press) and only 4 of 50 are ever live. Word regexes tolerate compound splits ("bubble gum"). Active words + pool position persist in sessionStorage. Buttons/keys do NOT rotate words — only voice does.
+  - **Summon word**: the bar starts HIDDEN (`.banished` class, translateX slide, no layout shove — first view of Umbraco is completely vanilla). Saying **"Sitecore"** (or pressing `5`) toggles it. While banished, all other voice words, the wake phrase, and keys 1-4 are cold (digits type normally); only Sitecore/`5`/`0` are hot. Visibility persists in sessionStorage (`sinners-bar-visible`) so exhibit reloads keep it out. Summon beep: rising two-tone; banish: low buzz.
 - Build: `npm run build` in `Umbraco.Community.Sinners.Extension/`.
 
 ### Spell checking (Rules VI & VII)
@@ -93,7 +96,7 @@ Umbraco.Community.Sinners.Extension/ # Frontend package (Vite + Lit)
 | IV | Program.cs is clean — no saved variable, no non-standard middleware/endpoints | ✅ Done |
 | V | Live environment is production-ready — scan appsettings for 5 required settings | ✅ Done |
 | VI | Document type aliases are camelCase English | ✅ Done |
-| VII | Translation keys are PascalCase English | ✅ Done |
+| VII | Translation keys are PascalCase English and nested in folders | ✅ Done |
 | VIII | No media items at root — list only, user fixes manually | ✅ Done |
 | IX | The root shall not render — no root content node may bear a template | ✅ Done |
 | X | uSync is installed — schema must be version-controlled | ✅ Done |

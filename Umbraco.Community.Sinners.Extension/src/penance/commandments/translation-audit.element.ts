@@ -320,7 +320,7 @@ export class TranslationAuditElement extends UmbElementMixin(LitElement) {
         const hasGroups = (result?.groupSuggestions.length ?? 0) > 0;
 
         return html`
-            <uui-box headline="VII — Translation keys are PascalCase English">
+            <uui-box headline="VII — Translation keys are PascalCase English and nested in folders">
                 ${this._loading
                     ? html`<uui-loader-bar></uui-loader-bar>`
                     : !hasIssues && !hasGroups
