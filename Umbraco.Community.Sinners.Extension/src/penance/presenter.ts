@@ -185,9 +185,18 @@ export const presenter = {
         console.log(`[PRESENTER] step ${idx + 1} done`);
     },
 
-    /** Wipe persisted presenter state and reload — the "0" panic reset. */
+    /**
+     * Wipe all demo state and reload — the "0" panic reset. Clears presenter
+     * progress, magic-word rotation, bar visibility (back to vanilla), and the
+     * Rule VIII pretend flag. Voice enablement is deliberately kept.
+     */
     reset() {
-        try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+        try {
+            sessionStorage.removeItem(STORAGE_KEY);
+            sessionStorage.removeItem('sinners-voice-words');
+            sessionStorage.removeItem(BAR_VISIBLE_KEY);
+            localStorage.removeItem('sinners-media-pretend');
+        } catch { /* ignore */ }
         window.location.href = PENANCE_URL;
     },
 };

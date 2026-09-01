@@ -1,5 +1,23 @@
 # Umbraco.Community.Sinners — Package Specification
 
+> ⚠️ **Historical document.** This is the original confession — what we *promised* to build
+> before the code, Umbraco 18, and common sense had their say. Preserved unedited as a
+> monument to planning. Where reality diverged:
+>
+> - The **six sacred types became four** — Umbraco 18's Library took the Repositories and
+>   Repository Items, and they ascended (see `commandments.md` §2).
+> - **Rule 9 changed religions**: instead of demanding Repositories at root, the root now
+>   simply *shall not render* — no root node may bear a template.
+> - **Rule 1** doesn't block composition saves; it surfaces sinful compositions and offers
+>   a value-preserving **fold-in** instead. Blocking would have prevented the backoffice
+>   from loading, which even we considered too much enforcement.
+> - The environment guard, the `Sinners` config section, rule severity levels, the
+>   creation-time classification modal, and the save-notification handlers were never
+>   built. The Penance Board dashboard ate the whole design.
+> - Targets Umbraco 17/18, not 17.
+>
+> The spec is what we confessed we would do. The code is what we did. Classic.
+
 ## Overview
 
 Sinners is a development-time package for Umbraco that enforces opinionated architectural rules via notification handlers, startup health checks, and a backoffice audit dashboard. It is explicitly a development tool and should no-op entirely when not running in the Development environment.
