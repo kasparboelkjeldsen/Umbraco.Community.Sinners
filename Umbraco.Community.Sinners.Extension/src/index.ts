@@ -2,6 +2,8 @@ import type { UmbEntryPointOnInit } from '@umbraco-cms/backoffice/extension-api'
 import type { ManifestDashboard } from '@umbraco-cms/backoffice/dashboard';
 import { PenanceDashboardElement } from './penance/penance-dashboard.element.js';
 import { registerSpookyThemes } from './penance/spooky-themes.js';
+import { presenter } from './penance/presenter.js';
+import './penance/presenter-bar.element.js';
 
 const ZALGO_ABOVE = [
     '̀', '́', '̂', '̃', '̅', '̈',
@@ -50,7 +52,30 @@ const manifests: ManifestDashboard[] = [
     },
 ];
 
+const POINTER_KEYS = new Set(['PageUp', 'PageDown', 'Escape', '.']);
+
+function listenForPointer() {
+    window.addEventListener('keydown', (e) => {
+        if (!POINTER_KEYS.has(e.key)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        console.log(`[POINTER] key="${e.key}"`);
+
+        if (e.key === 'PageDown') void presenter.next();
+        if (e.key === 'PageUp') presenter.nextTab();
+        if (e.key === '.') presenter.dot();
+        // Escape — reserved
+    }, true);
+}
+
+function mountPresenterBar() {
+    if (document.querySelector('sinners-presenter-bar')) return;
+    document.body.appendChild(document.createElement('sinners-presenter-bar'));
+}
+
 export const onInit: UmbEntryPointOnInit = (_host, extensionRegistry) => {
     extensionRegistry.registerMany(manifests);
     registerSpookyThemes(extensionRegistry);
+    listenForPointer();
+    mountPresenterBar();
 };

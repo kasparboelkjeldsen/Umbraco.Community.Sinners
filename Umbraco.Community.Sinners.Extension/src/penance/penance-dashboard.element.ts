@@ -3,8 +3,9 @@ import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_THEME_CONTEXT } from '@umbraco-cms/backoffice/themes';
 import { SPOOKY_ALIAS } from './spooky-themes.js';
+import { presenter } from './presenter.js';
 import './commandments/content-not-composable.element.js';
-import './commandments/six-sacred-types.element.js';
+import './commandments/four-sacred-types.element.js';
 import './commandments/data-types-in-folders.element.js';
 import './commandments/program-cs-clean.element.js';
 import './commandments/production-settings.element.js';
@@ -21,14 +22,14 @@ interface StatusDetail {
 
 const TABS = [
     { id: 'I',   label: 'I — Content is not composable' },
-    { id: 'II',  label: 'II — The Six Sacred Types' },
+    { id: 'II',  label: 'II — The Four Sacred Types' },
     { id: 'III', label: 'III — Data types live in folders' },
     { id: 'IV',  label: 'IV — Program.cs is clean' },
     { id: 'V',   label: 'V — Live environment is production-ready' },
     { id: 'VI',  label: 'VI — Aliases are camelCase English' },
-    { id: 'VII', label: 'VII — Translation keys are PascalCase' },
+    { id: 'VII', label: 'VII — Translation keys are PascalCase and nested' },
     { id: 'VIII', label: 'VIII — No media items at root' },
-    { id: 'IX',   label: 'IX — Root nodes are Repositories' },
+    { id: 'IX',   label: 'IX — The root shall not render' },
     { id: 'X',    label: 'X — uSync is installed' },
 ] as const;
 
@@ -56,6 +57,7 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
     @state() private _activeTab: TabId = 'I';
     @state() private _statuses = new Map<TabId, StatusDetail>();
     @state() private _spookyFactor = 0;
+    #userNavigated = false;
 
     static override styles = css`
         :host {
@@ -202,6 +204,21 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
 
     override connectedCallback() {
         super.connectedCallback();
+        // A persisted tab (from before an exhibit round-trip) beats both the default
+        // and the first-sinful-tab auto-jump — the talk resumes where it left off.
+        const persistedTab = presenter.activeTab;
+        if (persistedTab && TABS.some((t) => t.id === persistedTab)) {
+            this._activeTab = persistedTab as TabId;
+            this.#userNavigated = true;
+        }
+        presenter.setActiveTab(this._activeTab);
+        presenter.onNextTab(() => {
+            this.#userNavigated = true;
+            const ids = TABS.map((t) => t.id);
+            const next = ids[(ids.indexOf(this._activeTab) + 1) % ids.length];
+            this._activeTab = next;
+            presenter.setActiveTab(next);
+        });
         this.consumeContext(UMB_THEME_CONTEXT, (ctx) => {
             this.#themeCtx = ctx;
             this.#applyTheme();
@@ -231,6 +248,14 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
     #onStatus(tab: TabId, detail: StatusDetail) {
         this._statuses = new Map(this._statuses).set(tab, detail);
         if (this._spookyFactor === 0) this.#applyTheme();
+        if (!this.#userNavigated && this._statuses.size === TABS.length) {
+            this.#userNavigated = true;
+            const first = TABS.find((t) => (this._statuses.get(t.id)?.issueCount ?? 0) > 0);
+            if (first) {
+                this._activeTab = first.id;
+                presenter.setActiveTab(first.id);
+            }
+        }
     }
 
     #renderBadge(tab: TabId) {
@@ -253,7 +278,7 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
                 ${TABS.map((tab) => html`
                     <button
                         class="tab-btn ${this._activeTab === tab.id ? 'active' : ''}"
-                        @click=${() => { this._activeTab = tab.id; }}>
+                        @click=${() => { this.#userNavigated = true; this._activeTab = tab.id; presenter.setActiveTab(tab.id); }}>
                         ${tab.label}
                         ${this.#renderBadge(tab.id)}
                     </button>
@@ -267,9 +292,9 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
                     </sinners-content-not-composable>
                 </div>
                 <div style="display:${this._activeTab === 'II' ? 'block' : 'none'}">
-                    <sinners-six-sacred-types
+                    <sinners-four-sacred-types
                         @sinners-status=${(e: CustomEvent<StatusDetail>) => this.#onStatus('II', e.detail)}>
-                    </sinners-six-sacred-types>
+                    </sinners-four-sacred-types>
                 </div>
                 <div style="display:${this._activeTab === 'III' ? 'block' : 'none'}">
                     <sinners-data-types-in-folders

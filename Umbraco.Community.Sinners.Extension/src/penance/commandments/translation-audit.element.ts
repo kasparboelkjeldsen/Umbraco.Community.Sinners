@@ -1,4 +1,5 @@
 import { LitElement, html, css, nothing } from 'lit';
+import { presenter } from '../presenter.js';
 import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
@@ -179,6 +180,13 @@ export class TranslationAuditElement extends UmbElementMixin(LitElement) {
 
     override connectedCallback() {
         super.connectedCallback();
+        presenter.registerSteps('VII', [0, 1, 2, 3, 4, 5].map((i) => ({
+            label: `Create group ${i + 1} of 6`,
+            run: () => {
+                const next = this._result?.groupSuggestions[0];
+                if (next) return this.#createGroup(next);
+            },
+        })));
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;
             void this.#load();
@@ -312,7 +320,7 @@ export class TranslationAuditElement extends UmbElementMixin(LitElement) {
         const hasGroups = (result?.groupSuggestions.length ?? 0) > 0;
 
         return html`
-            <uui-box headline="VII — Translation keys are PascalCase English">
+            <uui-box headline="VII — Translation keys are PascalCase English and nested in folders">
                 ${this._loading
                     ? html`<uui-loader-bar></uui-loader-bar>`
                     : !hasIssues && !hasGroups

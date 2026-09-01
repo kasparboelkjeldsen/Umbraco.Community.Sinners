@@ -117,6 +117,12 @@ public class SinnersManagementApiController : ManagementApiControllerBase
     public IActionResult GetProgramCsAudit() =>
         Ok(_programCsAnalyzerService.Audit());
 
+    [HttpPost("fix-program-cs")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult FixProgramCs() =>
+        _programCsAnalyzerService.FixSavedVariable() ? Ok() : NotFound();
+
     [HttpGet("unorganized-data-types")]
     [ProducesResponseType<IEnumerable<UnorganizedDataTypeModel>>(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUnorganizedDataTypes() =>
@@ -184,15 +190,21 @@ public class SinnersManagementApiController : ManagementApiControllerBase
     public async Task<IActionResult> GetRootContentAudit() =>
         Ok(await _rootContentAuditService.AuditAsync());
 
-    [HttpPost("seek-repository-sanctuary")]
-    [ProducesResponseType<RepositorySanctuaryResult>(StatusCodes.Status200OK)]
-    public async Task<IActionResult> SeekRepositorySanctuary() =>
+    [HttpPost("seek-root-sanctuary")]
+    [ProducesResponseType<RootSanctuaryResult>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> SeekRootSanctuary() =>
         Ok(await _rootContentAuditService.SeekSanctuaryAsync());
 
     [HttpGet("usync-audit")]
     [ProducesResponseType<USyncAuditResult>(StatusCodes.Status200OK)]
     public IActionResult GetUSyncAudit() =>
         Ok(_uSyncAuditService.Audit());
+
+    [HttpPost("inject-usync")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult InjectUSync() =>
+        _uSyncAuditService.InjectUSync() ? Ok() : NotFound();
 }
 
 public record SetClassificationRequest

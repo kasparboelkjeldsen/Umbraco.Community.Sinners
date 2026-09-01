@@ -2,6 +2,8 @@ import { LitElement, html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
+import { presenter } from '../presenter.js';
+import { showMagic } from '../magic.js';
 
 interface ProgramCsAuditResult {
     found: boolean;
@@ -12,6 +14,33 @@ interface ProgramCsAuditResult {
 }
 
 const API_BASE = '/umbraco/management/api/v1/sinners';
+
+const BEFORE_CODE = `var i̸̖l̷̼l̴̮i̵̗g̸̫a̷̮l̶̼ = app.UseUmbraco();
+
+i̸̖l̷̼l̴̮i̵̗g̸̫a̷̮l̶̼.WithMiddleware(u =>
+    {
+        u.UseBackOffice();
+        u.UseWebsite();
+    })
+    .WithEndpoints(u =>
+    {
+        u.UseBackOfficeEndpoints();
+        u.UseWebsiteEndpoints();
+    });`;
+
+const AFTER_CODE = `app.UseUmbraco()
+    .WithMiddleware(u =>
+    {
+        u.UseBackOffice();
+        u.UseWebsite();
+    })
+    .WithEndpoints(u =>
+    {
+        u.UseBackOfficeEndpoints();
+        u.UseWebsiteEndpoints();
+    });
+
+await app.RunAsync();`;
 
 @customElement('sinners-program-cs-clean')
 export class ProgramCsCleanElement extends UmbElementMixin(LitElement) {
@@ -73,10 +102,71 @@ export class ProgramCsCleanElement extends UmbElementMixin(LitElement) {
             color: var(--uui-color-text-alt, #888);
             font-family: monospace;
         }
+
+        .diff-block {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            align-items: flex-start;
+        }
+
+        .diff-side {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .diff-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 6px;
+        }
+
+        .diff-label.before { color: var(--uui-color-danger-standalone, #d42054); }
+        .diff-label.after  { color: var(--uui-color-positive-standalone, #0d7a54); }
+
+        .diff-arrow {
+            font-size: 24px;
+            padding-top: 42px;
+            color: var(--uui-color-text-alt, #aaa);
+            flex-shrink: 0;
+        }
+
+        pre {
+            margin: 0;
+            padding: 12px 14px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        pre.before {
+            background: #fff0f3;
+            border: 1px solid #ffc0cb;
+            color: #6b0020;
+        }
+
+        pre.after {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            color: #1a4731;
+        }
+
+        .fix-btn {
+            margin: 0 16px 16px;
+        }
+
     `;
 
     override connectedCallback() {
         super.connectedCallback();
+        presenter.registerSteps('IV', [
+            { label: 'Cleanse Program.cs', run: () => this.#fix() },
+        ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;
             void this.#load();
@@ -106,39 +196,60 @@ export class ProgramCsCleanElement extends UmbElementMixin(LitElement) {
         }
     }
 
-    #renderIssues(result: ProgramCsAuditResult) {
-        const issues: { title: string; detail: string }[] = [];
+    async #fix() {
+        const token = await this.#authCtx?.getLatestToken();
+        await fetch(`${API_BASE}/fix-program-cs`, {
+            method: 'POST',
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        showMagic(() => void this.#load());
+    }
 
-        if (result.useUmbracoSavedToVariable)
-            issues.push({
-                title: 'UseUmbraco() result is assigned to a variable',
-                detail: 'Chain it directly: app.UseUmbraco().WithMiddleware(...).WithEndpoints(...)',
-            });
+    #renderIssues(result: ProgramCsAuditResult) {
+        const otherIssues: { title: string; detail: string }[] = [];
 
         for (const name of result.extraMiddleware)
-            issues.push({
+            otherIssues.push({
                 title: 'Non-standard middleware registered',
                 detail: `u.${name}()  — found inside .WithMiddleware(...)`,
             });
 
         for (const name of result.extraEndpoints)
-            issues.push({
+            otherIssues.push({
                 title: 'Non-standard endpoint registered',
                 detail: `u.${name}()  — found inside .WithEndpoints(...)`,
             });
 
         return html`
-            <div class="issue-list">
-                ${issues.map((issue) => html`
-                    <div class="issue-row">
-                        <span class="issue-icon">✕</span>
-                        <div class="issue-body">
-                            <span class="issue-title">${issue.title}</span>
-                            <span class="issue-detail">${issue.detail}</span>
-                        </div>
+            ${result.useUmbracoSavedToVariable ? html`
+                <div class="diff-block">
+                    <div class="diff-side">
+                        <div class="diff-label before">Before — thy sin</div>
+                        <pre class="before">${BEFORE_CODE}</pre>
                     </div>
-                `)}
-            </div>
+                    <div class="diff-arrow">→</div>
+                    <div class="diff-side">
+                        <div class="diff-label after">After — absolved</div>
+                        <pre class="after">${AFTER_CODE}</pre>
+                    </div>
+                </div>
+                <uui-button class="fix-btn" look="secondary" @click=${() => void this.#fix()}>
+                    ✨ Apply the fix
+                </uui-button>
+            ` : ''}
+            ${otherIssues.length > 0 ? html`
+                <div class="issue-list">
+                    ${otherIssues.map((issue) => html`
+                        <div class="issue-row">
+                            <span class="issue-icon">✕</span>
+                            <div class="issue-body">
+                                <span class="issue-title">${issue.title}</span>
+                                <span class="issue-detail">${issue.detail}</span>
+                            </div>
+                        </div>
+                    `)}
+                </div>
+            ` : ''}
         `;
     }
 

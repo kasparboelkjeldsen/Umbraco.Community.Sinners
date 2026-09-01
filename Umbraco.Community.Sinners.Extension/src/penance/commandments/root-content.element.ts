@@ -2,13 +2,15 @@ import { LitElement, html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
+import { presenter } from '../presenter.js';
 
 interface RootNodeModel {
     key: string;
     name: string;
     contentTypeAlias: string;
     contentTypeName: string;
-    isRepository: boolean;
+    hasTemplate: boolean;
+    templateAlias: string | null;
 }
 
 interface RootContentAuditResult {
@@ -16,7 +18,7 @@ interface RootContentAuditResult {
     rootNodes: RootNodeModel[];
 }
 
-interface RepositorySanctuaryResult {
+interface RootSanctuaryResult {
     success: boolean;
     message: string;
 }
@@ -143,6 +145,9 @@ export class RootContentElement extends UmbElementMixin(LitElement) {
 
     override connectedCallback() {
         super.connectedCallback();
+        presenter.registerSteps('IX', [
+            { label: 'Seek Root Sanctuary', run: () => this.#seekSanctuary() },
+        ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;
             void this.#load();
@@ -167,7 +172,7 @@ export class RootContentElement extends UmbElementMixin(LitElement) {
             const res = await this.#fetchAuth(`${API_BASE}/root-content-audit`);
             if (res.ok) this._result = (await res.json()) as RootContentAuditResult;
 
-            const count = this._result?.rootNodes.filter((n) => !n.isRepository).length ?? 0;
+            const count = this._result?.rootNodes.filter((n) => n.hasTemplate).length ?? 0;
             this.dispatchEvent(new CustomEvent('sinners-status', {
                 bubbles: true, composed: true,
                 detail: { issueCount: count, severity: count > 0 ? 'error' : 'ok' },
@@ -181,9 +186,9 @@ export class RootContentElement extends UmbElementMixin(LitElement) {
         this._seeking = true;
         this._sanctuaryMessage = null;
         try {
-            const res = await this.#fetchAuth(`${API_BASE}/seek-repository-sanctuary`, { method: 'POST' });
+            const res = await this.#fetchAuth(`${API_BASE}/seek-root-sanctuary`, { method: 'POST' });
             if (res.ok) {
-                const result = (await res.json()) as RepositorySanctuaryResult;
+                const result = (await res.json()) as RootSanctuaryResult;
                 this._sanctuaryMessage = result.success
                     ? result.message
                     : `⚠ ${result.message}`;
@@ -196,25 +201,25 @@ export class RootContentElement extends UmbElementMixin(LitElement) {
 
     override render() {
         const result = this._result;
-        const sinners = result?.rootNodes.filter((n) => !n.isRepository) ?? [];
+        const sinners = result?.rootNodes.filter((n) => n.hasTemplate) ?? [];
 
         return html`
-            <uui-box headline="IX — Root nodes are Repositories">
+            <uui-box headline="IX — The root shall not render">
                 ${this._loading
                     ? html`<uui-loader-bar></uui-loader-bar>`
                     : result?.isClean
-                      ? html`<div class="clean">✓ All root content nodes dwell within a Repository. The structure is righteous.</div>`
+                      ? html`<div class="clean">✓ No root node beareth a template. The root is unrenderable and righteous.</div>`
                       : html`
                             <div class="info">
-                                ${sinners.length} root node(s) exist outside a Repository. A site without a Repository at its root
-                                cannot serve multiple masters. Seek sanctuary below.
+                                ${sinners.length} root node(s) beareth a template. The Library now shelters thy shared
+                                content — the root's only calling is to hold structure, never to render. Seek sanctuary below.
                             </div>
                             ${result?.rootNodes.map((node) => html`
                                 <div class="item-row">
                                     <span class="item-name">${node.name}</span>
-                                    <span class="item-type">${node.contentTypeAlias}</span>
-                                    <span class="badge ${node.isRepository ? 'ok' : 'error'}">
-                                        ${node.isRepository ? '✓ Repository' : '✕ Sinner'}
+                                    <span class="item-type">${node.contentTypeAlias}${node.templateAlias ? ` → ${node.templateAlias}` : ''}</span>
+                                    <span class="badge ${node.hasTemplate ? 'error' : 'ok'}">
+                                        ${node.hasTemplate ? '✕ Rendereth' : '✓ Templateless'}
                                     </span>
                                 </div>
                             `)}
@@ -226,7 +231,7 @@ export class RootContentElement extends UmbElementMixin(LitElement) {
                                             class="sanctuary-btn"
                                             ?disabled=${this._seeking}
                                             @click=${this.#seekSanctuary}>
-                                            ${this._seeking ? '⏳ Building sanctuary...' : '⛪ Seek Repository Sanctuary'}
+                                            ${this._seeking ? '⏳ Building sanctuary...' : '⛪ Seek Root Sanctuary'}
                                         </button>
                                     </div>
                                 `}

@@ -19,16 +19,30 @@ if (-not $csproj) {
 }
 
 $csprojContent = Get-Content $csproj.FullName -Raw
-$newCsprojContent = $csprojContent -replace '<PackageReference Include="uSync"\s*/>', '<PackageReference Include="Clean" />'
+$uSyncRef = '<PackageReference Include="uSync"\s*/>'
+if ($csprojContent -match '<PackageReference Include="Clean"\s*/>') {
+    # Clean already referenced (v18 template sites) — just remove uSync, don't create a duplicate
+    $newCsprojContent = $csprojContent -replace "\s*$uSyncRef", ''
+    Write-Host "Removed uSync from $($csproj.Name) (Clean already present)"
+}
+else {
+    $newCsprojContent = $csprojContent -replace $uSyncRef, '<PackageReference Include="Clean" />'
+    Write-Host "Swapped uSync -> Clean in $($csproj.Name)"
+}
 Set-Content -Path $csproj.FullName -Value $newCsprojContent -Encoding utf8 -NoNewline
-Write-Host "Swapped uSync -> Clean in $($csproj.Name)"
 
 # --- Update Directory.Packages.props ---
 
 $propsFile = Join-Path $root "Directory.Packages.props"
 if (Test-Path $propsFile) {
     $propsContent = Get-Content $propsFile -Raw
-    $propsContent = $propsContent -replace '<PackageVersion Include="uSync"\s*Version="[^"]*"\s*/>', '<PackageVersion Include="Clean" Version="7.0.5" />'
+    $uSyncVer = '<PackageVersion Include="uSync"\s*Version="[^"]*"\s*/>'
+    if ($propsContent -match '<PackageVersion Include="Clean"') {
+        $propsContent = $propsContent -replace "\s*$uSyncVer", ''
+    }
+    else {
+        $propsContent = $propsContent -replace $uSyncVer, '<PackageVersion Include="Clean" Version="7.0.5" />'
+    }
     Set-Content -Path $propsFile -Value $propsContent -Encoding utf8 -NoNewline
     Write-Host "Updated Directory.Packages.props"
 }
@@ -83,7 +97,7 @@ $zalgo.WithMiddleware(u =>
 
 await app.RunAsync();
 
-// dotnet add Umbraco/$Version/Umbraco-$Version.csproj package uSync --version 17.3.2
+// dotnet add Umbraco/$Version/Umbraco-$Version.csproj package uSync
 "@
 
 [System.IO.File]::WriteAllText($programCs, $programContent, [System.Text.Encoding]::UTF8)

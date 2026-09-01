@@ -2,6 +2,7 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
+import { presenter } from '../presenter.js';
 
 interface AliasIssue {
     contentTypeAlias: string;
@@ -135,6 +136,15 @@ export class AliasAuditElement extends UmbElementMixin(LitElement) {
 
     override connectedCallback() {
         super.connectedCallback();
+        presenter.registerSteps('VI', [
+            {
+                label: 'Bless first alias',
+                run: () => {
+                    const first = this._items.find((i) => !i.isBlessed);
+                    if (first) return this.#bless(first, true);
+                },
+            },
+        ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;
             void this.#load();

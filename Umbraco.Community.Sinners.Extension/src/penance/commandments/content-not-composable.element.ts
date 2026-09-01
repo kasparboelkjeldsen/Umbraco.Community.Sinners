@@ -2,6 +2,7 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
+import { presenter } from '../presenter.js';
 
 interface SinfulProperty {
     propertyAlias: string;
@@ -253,6 +254,13 @@ export class ContentNotComposableElement extends UmbElementMixin(LitElement) {
 
     override connectedCallback() {
         super.connectedCallback();
+        presenter.registerSteps('I', [
+            { label: 'Fold In contentRows', run: () => this.#foldInByAlias('contentRows') },
+            { label: 'Fold In socialIconLinks', run: () => this.#foldInByAlias('socialIconLinks') },
+            { label: 'Bless instructionMessage', run: () => this.#blessByAlias('instructionMessage') },
+            { label: 'Bless successMessage', run: () => this.#blessByAlias('successMessage') },
+            { label: 'Bless errorMessage', run: () => this.#blessByAlias('errorMessage') },
+        ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;
             void this.#load();
@@ -289,6 +297,59 @@ export class ContentNotComposableElement extends UmbElementMixin(LitElement) {
             }));
         } finally {
             this._loading = false;
+        }
+    }
+
+    async #foldInByAlias(propertyAlias: string) {
+        const allProps = this._items.flatMap(i => i.sinfulProperties.map(p => `${i.contentTypeAlias}.${p.propertyAlias}`));
+        console.log(`[RULE I] foldInByAlias("${propertyAlias}") — available:`, allProps);
+        for (const item of this._items) {
+            const prop = item.sinfulProperties.find((p) => p.propertyAlias === propertyAlias);
+            if (prop) {
+                console.log(`[RULE I] found "${propertyAlias}" on "${item.contentTypeAlias}", folding in`);
+                await this.#foldInDirect(item, prop);
+                return;
+            }
+        }
+        console.warn(`[RULE I] property "${propertyAlias}" not found in any sinful composition`);
+    }
+
+    async #blessByAlias(propertyAlias: string) {
+        const allProps = this._items.flatMap(i => i.sinfulProperties.map(p => `${i.contentTypeAlias}.${p.propertyAlias}(blessed=${p.isBlessed})`));
+        console.log(`[RULE I] blessByAlias("${propertyAlias}") — available:`, allProps);
+        for (const item of this._items) {
+            const prop = item.sinfulProperties.find((p) => p.propertyAlias === propertyAlias && !p.isBlessed);
+            if (prop) {
+                console.log(`[RULE I] found unblessed "${propertyAlias}" on "${item.contentTypeAlias}", blessing`);
+                await this.#bless(item, prop, true);
+                return;
+            }
+        }
+        console.warn(`[RULE I] property "${propertyAlias}" not found or already blessed`);
+    }
+
+    async #foldInDirect(composition: SinfulComposition, property: SinfulProperty) {
+        const key = `${composition.contentTypeAlias}:${property.propertyAlias}`;
+        this._folding = new Set([...this._folding, key]);
+        this._lastResult = null;
+        try {
+            const res = await this.#fetchAuth(`${API_BASE}/fold-in`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    compositionAlias: composition.contentTypeAlias,
+                    propertyAlias: property.propertyAlias,
+                }),
+            });
+            const result = (await res.json()) as FoldInResult;
+            this._lastResult = { key, result };
+            if (result.success) await this.#load();
+        } catch (e) {
+            this._lastResult = {
+                key,
+                result: { success: false, message: String(e), affectedDocTypeCount: 0, affectedContentCount: 0 },
+            };
+        } finally {
+            this._folding = new Set([...this._folding].filter((k) => k !== key));
         }
     }
 

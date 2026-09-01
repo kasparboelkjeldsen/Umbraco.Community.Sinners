@@ -2,30 +2,31 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
+import { presenter } from '../presenter.js';
 
-type SixTypes = 'Page' | 'Block' | 'Data' | 'Composition' | 'Repository' | 'RepositoryItem';
+type SacredType = 'Page' | 'Block' | 'Data' | 'Composition';
 
 interface ContentTypeClassification {
     contentTypeAlias: string;
     contentTypeName: string;
     isElement: boolean;
-    classification: SixTypes | null;
+    classification: SacredType | null;
     folderPath: string;
-    suggestedClassification: SixTypes | null;
+    suggestedClassification: SacredType | null;
 }
 
-const SIX_TYPES: SixTypes[] = ['Page', 'Block', 'Data', 'Composition', 'Repository', 'RepositoryItem'];
+const SACRED_TYPES: SacredType[] = ['Page', 'Block', 'Data', 'Composition'];
 const API_BASE = '/umbraco/management/api/v1/sinners';
 
-@customElement('sinners-six-sacred-types')
-export class SixSacredTypesElement extends UmbElementMixin(LitElement) {
+@customElement('sinners-four-sacred-types')
+export class FourSacredTypesElement extends UmbElementMixin(LitElement) {
     #authCtx?: typeof UMB_AUTH_CONTEXT.TYPE;
 
     @state() private _items: ContentTypeClassification[] = [];
     @state() private _loading = true;
     @state() private _saving = false;
     @state() private _categorizing = false;
-    @state() private _pendingChanges = new Map<string, SixTypes>();
+    @state() private _pendingChanges = new Map<string, SacredType>();
 
     static override styles = css`
         .stats {
@@ -201,6 +202,11 @@ export class SixSacredTypesElement extends UmbElementMixin(LitElement) {
 
     override connectedCallback() {
         super.connectedCallback();
+        presenter.registerSteps('II', [
+            { label: 'Autofill classifications', run: () => this.#autofillClassifications() },
+            { label: 'Save all', run: () => this.#saveAll() },
+            { label: 'Auto categorize', run: () => this.#autoCategorize() },
+        ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;
             void this.#load();
@@ -237,15 +243,41 @@ export class SixSacredTypesElement extends UmbElementMixin(LitElement) {
 
     #onSelect(alias: string, value: string) {
         const map = new Map(this._pendingChanges);
-        if (value) map.set(alias, value as SixTypes);
+        if (value) map.set(alias, value as SacredType);
         else map.delete(alias);
         this._pendingChanges = map;
     }
 
-    #applySuggestion(alias: string, suggestion: SixTypes) {
+    #applySuggestion(alias: string, suggestion: SacredType) {
         const map = new Map(this._pendingChanges);
         map.set(alias, suggestion);
         this._pendingChanges = map;
+    }
+
+    #autofillClassifications() {
+        const map = new Map(this._pendingChanges);
+        for (const item of this._items) {
+            if (item.classification) continue;
+            if (map.has(item.contentTypeAlias)) continue;
+
+            if (item.suggestedClassification) {
+                map.set(item.contentTypeAlias, item.suggestedClassification);
+                console.log(`[RULE II] suggestion → ${item.contentTypeAlias} = ${item.suggestedClassification}`);
+            } else {
+                const path = item.folderPath ?? '';
+                if (path.startsWith('/Elements/Setting')) {
+                    map.set(item.contentTypeAlias, 'Data');
+                    console.log(`[RULE II] path rule (Data) → ${item.contentTypeAlias} (${path})`);
+                } else if (path.startsWith('/Elements/')) {
+                    map.set(item.contentTypeAlias, 'Block');
+                    console.log(`[RULE II] path rule (Block) → ${item.contentTypeAlias} (${path})`);
+                } else {
+                    console.warn(`[RULE II] no rule matched — ${item.contentTypeAlias} (${path}) left unclassified`);
+                }
+            }
+        }
+        this._pendingChanges = map;
+        console.log(`[RULE II] autofill complete — ${map.size} pending`);
     }
 
     async #autoCategorize() {
@@ -284,7 +316,7 @@ export class SixSacredTypesElement extends UmbElementMixin(LitElement) {
         }
     }
 
-    #current(item: ContentTypeClassification): SixTypes | '' {
+    #current(item: ContentTypeClassification): SacredType | '' {
         return this._pendingChanges.get(item.contentTypeAlias) ?? item.classification ?? '';
     }
 
@@ -310,7 +342,7 @@ export class SixSacredTypesElement extends UmbElementMixin(LitElement) {
                             this.#onSelect(item.contentTypeAlias, (e.target as HTMLSelectElement).value)}
                     >
                         <option value="">— Unclassified —</option>
-                        ${SIX_TYPES.map(
+                        ${SACRED_TYPES.map(
                             (type) => html`<option value=${type} ?selected=${current === type}>${type}</option>`,
                         )}
                     </select>
@@ -341,11 +373,11 @@ export class SixSacredTypesElement extends UmbElementMixin(LitElement) {
 
     override render() {
         const unclassified = this._items.filter((i) => !i.classification);
-        const byType = (type: SixTypes) => this._items.filter((i) => i.classification === type);
+        const byType = (type: SacredType) => this._items.filter((i) => i.classification === type);
         const totalUnclassified = unclassified.length;
 
         return html`
-            <uui-box headline="II — The Six Sacred Types">
+            <uui-box headline="II — The Four Sacred Types">
                 ${this._loading
                     ? html`<uui-loader-bar></uui-loader-bar>`
                     : this._items.length === 0
@@ -362,7 +394,7 @@ export class SixSacredTypesElement extends UmbElementMixin(LitElement) {
                                 ${totalUnclassified > 0
                                     ? html`<span class="stat-chip sinful">⚠ ${totalUnclassified} unclassified</span>`
                                     : html`<span class="stat-chip clean">✓ All classified</span>`}
-                                ${SIX_TYPES.map((type) => {
+                                ${SACRED_TYPES.map((type) => {
                                     const count = byType(type).length;
                                     return count > 0
                                         ? html`<span class="stat-chip">${type}: ${count}</span>`
@@ -371,7 +403,7 @@ export class SixSacredTypesElement extends UmbElementMixin(LitElement) {
                             </div>
 
                             ${this.#renderGroup('Unclassified', unclassified, true)}
-                            ${SIX_TYPES.map((type) => this.#renderGroup(type, byType(type)))}
+                            ${SACRED_TYPES.map((type) => this.#renderGroup(type, byType(type)))}
                             <div class="save-bar">
                                 <uui-button
                                     look="primary"
