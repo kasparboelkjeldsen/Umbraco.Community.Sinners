@@ -212,7 +212,7 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
             this.#userNavigated = true;
         }
         presenter.setActiveTab(this._activeTab);
-        presenter.onNextTab(() => {
+        presenter.onNextTab(this, () => {
             this.#userNavigated = true;
             const ids = TABS.map((t) => t.id);
             const next = ids[(ids.indexOf(this._activeTab) + 1) % ids.length];

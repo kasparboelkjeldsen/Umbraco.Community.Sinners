@@ -145,7 +145,7 @@ export class RootContentElement extends UmbElementMixin(LitElement) {
 
     override connectedCallback() {
         super.connectedCallback();
-        presenter.registerSteps('IX', [
+        presenter.registerSteps('IX', this, [
             { label: 'Seek Root Sanctuary', run: () => this.#seekSanctuary() },
         ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {

@@ -122,5 +122,5 @@ Write-Host "Overwrote Program.cs"
 
 Write-Host ""
 Write-Host "Server-side sin is maximised. Browser-side state (Rule VIII pretend flag," -ForegroundColor Yellow
-Write-Host "presenter progress, magic-word rotation) auto-invalidates on fresh installs" -ForegroundColor Yellow
+Write-Host "clicker progress, exhibited sins) auto-invalidates on fresh installs" -ForegroundColor Yellow
 Write-Host "-- or press 0 in the backoffice for a full demo-state reset." -ForegroundColor Yellow

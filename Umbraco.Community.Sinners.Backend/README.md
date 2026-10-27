@@ -13,5 +13,5 @@ It is development-time talk-ware. Not for production. Not for staging. Barely fo
 development. Point it only at sites you are prepared to lose, which is also — fittingly —
 the first commandment.
 
-Full sermon, warnings, and the voice-controlled presenter rig documentation:
+Full sermon, warnings, and the clicker controls:
 see the README at the repository root.

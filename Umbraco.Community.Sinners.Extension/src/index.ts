@@ -3,7 +3,6 @@ import type { ManifestDashboard } from '@umbraco-cms/backoffice/dashboard';
 import { PenanceDashboardElement } from './penance/penance-dashboard.element.js';
 import { registerSpookyThemes } from './penance/spooky-themes.js';
 import { presenter } from './penance/presenter.js';
-import './penance/presenter-bar.element.js';
 
 const ZALGO_ABOVE = [
     '̀', '́', '̂', '̃', '̅', '̈',
@@ -52,30 +51,38 @@ const manifests: ManifestDashboard[] = [
     },
 ];
 
-const POINTER_KEYS = new Set(['PageUp', 'PageDown', 'Escape', '.']);
+// Presentation clicker: next walks the whole demo, back is swallowed so a misclick
+// can't hurt, '.' (the blank button) exhibits the sin / returns to the Board.
+const CLICKER_NEXT = new Set(['PageDown', 'ArrowRight']);
+const CLICKER_SWALLOW = new Set(['PageUp', 'ArrowLeft', 'Escape']);
 
-function listenForPointer() {
+// Fallback for when the clicker dies and the presenter walks over to the laptop:
+// 1 = next fix step, 2 = next commandment, 3 = exhibit/return, 4 = reload, 0 = full reset.
+const NUMBER_KEYS = new Set(['1', '2', '3', '4', '0']);
+
+// Captured globally, even with an input focused: workspaces autofocus their name
+// field, which would otherwise silently eat the keys exactly when presenting blind.
+// The talk script involves no typing.
+function listenForClicker() {
     window.addEventListener('keydown', (e) => {
-        if (!POINTER_KEYS.has(e.key)) return;
+        if (!CLICKER_NEXT.has(e.key) && !CLICKER_SWALLOW.has(e.key) && e.key !== '.' && !NUMBER_KEYS.has(e.key)) return;
         e.preventDefault();
         e.stopPropagation();
-        console.log(`[POINTER] key="${e.key}"`);
+        // A held key auto-repeats — one press is one beat
+        if (e.repeat) return;
+        console.log(`[CLICKER] key="${e.key}"`);
 
-        if (e.key === 'PageDown') void presenter.next();
-        if (e.key === 'PageUp') presenter.nextTab();
-        if (e.key === '.') presenter.dot();
-        // Escape — reserved
+        if (CLICKER_NEXT.has(e.key)) void presenter.forward();
+        else if (e.key === '.' || e.key === '3') presenter.dot();
+        else if (e.key === '1') void presenter.next();
+        else if (e.key === '2') presenter.nextTab();
+        else if (e.key === '4') window.location.reload();
+        else if (e.key === '0') presenter.reset();
     }, true);
-}
-
-function mountPresenterBar() {
-    if (document.querySelector('sinners-presenter-bar')) return;
-    document.body.appendChild(document.createElement('sinners-presenter-bar'));
 }
 
 export const onInit: UmbEntryPointOnInit = (_host, extensionRegistry) => {
     extensionRegistry.registerMany(manifests);
     registerSpookyThemes(extensionRegistry);
-    listenForPointer();
-    mountPresenterBar();
+    listenForClicker();
 };

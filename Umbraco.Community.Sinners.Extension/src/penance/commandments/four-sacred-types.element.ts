@@ -202,7 +202,7 @@ export class FourSacredTypesElement extends UmbElementMixin(LitElement) {
 
     override connectedCallback() {
         super.connectedCallback();
-        presenter.registerSteps('II', [
+        presenter.registerSteps('II', this, [
             { label: 'Autofill classifications', run: () => this.#autofillClassifications() },
             { label: 'Save all', run: () => this.#saveAll() },
             { label: 'Auto categorize', run: () => this.#autoCategorize() },

@@ -180,7 +180,7 @@ export class TranslationAuditElement extends UmbElementMixin(LitElement) {
 
     override connectedCallback() {
         super.connectedCallback();
-        presenter.registerSteps('VII', [0, 1, 2, 3, 4, 5].map((i) => ({
+        presenter.registerSteps('VII', this, [0, 1, 2, 3, 4, 5].map((i) => ({
             label: `Create group ${i + 1} of 6`,
             run: () => {
                 const next = this._result?.groupSuggestions[0];

@@ -46,8 +46,9 @@ public class ProgramCsAnalyzerService(IWebHostEnvironment env)
 
         var varName = match.Groups[1].Value.Trim();
         var result = Regex.Replace(source, @"var\s+.+?\s*=\s*(?:\w+\.)*UseUmbraco\s*\(\s*\)\s*;", "app.UseUmbraco()");
-        result = Regex.Replace(result, Regex.Escape(varName) + @"\s*\.", "");
-        result = Regex.Replace(result, @"UseUmbraco\(\)\s*;\s*\n+\s*\.", "UseUmbraco()\n    .");
+        // "zalgo.WithMiddleware(" → ".WithMiddleware(", then pull it up under app.UseUmbraco()
+        result = Regex.Replace(result, Regex.Escape(varName) + @"\s*\.", ".");
+        result = Regex.Replace(result, @"UseUmbraco\(\)\s*\.", "UseUmbraco()\n    .");
         File.WriteAllText(path, result);
         return true;
     }

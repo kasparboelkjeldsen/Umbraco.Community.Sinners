@@ -5,28 +5,14 @@ export interface PresenterStep {
     run: StepFn;
 }
 
-export type PresenterAction = 'next' | 'nextTab' | 'dot' | 'state';
-
 export const TAB_ORDER = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'] as const;
-
-export const TAB_SHORT: Record<string, string> = {
-    I: 'Compositions',
-    II: 'Sacred Types',
-    III: 'Data Types',
-    IV: 'Program.cs',
-    V: 'Production',
-    VI: 'Aliases',
-    VII: 'Translations',
-    VIII: 'Media',
-    IX: 'Root',
-    X: 'uSync',
-};
 
 const STORAGE_KEY = 'sinners-presenter-state';
 
 interface PersistedState {
     activeTab: string;
     indices: Record<string, number>;
+    exhibited?: string[];
 }
 
 function loadState(): PersistedState {
@@ -38,33 +24,28 @@ function loadState(): PersistedState {
 }
 
 const _persisted = loadState();
-const _steps = new Map<string, PresenterStep[]>();
+// The backoffice may construct a dashboard twice and throw one copy away, so every
+// registration remembers its element and the one still on the page wins.
+const _steps = new Map<string, Array<{ host: Element; steps: PresenterStep[] }>>();
 const _indices = new Map<string, number>(Object.entries(_persisted.indices));
+// Tabs whose sin has already been exhibited — the clicker shows each one once
+const _exhibited = new Set<string>(_persisted.exhibited ?? []);
 let _activeTab = _persisted.activeTab;
-let _nextTabFn: (() => void) | null = null;
-const _listeners = new Set<(action: PresenterAction) => void>();
+let _nextTab: Array<{ host: Element; fn: () => void }> = [];
+// A clicker press while a step is still running would run that step twice
+let _busy = false;
 
 function persist() {
     try {
         sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
             activeTab: _activeTab,
             indices: Object.fromEntries(_indices),
+            exhibited: [..._exhibited],
         } satisfies PersistedState));
     } catch { /* storage unavailable — presenter still works, just forgets on reload */ }
 }
 
-function notify(action: PresenterAction) {
-    _listeners.forEach((fn) => fn(action));
-}
-
 const PENANCE_URL = '/umbraco/section/settings/dashboard/penance';
-
-// The bar starts hidden — the first view of Umbraco is completely vanilla.
-// It is summoned by speaking the forbidden name ("Sitecore") or pressing 5.
-const BAR_VISIBLE_KEY = 'sinners-bar-visible';
-let _barVisible = (() => {
-    try { return sessionStorage.getItem(BAR_VISIBLE_KEY) === '1'; } catch { return false; }
-})();
 
 const TAB_URLS: Partial<Record<string, string>> = {
     'I':    '/umbraco/section/content/workspace/document/edit/704a66de-b213-44fe-815a-f988c0707bbf/invariant/view/info/modal/umb-modal-workspace/invariant/general/document-type/edit/b871f83c-2395-4894-be0f-5422c1a71e48/tab/content',
@@ -79,63 +60,36 @@ const ELSEWHERE_RULES: Array<{ match: string; target: string }> = [
     { match: '/umbraco/section/content', target: '/umbraco/section/settings' },
 ];
 
+function stepsFor(tabId: string): PresenterStep[] {
+    const all = _steps.get(tabId) ?? [];
+    const live = all.filter((r) => r.host.isConnected);
+    return (live.length ? live : all).at(-1)?.steps ?? [];
+}
+
+function onBoard(): boolean {
+    return window.location.pathname.includes('/dashboard/penance');
+}
+
 export const presenter = {
     get activeTab(): string {
         return _activeTab;
     },
 
-    get barVisible(): boolean {
-        return _barVisible;
-    },
-
-    /** Returns the new visibility. */
-    toggleBar(): boolean {
-        _barVisible = !_barVisible;
-        try { sessionStorage.setItem(BAR_VISIBLE_KEY, _barVisible ? '1' : '0'); } catch { /* fine */ }
-        notify('state');
-        return _barVisible;
-    },
-
     setActiveTab(tabId: string) {
         _activeTab = tabId;
         persist();
-        notify('state');
     },
 
-    subscribe(fn: (action: PresenterAction) => void): () => void {
-        _listeners.add(fn);
-        return () => _listeners.delete(fn);
-    },
-
-    /** Info about the pending step on the active tab, or null when no steps are registered (e.g. away from the board). */
-    stepInfo(): { label: string; index: number; total: number } | null {
-        const steps = _steps.get(_activeTab);
-        if (!steps || steps.length === 0) return null;
-        const idx = _indices.get(_activeTab) ?? 0;
-        if (idx >= steps.length) return { label: '', index: idx, total: steps.length };
-        return { label: steps[idx].label, index: idx, total: steps.length };
-    },
-
-    nextTabId(): string {
-        const ids = TAB_ORDER as readonly string[];
-        const idx = ids.indexOf(_activeTab);
-        return ids[(idx + 1) % ids.length];
-    },
-
-    /** What dot() will do from the current location. */
-    dotIntent(): 'exhibit' | 'board-reload' | 'return' {
-        if (window.location.pathname.includes('/dashboard/penance'))
-            return TAB_URLS[_activeTab] ? 'exhibit' : 'board-reload';
-        return 'return';
-    },
-
+    /** Exhibit the active tab's sin (on the Board), or return to the Board (anywhere else). */
     dot() {
         const path = window.location.pathname;
-        const onPenance = path.includes('/dashboard/penance');
-        notify('dot');
 
-        if (onPenance) {
+        if (onBoard()) {
             const url = TAB_URLS[_activeTab] ?? PENANCE_URL;
+            if (TAB_URLS[_activeTab]) {
+                _exhibited.add(_activeTab);
+                persist();
+            }
             console.log(`[PRESENTER] dot() on penance tab="${_activeTab}" → ${url}`);
             window.location.href = url;
             return;
@@ -147,54 +101,84 @@ export const presenter = {
         window.location.href = target;
     },
 
-    onNextTab(fn: () => void) {
-        _nextTabFn = fn;
-    },
-
-    get canNextTab(): boolean {
-        return _nextTabFn !== null;
+    onNextTab(host: Element, fn: () => void) {
+        _nextTab = [..._nextTab.filter((r) => r.host !== host && r.host.isConnected), { host, fn }];
     },
 
     nextTab() {
         console.log('[PRESENTER] nextTab()');
-        _nextTabFn?.();
-        notify('nextTab');
+        const live = _nextTab.filter((r) => r.host.isConnected);
+        (live.length ? live : _nextTab).at(-1)?.fn();
     },
 
-    registerSteps(tabId: string, steps: PresenterStep[]) {
-        _steps.set(tabId, steps);
+    registerSteps(tabId: string, host: Element, steps: PresenterStep[]) {
+        const kept = (_steps.get(tabId) ?? []).filter((r) => r.host !== host && r.host.isConnected);
+        _steps.set(tabId, [...kept, { host, steps }]);
         // Restore a persisted index (survives exhibit round-trips) but never point past the end
         const stored = _indices.get(tabId) ?? 0;
         _indices.set(tabId, Math.min(stored, steps.length));
-        notify('state');
     },
 
     async next() {
-        const steps = _steps.get(_activeTab) ?? [];
+        if (_busy) return;
+        const steps = stepsFor(_activeTab);
         const idx = _indices.get(_activeTab) ?? 0;
         console.log(`[PRESENTER] next() — tab="${_activeTab}" step=${idx + 1}/${steps.length}`);
-        notify('next');
         if (idx >= steps.length) {
             console.log(`[PRESENTER] no more steps on tab "${_activeTab}"`);
             return;
         }
-        await steps[idx].run();
+        _busy = true;
+        try {
+            await steps[idx].run();
+        } finally {
+            _busy = false;
+        }
         _indices.set(_activeTab, idx + 1);
         persist();
-        notify('state');
-        console.log(`[PRESENTER] step ${idx + 1} done`);
+        console.log(`[PRESENTER] step ${idx + 1} "${steps[idx].label}" done`);
+    },
+
+    /**
+     * The clicker's "next": one press, one beat of the demo. Per commandment it walks
+     * exhibit the sin → return to the Board → each fix step → next commandment, and
+     * stops after the last step of the last commandment. Off the Board it always
+     * means "return to the Board".
+     */
+    async forward() {
+        if (_busy) return;
+        if (!onBoard()) {
+            this.dot();
+            return;
+        }
+        // The dashboard hasn't told us which tab it shows yet — don't guess
+        if (!_activeTab || !_nextTab.some((r) => r.host.isConnected)) return;
+
+        if (TAB_URLS[_activeTab] && !_exhibited.has(_activeTab)) {
+            this.dot();
+            return;
+        }
+
+        const steps = stepsFor(_activeTab);
+        if ((_indices.get(_activeTab) ?? 0) < steps.length) {
+            await this.next();
+            return;
+        }
+
+        if (_activeTab === TAB_ORDER[TAB_ORDER.length - 1]) {
+            console.log('[PRESENTER] forward() — all ten commandments atoned, nothing left');
+            return;
+        }
+        this.nextTab();
     },
 
     /**
      * Wipe all demo state and reload — the "0" panic reset. Clears presenter
-     * progress, magic-word rotation, bar visibility (back to vanilla), and the
-     * Rule VIII pretend flag. Voice enablement is deliberately kept.
+     * progress, exhibited sins and the Rule VIII pretend flag.
      */
     reset() {
         try {
             sessionStorage.removeItem(STORAGE_KEY);
-            sessionStorage.removeItem('sinners-voice-words');
-            sessionStorage.removeItem(BAR_VISIBLE_KEY);
             localStorage.removeItem('sinners-media-pretend');
         } catch { /* ignore */ }
         window.location.href = PENANCE_URL;

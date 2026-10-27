@@ -254,7 +254,7 @@ export class ContentNotComposableElement extends UmbElementMixin(LitElement) {
 
     override connectedCallback() {
         super.connectedCallback();
-        presenter.registerSteps('I', [
+        presenter.registerSteps('I', this, [
             {
                 label: 'Fold In & bless everything',
                 run: async () => {

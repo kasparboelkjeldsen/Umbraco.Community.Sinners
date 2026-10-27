@@ -136,7 +136,7 @@ export class AliasAuditElement extends UmbElementMixin(LitElement) {
 
     override connectedCallback() {
         super.connectedCallback();
-        presenter.registerSteps('VI', [
+        presenter.registerSteps('VI', this, [
             {
                 label: 'Bless first alias',
                 run: () => {

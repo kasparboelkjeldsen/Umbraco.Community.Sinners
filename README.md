@@ -2,10 +2,10 @@
 
 ### The 10 UmbraCommandments — a conference talk that escaped containment
 
-This is a **development-time Umbraco 18 package** built as the live demo for the talk
-*"The 10 UmbraCommandments"*. It audits your Umbraco installation against ten opinionated
-architectural rules on a **Penance Board** dashboard in the Settings section, judges you,
-and offers to absolve your sins — one keypress, one click, or one shouted absurdity at a time.
+This is a **development-time Umbraco 18 package** (built against 18.2.1) made as the live demo
+for the talk *"The 10 UmbraCommandments"*. It audits your Umbraco installation against ten
+opinionated architectural rules on a **Penance Board** dashboard in the Settings section,
+judges you, and offers to absolve your sins — one clicker press at a time.
 
 It is a sermon delivered as software. It is not a product.
 
@@ -21,8 +21,9 @@ Read this part twice:
 - It **moves your document types and data types around**, creates folders, strips
   `AllowedAsRoot`, folds composition properties into page types, and saves every affected
   content node as a draft while doing it.
-- It injects a voice-controlled presenter bar into the backoffice that hijacks the number keys
-  and listens to your microphone for the word *"banana"*.
+- It hijacks PageDown, PageUp, the arrow keys, `.`, Escape and the number keys across the
+  whole backoffice, so a presentation clicker can drive the demo. Typing in a text field
+  while it's installed is a penance of its own.
 - It is deliberately **not** on NuGet and **not** tagged for the Umbraco Marketplace,
   and it never will be. The only way it gets into a solution is if you put it there
   with your own hands, knowing exactly what it is.
@@ -53,30 +54,31 @@ The full doctrine lives in [commandments.md](commandments.md), the slide headlin
 
 ## The presenter rig (the part you actually cloned this for)
 
-The talk is driven without trusting a single piece of venue hardware:
+The whole demo runs on one button: the "next" button of an ordinary presentation clicker.
+There is no on-screen rig, so the backoffice looks like plain Umbraco from first press to last.
 
-- **The bar** — four big numbered buttons fixed to the right edge of the backoffice, each
-  showing exactly what it will do next ("Fold In & bless everything · 1/1"). Keys `1`–`4`
-  mirror them, `5` toggles the bar, `0` is a full demo reset. It rides the Popover API into
-  the browser's top layer, so not even Umbraco's modal dialogs can hide it.
-- **The vanilla start** — the bar is hidden until summoned, so the first view of Umbraco is
-  completely unspoiled. It is summoned by speaking the forbidden name: **"Sitecore"**
-  (also accepted: *site call, sitecall, side core, psycho, cycle* — speech recognition is
-  a lawless place). Say it again to banish it.
-- **Magic words** — while the mic is on, four words from a 50-word pool (*pineapple, banana,
-  banjo, tuxedo, …*) are live. Speaking one presses its button. The words have **no relation
-  to what the buttons do** — that is the entire point. Fired words rotate out so the
-  recognizer can't double-press, and the current words are printed right on the buttons.
-- **"Hey Umbraco"** — the formal liturgy also works: wake phrase, six-second window, say a number.
-- Everything falls back to clicks and keys, because the only hardware trusted less than a
-  venue presenter-remote is a venue microphone.
+| Key | What it does |
+|---|---|
+| **PageDown** / **→** (clicker next) | The next beat of the demo (see below) |
+| **PageUp** / **←** (clicker back) | Nothing, on purpose. A misclick can't undo a fold-in |
+| **`.`** (the clicker's blank button) | Exhibit the sin (on the Board) / return to the Board (anywhere else) |
+| **Escape** | Nothing (swallowed, so a clicker's Esc can't close the exhibit you're showing) |
+| `1` · `2` · `3` · `4` | Laptop fallback: next fix step · next commandment · exhibit/return · reload |
+| `0` | Full demo reset: forget progress, back to the Board |
 
-Fair warning, speakers: the magic words are displayed on the projector, and there is no
-defense against an audience member shouting **"TUXEDO"**. This is considered a feature.
+**Next** walks one script per commandment: *exhibit the sin* (jump to where it lives in
+Umbraco), *return to the Board*, *each fix step*, *next commandment*. Commandments with
+nothing to exhibit (IV, V, VI, X) go straight to their fixes. Off the Board, next always
+means "take me back to the Board". After the last fix on X, next does nothing. The keys work
+even with a text field focused, because exhibit pages autofocus their name field.
+
+Progress lives in `sessionStorage`, so the full-page jumps between the Board and the
+exhibits pick up where they left off. If the clicker dies, the fallback is walking over to
+the laptop and pressing a number.
 
 ## Running it (on something you do not love)
 
-1. Clone. Scaffold a throwaway Umbraco 18 site under `Umbraco/<version>/` (SQLite,
+1. Clone. Scaffold a throwaway Umbraco 18.2.1+ site under `Umbraco/<version>/` (SQLite,
    unattended install, the [Clean starter kit](https://www.nuget.org/packages/Clean) gives
    you beautifully sinful content to fix). Add a `ProjectReference` to
    `Umbraco.Community.Sinners.Backend` — see `CLAUDE.md` for the exact wiring, including
@@ -104,9 +106,9 @@ That is not a question. Seek sanctuary.
 It preserved every content value in testing, saves drafts only, and was built in two days
 for a talk. You already know the answer.
 
-**Why does saying "psycho" open a sidebar?**
-Because speech recognition thinks that's how Danes pronounce a competing CMS, and we
-chose acceptance.
+**Didn't this used to be voice-controlled?**
+It did, for one trial run. Shouting at a laptop turned out to be less fun than it sounds.
+The clicker won. We do not speak of the walrus.
 
 ---
 
