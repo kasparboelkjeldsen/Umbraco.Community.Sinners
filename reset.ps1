@@ -81,7 +81,7 @@ $megaMenuContent = @'
 [System.IO.File]::WriteAllText($megaMenu, $megaMenuContent, [System.Text.UTF8Encoding]::new($false))
 Write-Host "Wrote Views\Partials\megaMenu.cshtml (Rule VII sinner)"
 
-# --- Commandment VIII: the seeder plants a warehouse at boot, if it's allowed to ---
+# --- Commandments III and VIII: the seeder plants root media and a warehouse at boot, if it's allowed to ---
 
 $devSettings = Join-Path $root "appsettings.Development.json"
 if (-not ((Test-Path $devSettings) -and ((Get-Content $devSettings -Raw) -match '"SeedSins"\s*:\s*true'))) {
@@ -182,6 +182,6 @@ await app.RunAsync();
 Write-Host "Overwrote Program.cs"
 
 Write-Host ""
-Write-Host "Server-side sin is maximised (the seeder plants Rule VIII at first boot). Clicker" -ForegroundColor Yellow
+Write-Host "Server-side sin is maximised (the seeder plants III's root media and VIII at first boot). Clicker" -ForegroundColor Yellow
 Write-Host "progress and exhibited sins live in the browser: they auto-invalidate on fresh installs" -ForegroundColor Yellow
 Write-Host "-- or press 0 in the backoffice for a full demo-state reset." -ForegroundColor Yellow

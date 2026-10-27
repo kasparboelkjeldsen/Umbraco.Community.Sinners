@@ -1,5 +1,7 @@
+using Microsoft.Extensions.Logging;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.Models.ContentEditing;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Cms.Infrastructure.Scoping;
@@ -15,7 +17,10 @@ public class RootContentAuditService(
     IContentTypeService contentTypeService,
     IContentTypeContainerService containerService,
     IScopeProvider scopeProvider,
-    IShortStringHelper shortStringHelper)
+    IShortStringHelper shortStringHelper,
+    IDomainService domainService,
+    ILanguageService languageService,
+    ILogger<RootContentAuditService> logger)
 {
     public Task<RootContentAuditResult> AuditAsync()
     {
@@ -178,11 +183,72 @@ public class RootContentAuditService(
             }
         }
 
+        // Step 5: Give every rendering root its own sanctuary node (one SiteRoot per site) and lead it in
+        var sinners = rootNodes
+            .Where(n => audit.RootNodes.Any(a => a.Key == n.Key && a.HasTemplate))
+            .OrderBy(n => n.SortOrder)
+            .ToList();
+        if (sinners.Count == 0)
+            return new RootSanctuaryResult { Success = true, Message = "No root node beareth a template. SiteRoot stands ready in Pages/Roots should one ever stray." };
+
+        // A site without hostnames is found by being the first root. Once it moves down a level it needs a
+        // relative domain ("/", any host) to keep answering at the site's root, as it did before.
+        var hasHostnames = (await domainService.GetAllAsync(false)).Any();
+        var defaultIsoCode = await languageService.GetDefaultIsoCodeAsync();
+
+        var newRootOrder = rootNodes.OrderBy(n => n.SortOrder).ToList();
+        var moved = new List<string>();
+        foreach (var node in sinners)
+        {
+            var sanctuaryName = sinners.Count == 1 ? "Site" : $"Site: {node.Name}";
+            var sanctuary = rootNodes.FirstOrDefault(n =>
+                                n.ContentType.Alias == siteRoot.Alias && n.Name == sanctuaryName)
+                            ?? contentService.Create(sanctuaryName, Constants.System.Root, siteRoot);
+            if (!sanctuary.Published)
+            {
+                contentService.Save(sanctuary);
+                var publish = contentService.Publish(sanctuary, ["*"]);
+                if (!publish.Success)
+                    return new RootSanctuaryResult { Success = false, Message = $"The sanctuary '{sanctuaryName}' could not be consecrated ({publish.Result}). Seek forgiveness elsewhere." };
+            }
+
+            var wasPublished = node.Published;
+            var move = contentService.Move(node, sanctuary.Id, Constants.Security.SuperUserId);
+            if (!move.Success)
+                return new RootSanctuaryResult { Success = false, Message = $"'{node.Name}' would not be led into its sanctuary ({move.Result}). Seek forgiveness elsewhere." };
+            if (wasPublished && contentService.GetById(node.Key) is { Published: false } stray)
+                contentService.Publish(stray, ["*"]);
+
+            newRootOrder.RemoveAll(n => n.Key == sanctuary.Key);
+            newRootOrder[newRootOrder.FindIndex(n => n.Key == node.Key)] = sanctuary;
+
+            if (!hasHostnames && moved.Count == 0)
+                await KeepAnsweringAtTheRootAsync(node, defaultIsoCode);
+            moved.Add(node.Name ?? node.Key.ToString());
+        }
+
+        // The sanctuaries take the places their sites left
+        contentService.Sort(newRootOrder, Constants.Security.SuperUserId);
+
+        var names = moved.Count == 1 ? $"'{moved[0]}' now dwelleth" : $"{string.Join(", ", moved.Select(m => $"'{m}'"))} now dwell";
         return new RootSanctuaryResult
         {
             Success = true,
-            Message = "Thy sanctuary has been prepared. SiteRoot now stands templateless in Pages/Roots, unrenderable and righteous. Go now to thy Content section — create a SiteRoot node and drag each renderable root beneath it, and thy penance shall be complete.",
+            Message = $"Thy sanctuary is built. {names} beneath a templateless SiteRoot, still published, still answering where it did. The root no longer rendereth.",
         };
+    }
+
+    private async Task KeepAnsweringAtTheRootAsync(IContent node, string defaultIsoCode)
+    {
+        var assigned = (await domainService.GetAssignedDomainsAsync(node.Key, true)).ToList();
+        var wildcard = assigned.FirstOrDefault(d => d.IsWildcard);
+        var result = await domainService.UpdateDomainsAsync(node.Key, new DomainsUpdateModel
+        {
+            DefaultIsoCode = wildcard?.LanguageIsoCode,
+            Domains = [new DomainModel { DomainName = "/", IsoCode = wildcard?.LanguageIsoCode ?? defaultIsoCode }],
+        });
+        if (!result.Success)
+            logger.LogWarning("Sinners IX: could not give {Node} the relative domain '/' ({Status}); it answers at its own path now", node.Name, result.Status);
     }
 }
 

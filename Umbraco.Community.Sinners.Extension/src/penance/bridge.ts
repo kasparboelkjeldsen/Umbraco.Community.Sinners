@@ -23,3 +23,12 @@ export function absolved(commandment: CommandmentNumber, action: string, pretend
 export function boardMounted() {
     post({ type: 'board' });
 }
+
+/**
+ * The clicker pressed next with nothing left in the script (every step of X is done): the deck takes the
+ * clicker back and moves on. Posted again on every further press, in case the first one was missed.
+ */
+export function scriptEnded() {
+    console.log('[BRIDGE] end of the script');
+    post({ type: 'end' });
+}

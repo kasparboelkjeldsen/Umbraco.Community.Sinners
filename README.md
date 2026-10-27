@@ -51,7 +51,7 @@ The talk's numbering (it differs from [commandments.md](commandments.md) on purp
 | VI | Thy names: aliases English camelCase; translation keys PascalCase, dot-separated | Hunspell-verified, no `nogetPaaDansk` | Bless the false positives |
 | VII | Views render; they don't search | `.Descendants(`, `DescendantsOrSelf(` and `@inject IContentService` in `Views/**/*.cshtml`, one sin per line | **Confess** (the Board shows file, line and code; code can't be fixed from a web request) |
 | VIII | Umbraco is not your database | A parent with more than 500 children of one type, a node with more than 100 versions | **Exodus**: export to JSON, delete the children, prune the versions |
-| IX | A root node is not a rendering node | Root nodes whose type has a template | Seek Root Sanctuary (a templateless `siteRoot` in `Pages/Roots`) |
+| IX | A root node is not a rendering node | Root nodes whose type has a template | Seek Root Sanctuary: a templateless `siteRoot` type in `Pages/Roots`, a published "Site" node per site, and the site moved in. Still published, and still at `/` (a site without hostnames gets the relative domain `/`) |
 | X | uSync when not on Umbraco Cloud | No uSync or Umbraco.Deploy in the csproj | ✨ Also pretend ✨ (a real csproj injection, see warning above) |
 
 There used to be six sacred types. Umbraco 18's Library took up the burden of the
@@ -81,7 +81,8 @@ walks them one at a time: the loose data type → organize, the flat dictionary 
 media root → ✨. VII exhibits the sinful partial in the backoffice's partial view editor, VIII
 the "Form submissions" collection. Commandments with nothing to exhibit (IV, V, VI, X) go
 straight to their fixes. Off the Board, next always means "take me back to the Board". After
-the last fix on X, next does nothing. The keys work even with a text field focused, because
+the last fix on X, next tells the talk's deck the script is over (`end`, see the sin bridge), so
+the deck can take the clicker back. The keys work even with a text field focused, because
 exhibit pages autofocus their name field.
 
 Progress lives in `sessionStorage`, so the full-page jumps between the Board and the
@@ -148,6 +149,8 @@ reports `sins: -1`. Before the install has finished the endpoint answers 503.
   `group-dictionary`, `pretend-media` (III, `pretended: true`), `cleanse-program-cs` (IV),
   `confess` (VII), `exodus` (VIII), `root-sanctuary` (IX), `pretend-usync` (X, `pretended: true`).
   Unblessing posts nothing.
+- `{ source: 'sinners', type: 'end' }` when next is pressed with nothing left in the script
+  (every step of X done), and again on every further press: the deck takes the clicker back
 
 ## Running it (on something you do not love)
 
@@ -163,9 +166,10 @@ reports `sins: -1`. Before the install has finished the endpoint answers 503.
    zalgo-cursed variable and plants `Views/Partials/megaMenu.cshtml`, a mega menu that walks
    the whole tree (VII). Maximum sin, reproducibly.
 3. `dotnet build`, boot, log in, go to **Settings → P̸e̷n̴a̵n̸c̶e̷**. On the first boot the seeder
-   plants VIII in the background (~20 s): a "Form submissions" collection with 600
-   submissions and a "Visitor counter" published 120 times.
-4. Press `0`, upload one image at the media root (III needs a sinner), and confess.
+   plants its sins in the background (~20 s): three media items loose at the media root for III
+   ("final-final-v2.jpg", "Brochure 2019.pdf" and "logo"), and for VIII a "Form submissions"
+   collection with 600 submissions and a "Visitor counter" published 120 times.
+4. Press `0` and confess.
 
 Thresholds for VIII: `Sinners:ExodusChildThreshold` (500) and `Sinners:ExodusVersionThreshold`
 (100); the seeder plants threshold + 100 children and threshold + 20 versions. Exodus exports

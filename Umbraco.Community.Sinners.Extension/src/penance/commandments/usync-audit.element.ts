@@ -103,16 +103,18 @@ export class USyncAuditElement extends UmbElementMixin(LitElement) {
         }
     }
 
+    // The clicker step waits for the magic and the reload, so the next press (the end of the script)
+    // can't reach the deck before the 'absolved' message does.
     async #pretend() {
         const token = await this.#authCtx?.getLatestToken();
-        await fetch(`${API_BASE}/inject-usync`, {
+        const res = await fetch(`${API_BASE}/inject-usync`, {
             method: 'POST',
             headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
-        showMagic(() => {
-            absolved(10, 'pretend-usync', true);
-            void this.#load();
-        });
+        if (!res.ok) console.warn(`[SINNERS] inject-usync answered ${res.status}`);
+        await new Promise<void>((resolve) => showMagic(resolve));
+        await this.#load();
+        absolved(10, 'pretend-usync', true);
     }
 
     override render() {

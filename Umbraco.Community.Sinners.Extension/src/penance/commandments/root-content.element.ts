@@ -212,7 +212,16 @@ export class RootContentElement extends UmbElementMixin(LitElement) {
                 ${this._loading
                     ? html`<uui-loader-bar></uui-loader-bar>`
                     : result?.isClean
-                      ? html`<div class="clean">✓ No root node beareth a template. The root is unrenderable and righteous.</div>`
+                      ? html`
+                            <div class="clean">✓ No root node beareth a template. The root is unrenderable and righteous.</div>
+                            ${this._sanctuaryMessage ? html`<div class="sanctuary-message">${this._sanctuaryMessage}</div>` : ''}
+                            ${result.rootNodes.map((node) => html`
+                                <div class="item-row">
+                                    <span class="item-name">${node.name}</span>
+                                    <span class="item-type">${node.contentTypeAlias}</span>
+                                    <span class="badge ok">✓ Templateless</span>
+                                </div>
+                            `)}`
                       : html`
                             <div class="info">
                                 ${sinners.length} root node(s) beareth a template. The Library now shelters thy shared

@@ -1,3 +1,5 @@
+import { scriptEnded } from './bridge.js';
+
 type StepFn = () => void | Promise<void>;
 
 export interface PresenterStep {
@@ -179,7 +181,8 @@ export const presenter = {
     /**
      * The clicker's "next": one press, one beat of the demo. Per commandment it walks
      * exhibit a sin → return to the Board → its fix step (repeated per exhibit) → the remaining
-     * fix steps → next commandment, and stops after the last step of the last commandment.
+     * fix steps → next commandment. After the last step of the last commandment it tells the talk's
+     * deck the script is over (bridge `end`), so the deck can take the clicker back.
      * Off the Board it always means "return to the Board".
      */
     async forward() {
@@ -207,7 +210,8 @@ export const presenter = {
         }
 
         if (_activeTab === TAB_ORDER[TAB_ORDER.length - 1]) {
-            console.log('[PRESENTER] forward() — all ten commandments atoned, nothing left');
+            console.log('[PRESENTER] forward() — all ten commandments atoned, handing the clicker back');
+            scriptEnded();
             return;
         }
         this.nextTab();
