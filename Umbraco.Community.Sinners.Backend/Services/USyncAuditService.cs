@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace Umbraco.Community.Sinners.Backend.Services;
 
-public class USyncAuditService(IWebHostEnvironment env)
+public class USyncAuditService(IWebHostEnvironment env, PenanceStateStore stateStore)
 {
     private static readonly Regex USyncRef = new(
         @"<PackageReference[^>]+Include=""uSync""",
@@ -21,13 +21,15 @@ public class USyncAuditService(IWebHostEnvironment env)
 
         var path = csprojFiles[0];
         var content = File.ReadAllText(path);
+        var hasUSync = USyncRef.IsMatch(content);
 
         return new USyncAuditResult
         {
             CsprojFound = true,
             CsprojName = Path.GetFileName(path),
-            HasUSync = USyncRef.IsMatch(content),
+            HasUSync = hasUSync,
             HasUmbracoDeploy = DeployRef.IsMatch(content),
+            Pretended = hasUSync && stateStore.Read().PretendedUSync,
         };
     }
 
@@ -51,6 +53,7 @@ public class USyncAuditService(IWebHostEnvironment env)
         var injection = "  <ItemGroup>\n" + packageRef + "  </ItemGroup>\n";
         var updated = content.Replace("</Project>", injection + "</Project>");
         File.WriteAllText(path, updated);
+        stateStore.Update(s => s.PretendedUSync = true);
 
         if (usesCpm)
         {
@@ -76,4 +79,7 @@ public record USyncAuditResult
     public required bool HasUSync { get; init; }
     public required bool HasUmbracoDeploy { get; init; }
     public required string? CsprojName { get; init; }
+
+    /// <summary>uSync is in the csproj because the ✨ button put it there: nobody restored, built or ran it.</summary>
+    public bool Pretended { get; init; }
 }

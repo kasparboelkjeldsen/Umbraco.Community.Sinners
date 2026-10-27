@@ -3,6 +3,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
 import { presenter } from '../presenter.js';
+import { absolved } from '../bridge.js';
 import { showMagic } from '../magic.js';
 
 interface ProgramCsAuditResult {
@@ -202,7 +203,10 @@ export class ProgramCsCleanElement extends UmbElementMixin(LitElement) {
             method: 'POST',
             headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
-        showMagic(() => void this.#load());
+        showMagic(() => {
+            absolved(4, 'cleanse-program-cs');
+            void this.#load();
+        });
     }
 
     #renderIssues(result: ProgramCsAuditResult) {
@@ -256,7 +260,7 @@ export class ProgramCsCleanElement extends UmbElementMixin(LitElement) {
     override render() {
         const result = this._result;
         return html`
-            <uui-box headline="IV — Program.cs is clean">
+            <uui-box headline="IV — Compose in thy IComposer, not Program.cs">
                 ${this._loading
                     ? html`<uui-loader-bar></uui-loader-bar>`
                     : !result || !result.found

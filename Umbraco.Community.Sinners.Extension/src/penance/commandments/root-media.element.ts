@@ -2,7 +2,8 @@ import { LitElement, html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
-import { presenter } from '../presenter.js';
+import { presenter, FORGET_PRETENCES_KEY } from '../presenter.js';
+import { absolved } from '../bridge.js';
 import { showMagic } from '../magic.js';
 
 interface RootMediaItem {
@@ -10,6 +11,11 @@ interface RootMediaItem {
     name: string;
     mediaTypeAlias: string;
     createDate: string;
+}
+
+interface RootMediaAudit {
+    items: RootMediaItem[];
+    pretending: boolean;
 }
 
 const API_BASE = '/umbraco/management/api/v1/sinners';
@@ -79,65 +85,74 @@ export class RootMediaElement extends UmbElementMixin(LitElement) {
 
     override connectedCallback() {
         super.connectedCallback();
-        presenter.registerSteps('VIII', this, [
-            { label: 'Pretend to fix ✨', run: () => this.#pretend() },
-        ]);
+        presenter.registerSteps('III', this, [
+            { label: 'Pretend to fix the media root ✨', run: () => this.#pretend() },
+        ], 'media');
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;
             void this.#load();
         });
     }
 
+    async #fetchAuth(url: string, options: RequestInit = {}): Promise<Response> {
+        const token = await this.#authCtx?.getLatestToken();
+        return fetch(url, {
+            ...options,
+            headers: {
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                ...(options.headers ?? {}),
+            },
+        });
+    }
+
     async #load() {
         this._loading = true;
         try {
-            const token = await this.#authCtx?.getLatestToken();
-            const res = await fetch(`${API_BASE}/root-media`, {
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
-            });
-            if (res.ok) this._items = (await res.json()) as RootMediaItem[];
-
-            // The pretend flag stores the keys it pretended away. If the actual root
-            // media differs (fresh install, new upload), the pretense collapses —
-            // a wiped site never inherits an old browser's magic.
-            const stored = localStorage.getItem('sinners-media-pretend');
-            if (stored) {
-                let pretendedKeys: string[] = [];
-                try { pretendedKeys = JSON.parse(stored) as string[]; } catch { /* legacy '1' → stale */ }
-                const currentKeys = this._items.map((i) => i.key).sort().join(',');
-                if (Array.isArray(pretendedKeys) && pretendedKeys.slice().sort().join(',') === currentKeys) {
-                    this._pretending = true;
-                } else {
-                    localStorage.removeItem('sinners-media-pretend');
-                    this._pretending = false;
-                }
+            // The '0' reset asked us to forget the pretence before counting
+            let forget = false;
+            try { forget = sessionStorage.getItem(FORGET_PRETENCES_KEY) === '1'; } catch { /* no storage */ }
+            if (forget) {
+                await this.#fetchAuth(`${API_BASE}/forget-pretences`, { method: 'POST' });
+                try { sessionStorage.removeItem(FORGET_PRETENCES_KEY); } catch { /* no storage */ }
             }
 
-            const count = this._pretending ? 0 : this._items.length;
-            this.dispatchEvent(new CustomEvent('sinners-status', {
-                bubbles: true, composed: true,
-                detail: { issueCount: count, severity: count > 0 ? 'error' : 'ok' },
-            }));
+            // The server holds the pretence (so the deck can see it) and checks it against the actual
+            // root media: a fresh install or a new upload collapses it.
+            const res = await this.#fetchAuth(`${API_BASE}/root-media`);
+            if (res.ok) {
+                const result = (await res.json()) as RootMediaAudit;
+                this._items = result.items;
+                this._pretending = result.pretending;
+            }
+            this.#reportStatus();
         } finally {
             this._loading = false;
         }
     }
 
-    #pretend() {
+    #reportStatus() {
+        const count = this._pretending ? 0 : this._items.length;
+        this.dispatchEvent(new CustomEvent('sinners-status', {
+            bubbles: true, composed: true,
+            detail: { issueCount: count, severity: count > 0 ? 'error' : 'ok' },
+        }));
+    }
+
+    async #pretend() {
+        if (this._items.length === 0) return;
+        const res = await this.#fetchAuth(`${API_BASE}/pretend-root-media`, { method: 'POST' });
+        if (!res.ok) return;
         showMagic(() => {
             this._pretending = true;
-            localStorage.setItem('sinners-media-pretend', JSON.stringify(this._items.map((i) => i.key)));
-            this.dispatchEvent(new CustomEvent('sinners-status', {
-                bubbles: true, composed: true,
-                detail: { issueCount: 0, severity: 'ok' },
-            }));
+            this.#reportStatus();
+            absolved(3, 'pretend-media', true);
         });
     }
 
     override render() {
         const items = this._pretending ? [] : this._items;
         return html`
-            <uui-box headline="VIII — No media items at root">
+            <uui-box headline="III — The root is bare: no media at the root">
                 ${this._loading
                     ? html`<uui-loader-bar></uui-loader-bar>`
                     : items.length === 0

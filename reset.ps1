@@ -26,6 +26,67 @@ if (Test-Path $umbracoData) {
 else {
     Write-Host "No umbraco data folder found -- already blank"
 }
+# (That also takes the pretences, the confessions and the Exodus exports: they live in umbraco/Data.)
+
+# --- Forget every blessing (Sinners:BlessingsPath, default sinners.blessings.json in the content root) ---
+
+$blessings = Join-Path $root "sinners.blessings.json"
+if (Test-Path $blessings) {
+    Remove-Item $blessings -Force
+    Write-Host "Deleted sinners.blessings.json -- nothing is blessed"
+}
+
+# --- Commandment VII: a nav partial that searches the whole tree on every request ---
+# Clean copies its own views on every build but never deletes extra ones, so this one survives builds.
+
+$megaMenu = Join-Path $root "Views\Partials\megaMenu.cshtml"
+$megaMenuContent = @'
+@inherits UmbracoViewPage
+@using Umbraco.Cms.Core.Services
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels
+@inject IContentService ContentService
+
+@* Mega menu: every section with every page under it, plus the latest articles *@
+@{
+    var root = Model.Root();
+    var sections = root.Children().Where(x => x.IsVisible());
+    var latest = Model.Root().Descendants<ContentModels.Article>().OrderByDescending(x => x.CreateDate).Take(5);
+    var pageCount = ContentService.CountDescendants(root.Id);
+}
+
+<nav class="mega-menu" data-page-count="@pageCount">
+    @foreach (var section in sections)
+    {
+        <div class="mega-menu__column">
+            <a class="mega-menu__heading" href="@section.Url()">@section.Name</a>
+            <ul>
+                @foreach (var page in section.DescendantsOrSelf().Where(x => x.IsVisible()))
+                {
+                    <li><a href="@page.Url()">@page.Name</a></li>
+                }
+            </ul>
+        </div>
+    }
+    <div class="mega-menu__column">
+        <span class="mega-menu__heading">Latest</span>
+        <ul>
+            @foreach (var article in latest)
+            {
+                <li><a href="@article.Url()">@article.Name</a></li>
+            }
+        </ul>
+    </div>
+</nav>
+'@
+[System.IO.File]::WriteAllText($megaMenu, $megaMenuContent, [System.Text.UTF8Encoding]::new($false))
+Write-Host "Wrote Views\Partials\megaMenu.cshtml (Rule VII sinner)"
+
+# --- Commandment VIII: the seeder plants a warehouse at boot, if it's allowed to ---
+
+$devSettings = Join-Path $root "appsettings.Development.json"
+if (-not ((Test-Path $devSettings) -and ((Get-Content $devSettings -Raw) -match '"SeedSins"\s*:\s*true'))) {
+    Write-Warning "appsettings.Development.json has no ""Sinners"": { ""SeedSins"": true } -- Rule VIII will have no warehouse to lead out"
+}
 
 # --- Remove uSync from .csproj ---
 
@@ -121,6 +182,6 @@ await app.RunAsync();
 Write-Host "Overwrote Program.cs"
 
 Write-Host ""
-Write-Host "Server-side sin is maximised. Browser-side state (Rule VIII pretend flag," -ForegroundColor Yellow
-Write-Host "clicker progress, exhibited sins) auto-invalidates on fresh installs" -ForegroundColor Yellow
+Write-Host "Server-side sin is maximised (the seeder plants Rule VIII at first boot). Clicker" -ForegroundColor Yellow
+Write-Host "progress and exhibited sins live in the browser: they auto-invalidate on fresh installs" -ForegroundColor Yellow
 Write-Host "-- or press 0 in the backoffice for a full demo-state reset." -ForegroundColor Yellow

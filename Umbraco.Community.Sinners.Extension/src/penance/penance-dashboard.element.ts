@@ -1,9 +1,10 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, css, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_THEME_CONTEXT } from '@umbraco-cms/backoffice/themes';
 import { SPOOKY_ALIAS } from './spooky-themes.js';
 import { presenter } from './presenter.js';
+import { boardMounted } from './bridge.js';
 import './commandments/content-not-composable.element.js';
 import './commandments/four-sacred-types.element.js';
 import './commandments/data-types-in-folders.element.js';
@@ -12,6 +13,8 @@ import './commandments/production-settings.element.js';
 import './commandments/alias-audit.element.js';
 import './commandments/translation-audit.element.js';
 import './commandments/root-media.element.js';
+import './commandments/views-confession.element.js';
+import './commandments/exodus.element.js';
 import './commandments/root-content.element.js';
 import './commandments/usync-audit.element.js';
 
@@ -20,20 +23,25 @@ interface StatusDetail {
     severity: 'ok' | 'warning' | 'error';
 }
 
+// The talk's numbering. III and VI merge several audits: each part reports its own status and the
+// tab's badge is their sum.
 const TABS = [
-    { id: 'I',   label: 'I — Content is not composable' },
-    { id: 'II',  label: 'II — The Four Sacred Types' },
-    { id: 'III', label: 'III — Data types live in folders' },
-    { id: 'IV',  label: 'IV — Program.cs is clean' },
-    { id: 'V',   label: 'V — Live environment is production-ready' },
-    { id: 'VI',  label: 'VI — Aliases are camelCase English' },
-    { id: 'VII', label: 'VII — Translation keys are PascalCase and nested' },
-    { id: 'VIII', label: 'VIII — No media items at root' },
-    { id: 'IX',   label: 'IX — The root shall not render' },
-    { id: 'X',    label: 'X — uSync is installed' },
+    { id: 'I',    label: 'I — Content is not composable', parts: ['I'] },
+    { id: 'II',   label: 'II — Four content types', parts: ['II'] },
+    { id: 'III',  label: 'III — The root is bare, a folder is only a folder', parts: ['III.data-types', 'III.dictionary', 'III.media'] },
+    { id: 'IV',   label: 'IV — Compose in thy IComposer, not Program.cs', parts: ['IV'] },
+    { id: 'V',    label: 'V — Production runs in production mode', parts: ['V'] },
+    { id: 'VI',   label: 'VI — Thy names', parts: ['VI.aliases', 'VI.keys'] },
+    { id: 'VII',  label: 'VII — Views render; they don’t search', parts: ['VII'] },
+    { id: 'VIII', label: 'VIII — Umbraco is not thy database', parts: ['VIII'] },
+    { id: 'IX',   label: 'IX — A root node is not a rendering node', parts: ['IX'] },
+    { id: 'X',    label: 'X — uSync when not on Umbraco Cloud', parts: ['X'] },
 ] as const;
 
 type TabId = typeof TABS[number]['id'];
+
+const SEVERITY_RANK = { ok: 0, warning: 1, error: 2 } as const;
+const ALL_PARTS = TABS.flatMap((t) => t.parts as readonly string[]);
 
 const SPOOKY_LABELS: Record<number, string> = {
     0: 'Righteous — thy backoffice is clean',
@@ -55,7 +63,8 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
     readonly #isDebug = new URLSearchParams(window.location.search).has('debug');
 
     @state() private _activeTab: TabId = 'I';
-    @state() private _statuses = new Map<TabId, StatusDetail>();
+    /** Keyed by part ('I', 'III.media', …) */
+    @state() private _statuses = new Map<string, StatusDetail>();
     @state() private _spookyFactor = 0;
     #userNavigated = false;
 
@@ -200,6 +209,11 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
         .debug-strip input[type=range] {
             width: 100%;
         }
+
+        .pane {
+            flex-direction: column;
+            gap: var(--uui-size-space-5, 24px);
+        }
     `;
 
     override connectedCallback() {
@@ -223,12 +237,24 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
             this.#themeCtx = ctx;
             this.#applyTheme();
         });
+        boardMounted();
+    }
+
+    /** A tab's status, once every one of its parts has reported. */
+    #tabStatus(tab: typeof TABS[number]): StatusDetail | undefined {
+        const parts = (tab.parts as readonly string[]).map((p) => this._statuses.get(p));
+        if (parts.some((p) => !p)) return undefined;
+        const reported = parts as StatusDetail[];
+        const issueCount = reported.reduce((sum, p) => sum + p.issueCount, 0);
+        const severity = reported
+            .filter((p) => p.issueCount > 0)
+            .reduce<StatusDetail['severity']>((worst, p) => SEVERITY_RANK[p.severity] > SEVERITY_RANK[worst] ? p.severity : worst, 'ok');
+        return { issueCount, severity };
     }
 
     get #autoLevel(): number {
-        let sinful = 0;
-        this._statuses.forEach((s) => { if (s.issueCount > 0) sinful++; });
-        return sinful; // max is naturally 10 (one per commandment)
+        // One per sinful commandment, so the max is naturally 10
+        return TABS.filter((t) => (this.#tabStatus(t)?.issueCount ?? 0) > 0).length;
     }
 
     get #effectiveLevel(): number {
@@ -245,12 +271,12 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
         this.#applyTheme();
     }
 
-    #onStatus(tab: TabId, detail: StatusDetail) {
-        this._statuses = new Map(this._statuses).set(tab, detail);
+    #onStatus(part: string, detail: StatusDetail) {
+        this._statuses = new Map(this._statuses).set(part, detail);
         if (this._spookyFactor === 0) this.#applyTheme();
-        if (!this.#userNavigated && this._statuses.size === TABS.length) {
+        if (!this.#userNavigated && ALL_PARTS.every((p) => this._statuses.has(p))) {
             this.#userNavigated = true;
-            const first = TABS.find((t) => (this._statuses.get(t.id)?.issueCount ?? 0) > 0);
+            const first = TABS.find((t) => (this.#tabStatus(t)?.issueCount ?? 0) > 0);
             if (first) {
                 this._activeTab = first.id;
                 presenter.setActiveTab(first.id);
@@ -258,11 +284,19 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
         }
     }
 
-    #renderBadge(tab: TabId) {
-        const status = this._statuses.get(tab);
+    #renderBadge(tab: typeof TABS[number]) {
+        const status = this.#tabStatus(tab);
         if (!status) return html`<span class="status-badge pending"></span>`;
         if (status.issueCount === 0) return html`<span class="status-badge ok">✓</span>`;
         return html`<span class="status-badge ${status.severity}">${status.issueCount}</span>`;
+    }
+
+    #pane(tab: TabId, content: unknown) {
+        return html`<div class="pane" style="display:${this._activeTab === tab ? 'flex' : 'none'}">${content}</div>`;
+    }
+
+    #status(part: string) {
+        return (e: CustomEvent<StatusDetail>) => this.#onStatus(part, e.detail);
     }
 
     override render() {
@@ -270,7 +304,7 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
             <div class="hero">
                 <h1>Penance Board</h1>
                 <p>Confess your sins. Audit your Umbraco installation against the Ten UmbraCommandments.</p>
-                ${this._statuses.size > 0 ? html`<p class="verdict">${SPOOKY_LABELS[this.#effectiveLevel]}</p>` : ''}
+                ${this._statuses.size > 0 ? html`<p class="verdict">${SPOOKY_LABELS[this.#effectiveLevel]}</p>` : nothing}
             </div>
 
             <div class="layout">
@@ -280,62 +314,35 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
                         class="tab-btn ${this._activeTab === tab.id ? 'active' : ''}"
                         @click=${() => { this.#userNavigated = true; this._activeTab = tab.id; presenter.setActiveTab(tab.id); }}>
                         ${tab.label}
-                        ${this.#renderBadge(tab.id)}
+                        ${this.#renderBadge(tab)}
                     </button>
                 `)}
             </div>
 
             <div class="tab-content">
-                <div style="display:${this._activeTab === 'I' ? 'block' : 'none'}">
-                    <sinners-content-not-composable
-                        @sinners-status=${(e: CustomEvent<StatusDetail>) => this.#onStatus('I', e.detail)}>
-                    </sinners-content-not-composable>
-                </div>
-                <div style="display:${this._activeTab === 'II' ? 'block' : 'none'}">
-                    <sinners-four-sacred-types
-                        @sinners-status=${(e: CustomEvent<StatusDetail>) => this.#onStatus('II', e.detail)}>
-                    </sinners-four-sacred-types>
-                </div>
-                <div style="display:${this._activeTab === 'III' ? 'block' : 'none'}">
-                    <sinners-data-types-in-folders
-                        @sinners-status=${(e: CustomEvent<StatusDetail>) => this.#onStatus('III', e.detail)}>
-                    </sinners-data-types-in-folders>
-                </div>
-                <div style="display:${this._activeTab === 'IV' ? 'block' : 'none'}">
-                    <sinners-program-cs-clean
-                        @sinners-status=${(e: CustomEvent<StatusDetail>) => this.#onStatus('IV', e.detail)}>
-                    </sinners-program-cs-clean>
-                </div>
-                <div style="display:${this._activeTab === 'V' ? 'block' : 'none'}">
-                    <sinners-production-settings
-                        @sinners-status=${(e: CustomEvent<StatusDetail>) => this.#onStatus('V', e.detail)}>
-                    </sinners-production-settings>
-                </div>
-                <div style="display:${this._activeTab === 'VI' ? 'block' : 'none'}">
-                    <sinners-alias-audit
-                        @sinners-status=${(e: CustomEvent<StatusDetail>) => this.#onStatus('VI', e.detail)}>
-                    </sinners-alias-audit>
-                </div>
-                <div style="display:${this._activeTab === 'VII' ? 'block' : 'none'}">
-                    <sinners-translation-audit
-                        @sinners-status=${(e: CustomEvent<StatusDetail>) => this.#onStatus('VII', e.detail)}>
-                    </sinners-translation-audit>
-                </div>
-                <div style="display:${this._activeTab === 'VIII' ? 'block' : 'none'}">
-                    <sinners-root-media
-                        @sinners-status=${(e: CustomEvent<StatusDetail>) => this.#onStatus('VIII', e.detail)}>
-                    </sinners-root-media>
-                </div>
-                <div style="display:${this._activeTab === 'IX' ? 'block' : 'none'}">
-                    <sinners-root-content
-                        @sinners-status=${(e: CustomEvent<StatusDetail>) => this.#onStatus('IX', e.detail)}>
-                    </sinners-root-content>
-                </div>
-                <div style="display:${this._activeTab === 'X' ? 'block' : 'none'}">
-                    <sinners-usync-audit
-                        @sinners-status=${(e: CustomEvent<StatusDetail>) => this.#onStatus('X', e.detail)}>
-                    </sinners-usync-audit>
-                </div>
+                ${this.#pane('I', html`
+                    <sinners-content-not-composable @sinners-status=${this.#status('I')}></sinners-content-not-composable>`)}
+                ${this.#pane('II', html`
+                    <sinners-four-sacred-types @sinners-status=${this.#status('II')}></sinners-four-sacred-types>`)}
+                ${this.#pane('III', html`
+                    <sinners-data-types-in-folders @sinners-status=${this.#status('III.data-types')}></sinners-data-types-in-folders>
+                    <sinners-translation-audit mode="grouping" @sinners-status=${this.#status('III.dictionary')}></sinners-translation-audit>
+                    <sinners-root-media @sinners-status=${this.#status('III.media')}></sinners-root-media>`)}
+                ${this.#pane('IV', html`
+                    <sinners-program-cs-clean @sinners-status=${this.#status('IV')}></sinners-program-cs-clean>`)}
+                ${this.#pane('V', html`
+                    <sinners-production-settings @sinners-status=${this.#status('V')}></sinners-production-settings>`)}
+                ${this.#pane('VI', html`
+                    <sinners-alias-audit @sinners-status=${this.#status('VI.aliases')}></sinners-alias-audit>
+                    <sinners-translation-audit mode="naming" @sinners-status=${this.#status('VI.keys')}></sinners-translation-audit>`)}
+                ${this.#pane('VII', html`
+                    <sinners-views-confession @sinners-status=${this.#status('VII')}></sinners-views-confession>`)}
+                ${this.#pane('VIII', html`
+                    <sinners-exodus @sinners-status=${this.#status('VIII')}></sinners-exodus>`)}
+                ${this.#pane('IX', html`
+                    <sinners-root-content @sinners-status=${this.#status('IX')}></sinners-root-content>`)}
+                ${this.#pane('X', html`
+                    <sinners-usync-audit @sinners-status=${this.#status('X')}></sinners-usync-audit>`)}
             </div>
             </div>
 
@@ -349,7 +356,7 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
                         max="10"
                         .value=${String(this._spookyFactor)}
                         @input=${this.#onSpookyChange}>
-                </div>` : ''}
+                </div>` : nothing}
         `;
     }
 }

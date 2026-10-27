@@ -7,35 +7,43 @@ Dev-time Umbraco package for a talk: "The 10 UmbraCommandments". Enforces opinio
 - Umbraco 18 — `net10.0` single target, no multi-targeting, no version guards. Backend references `Umbraco.Cms` `[18.2.1,19.0.0)` (compiles against 18.2.1, the latest stable as of Oct 2026); frontend `@umbraco-cms/backoffice` 18.2.1. Umbraco 17 is no longer supported (the doctrine is Library-era anyway).
 - Test sites live under `Umbraco/` (local, not in this repo). Current demo target: `18.2.1/` (Clean 8.0.1 starter kit, uSync 18.1.5 in its props, admin@example.com / 1234567890, https://localhost:44343, http on 8699 is rejected by the backoffice login). It was created by copying `18.1.1/` (the 18.2.1 project template only differs in version numbers); older `17.x/` and `18.1.1/` folders may still exist locally but aren't in the solution.
 - The site consumes Sinners via ProjectReference; a `CopySinnersUiAssets` target in its csproj copies `Backend/ui/**` into `wwwroot/App_Plugins/umbraco.community.sinners.frontend/` on every build.
-- **Demo reset ritual**: `.\reset.ps1 -Version 18.2.1` (deletes `Umbraco/18.2.1/umbraco` data folder, strips uSync from csproj/props, overwrites Program.cs with the zalgo sin) → `dotnet build` → boot (unattended install + Clean import, ~90s) → press `0` in the backoffice (clears browser demo state) → upload one image at media root (Rule VIII sin).
+- **Demo reset ritual**: `.\reset.ps1 -Version 18.2.1` (deletes `Umbraco/18.2.1/umbraco` data folder — DB, pretences, confessions, Exodus exports — and `sinners.blessings.json`, strips uSync from csproj/props, overwrites Program.cs with the zalgo sin, writes the Rule VII sinner `Views/Partials/megaMenu.cshtml`) → `dotnet build` → boot (unattended install + Clean import, ~90s; then `DemoSinSeeder` plants Rule VIII in the background, ~20 s) → press `0` in the backoffice (clears browser demo state and the server's media pretence) → upload one image at media root (Rule III media sin). Run it with the PowerShell tool, not `powershell -ExecutionPolicy Bypass` (blocked).
+- The 18.2.1 site's local `appsettings.Development.json` sets `Sinners:SeedSins = true` (reset.ps1 warns when it's missing).
 - Umbraco 18 auth note (for scripted Management API access): tokens are redacted into encrypted HttpOnly cookies (`__Host-umbAccessToken` etc.). Send `Authorization: Bearer [redacted]` (literal) plus the cookie jar — middleware substitutes the real token. Access tokens expire in ~5 min.
 
 ## Solution structure
 
 ```
 Umbraco.Community.Sinners.Backend/   # C# package
-  Composers/        # IComposer registrations
-  Controllers/      # Management API controllers (single: SinnersManagementApiController)
-  Middleware/       # AutoLoginMiddleware (stage rig: always logged in, dev only)
-  Dictionaries/     # Embedded Hunspell en_US.aff + en_US.dic (for Rules VI & VII)
+  Composers/        # IComposer registrations (AutoLoginComposer adds both stage-rig middlewares)
+  Controllers/      # Management API controller (SinnersManagementApiController) + InvalidateSinStatusAttribute
+  Middleware/       # AutoLoginMiddleware (always logged in) + SinStatusMiddleware (the deck's sin bridge), dev + loopback only
+  Dictionaries/     # Embedded Hunspell en_US.aff + en_US.dic (for Rule VI)
   Migrations/       # AsyncMigrationBase migrations + PackageMigrationPlan
   Models/           # NPoco DTOs
-  Services/         # Business logic
+  Services/         # Business logic, one service per audit, plus BlessingStore, PenanceStateStore,
+                    # SinStatusService (+ SinStatusCache) and DemoSinSeeder
 
 Umbraco.Community.Sinners.Extension/ # Frontend package (Vite + Lit)
   src/
-    index.ts                         # Entry point: registers manifests via onInit
+    index.ts                         # Entry point: registers manifests via onInit, listenForClicker()
     penance/
       penance-dashboard.element.ts   # Vertical tab shell (tab strip left, content right)
+      presenter.ts                   # Clicker script: exhibits, steps per tab/part, sessionStorage state
+      bridge.ts                      # postMessage to the deck (absolved / board)
       commandments/
-        content-not-composable.element.ts  # Rule I
-        six-sacred-types.element.ts        # Rule II
-        data-types-in-folders.element.ts   # Rule III
-        program-cs-clean.element.ts        # Rule IV
-        production-settings.element.ts     # Rule V
-        alias-audit.element.ts             # Rule VI
-        translation-audit.element.ts       # Rule VII
-        root-media.element.ts              # Rule VIII
+        content-not-composable.element.ts  # I
+        four-sacred-types.element.ts       # II
+        data-types-in-folders.element.ts   # III (part data-types)
+        translation-audit.element.ts       # mode="grouping": III (part dictionary); mode="naming": VI (part keys)
+        root-media.element.ts              # III (part media, the ✨ pretend)
+        program-cs-clean.element.ts        # IV
+        production-settings.element.ts     # V
+        alias-audit.element.ts             # VI (part aliases)
+        views-confession.element.ts        # VII
+        exodus.element.ts                  # VIII
+        root-content.element.ts            # IX
+        usync-audit.element.ts             # X
 ```
 
 ## Architecture conventions
@@ -71,19 +79,22 @@ Umbraco.Community.Sinners.Extension/ # Frontend package (Vite + Lit)
 - Dashboard registered programmatically in `onInit` with `element: PenanceDashboardElement` (class ref, not string) — avoids URL module import error.
 - **One file per commandment** under `src/penance/commandments/`. Each is a self-contained custom element with its own styles, state, and API calls. `penance-dashboard.element.ts` is a thin shell that imports and renders them.
 - **Tab layout**: vertical tab strip (260px left column, `border-right`), content `flex: 1` on the right. All commandment elements always in DOM (`display:none` for inactive) so status events fire for all tabs on initial load. Do NOT use `uui-tab-group` — it has a 352px fixed shadow-DOM width that clips tabs.
-- **Status events**: each commandment dispatches `sinners-status` (`{ issueCount: number, severity: 'ok' | 'warning' | 'error' }`) with `bubbles: true, composed: true`. Dashboard renders a badge per tab.
+- **Status events**: each commandment dispatches `sinners-status` (`{ issueCount: number, severity: 'ok' | 'warning' | 'error' }`) with `bubbles: true, composed: true`. Dashboard renders a badge per tab. Merged commandments (III: data-types, dictionary, media; VI: aliases, keys) render one element per part in the same pane; the dashboard keys statuses by part (`'III.media'`) and the tab badge is the sum (worst severity), shown once every part has reported. **The server's `SinStatusService` counts the same way** — change one, change the other.
+- **Sin bridge** (`bridge.ts`): `absolved(commandment, action, pretended?)` posts `{ source: 'sinners', type: 'absolved', … }` to `window.parent` (only when framed, target `location.origin`); call it only after the server call (and the element's reload) finished, because the deck re-polls `/umbraco/sinners/status` on the message. `boardMounted()` posts `{ source: 'sinners', type: 'board' }` from the dashboard's `connectedCallback`. Action ids are listed in README "The sin bridge".
 - **Clicker controls** (talk controls): `presenter.ts` (state + script) and `listenForClicker()` in `index.ts` (keys). No on-screen UI: the backoffice stays vanilla, the fallback is walking to the laptop. There used to be an on-screen presenter bar and voice control; both were removed after a trial run, so don't bring them back.
   - One capture-phase `keydown` listener on `window`, `preventDefault` + `stopPropagation`, hot even with an input focused (exhibit workspaces autofocus their name field), auto-repeat ignored. PageDown/ArrowRight = `presenter.forward()`; PageUp/ArrowLeft/Escape = swallowed, do nothing (Kaspar's call: back must never undo a fix); `.` = `dot()`; fallback `1` = `next()`, `2` = `nextTab()`, `3` = `dot()`, `4` = reload, `0` = `reset()`.
-  - `forward()` = one beat. Off the Board: `dot()` (return; `/umbraco/section/content` returns via `/umbraco/section/settings`, so IX's exhibit costs one extra press). On the Board, per active tab: exhibit if the tab has a `TAB_URLS` entry and isn't in `exhibited` yet → each registered step → `nextTab()`; on X with all steps done it does nothing. Order per tab: exhibit, return, fixes, next tab (Kaspar's choice).
-  - `dot()` on the Board marks the tab as exhibited, so a manual `.`/`3` exhibit isn't repeated by the clicker. `next()`/`forward()` ignore presses while a step is still running (`_busy`).
-  - `registerSteps(tabId, host, steps)` and `onNextTab(host, fn)` take the registering element; at run time the presenter uses the most recent registration whose host `isConnected`, in case the backoffice builds a dashboard twice and throws one copy away.
-  - State (active tab, step indices, exhibited tabs) persists in sessionStorage (`sinners-presenter-state`) so full-page exhibit round-trips resume; the dashboard prefers the persisted tab over its first-sinful-tab auto-jump. `0` clears it plus the Rule VIII pretend flag.
+  - `forward()` = one beat. Off the Board: `dot()` (return; `/umbraco/section/content` returns via `/umbraco/section/settings`, so IX's exhibit costs one extra press). On the Board, per active tab: `TAB_EXHIBITS[tab]` is a list and **exhibit k comes right before step k** → remaining steps → `nextTab()`; on X with all steps done it does nothing. One exhibit = the old order (exhibit, return, fixes, next tab, Kaspar's choice). III has three: data type → Organize, translation section → Group all, media collection → Pretend ✨. VII exhibits `megaMenu.cshtml` in the partial view editor (unique `megaMenu%dot%cshtml`, URL-encoded), VIII the seeded "Form submissions" collection (fixed key `DemoSinSeeder.FormSubmissionsKey`).
+  - `dot()` on the Board shows the tab's next unshown exhibit (the last one again once all were shown) and counts it, so a manual `.`/`3` exhibit isn't repeated by the clicker. `next()`/`forward()` ignore presses while a step is still running (`_busy`).
+  - `registerSteps(tabId, host, steps, part = 'main')` and `onNextTab(host, fn)` take the registering element; at run time the presenter uses the most recent registration whose host `isConnected`, in case the backoffice builds a dashboard twice and throws one copy away. A tab's script is its parts' steps in `TAB_PARTS` order (III: data-types, dictionary, media; VI: aliases, keys — keys has no step, Clean's keys are clean).
+  - State (active tab, step indices, exhibits shown per tab) persists in sessionStorage (`sinners-presenter-state`) so full-page exhibit round-trips resume; the dashboard prefers the persisted tab over its first-sinful-tab auto-jump. `0` clears it and sets `sinners-forget-pretences`, which makes the media element `POST forget-pretences` before it loads (the pretence is server-side now).
   - **Inside the talk's deck** (can-present, `decks/umbracommandments`): the backoffice runs as a same-origin iframe through the deck's dev-server proxy (http://localhost:5180/umbraco). The deck sets `<html data-sinners-keys="off">` in the iframe while the clicker belongs to the deck; `listenForClicker` then ignores every key. At DEMO TIME the deck sets it `on` and forwards the clicker into the iframe. The 18.2.1 site's local `appsettings.Development.json` needs `Security:BackOfficeHost = http://localhost:5180` (OpenIddict rejects the proxied redirect_uri otherwise; direct login on :44343 may break while it's set), `Global:TimeOut = 1.00:00:00` and `Security:KeepUserLoggedIn = true` (the default 20-minute timeout ends the session mid-talk).
   - **Always logged in** (`Middleware/AutoLoginMiddleware.cs`, added by `AutoLoginComposer` as an Umbraco pipeline filter at `PrePipeline`, so Program.cs stays untouched for Rule IV): when `Sinners:AutoLoginEmail` is set, the environment is Development and the request comes from this machine (loopback, which includes the deck's Vite proxy), a GET of `/umbraco/login` signs that user in with `IBackOfficeSignInManager.SignInAsync(user, isPersistent: true)` and redirects to its `ReturnUrl` (local URLs only). The OpenIddict authorize endpoint then issues the code as after a normal login. Signing out works but signs you straight back in. The 18.2.1 test site sets it to `admin@example.com` in its local `appsettings.Development.json`. Verified: a cookie-less client goes authorize → login → authorize → `oauth_complete?code=…` with no credentials; a browser signed out via `/umbraco/management/api/v1/security/back-office/signout` lands back in the backoffice as admin.
+  - **Sin status for the deck** (`Middleware/SinStatusMiddleware.cs`, same pipeline filter and same guard as the auto-login: Development + loopback): `GET /umbraco/sinners/status` → `{ commandments: [{ number, title, sins, pretended, blessed }] × 10, total }`, `no-store`, 503 before the install is done. `SinStatusService` computes it, `SinStatusCache` (singleton) keeps it 1.5 s; `[InvalidateSinStatus]` on the controller drops the cache after every non-GET Sinners call. VII's Views scan has its own 2 s cache. Cold ~0.3 s, cached ~20 ms.
+  - Scripted API access for verification: the auto-login also works for curl. authorize (PKCE, `redirect_uri=http://localhost:5180/umbraco/oauth_complete`) → login → authorize gives `code=[redacted]` (the real code is in a cookie); POST it to `/security/back-office/token` with the same cookie jar, then call with `Authorization: Bearer [redacted]` + the jar. On Git Bash, strip `\r` from `openssl base64` output. `Security:AllowConcurrentLogins` is false, so a scripted login signs an open backoffice out (it auto-logs back in on reload).
   - Verifying in a hidden/background browser pane: rendering is throttled and a step can run before the commandment has loaded its data (it then finds nothing to fix). Force a frame (screenshot) and wait for the tab to render before pressing next.
 - Build: `npm run build` in `Umbraco.Community.Sinners.Extension/`.
 
-### Spell checking (Rules VI & VII)
+### Spell checking (Rule VI)
 - Package: `WeCantSpell.Hunspell` 7.0.1
 - Dictionary files: `Dictionaries/en_US.aff` + `Dictionaries/en_US.dic` as `<EmbeddedResource>` in the .csproj
 - Loaded once via `HunspellDictionary` static class (`Lazy<WordList>`, thread-safe). Both `AliasAuditService` and `TranslationAuditService` use `HunspellDictionary.EnUs`.
@@ -91,23 +102,31 @@ Umbraco.Community.Sinners.Extension/ # Frontend package (Vite + Lit)
 
 ## The Ten UmbraCommandments (implementation status)
 
-| # | Rule | Status |
+The talk's numbering (Oct 2026). It differs from `commandments.md` / `gospel.md` on purpose; Kaspar updates those himself — don't touch them.
+
+| # | Rule | What the Board audits / fixes |
 |---|------|--------|
-| I | Content is not composable — no BlockList/BlockGrid/RichText on compositions | ✅ Done |
-| II | The Four Sacred Types — classify all content types, enforce root folder naming | ✅ Done |
-| III | Data types live in folders — auto-organize loose data types | ✅ Done |
-| IV | Program.cs is clean — no saved variable, no non-standard middleware/endpoints | ✅ Done |
-| V | Live environment is production-ready — scan appsettings for 5 required settings | ✅ Done |
-| VI | Document type aliases are camelCase English | ✅ Done |
-| VII | Translation keys are PascalCase English and nested in folders | ✅ Done |
-| VIII | No media items at root — list only, user fixes manually | ✅ Done |
-| IX | The root shall not render — no root content node may bear a template | ✅ Done |
-| X | uSync is installed — schema must be version-controlled | ✅ Done |
+| I | Content is not composable | BlockList/BlockGrid/RichText on compositions — Fold In / Bless |
+| II | Four content types: Page, Block, Data, Composition | Classify all content types, enforce root folder naming |
+| III | The root is bare, and a folder is only a folder | Data types at root (auto-organize) + media at root (✨ pretend) + dotted dictionary keys at root (group under a folder-only parent) |
+| IV | Compose in your IComposer, not Program.cs | No saved variable, no non-standard middleware/endpoints — one-click cleanse |
+| V | A production site runs in production mode | Scan appsettings for 5 required settings — Bless |
+| VI | Thy names: aliases English camelCase; translation keys PascalCase, dot-separated | Hunspell audit of content type aliases and dictionary keys — Bless |
+| VII | Views render; they don't search | Grep `Views/**/*.cshtml` — Confess |
+| VIII | Umbraco is not your database | Warehouses and log tables — Exodus |
+| IX | A root node is not a rendering node | No root content node may bear a template — Seek Root Sanctuary |
+| X | uSync when not on Umbraco Cloud | uSync/Deploy in the csproj — ✨ pretend (a real csproj injection) |
+
+### Blessings (I, V, VI)
+All Bless decisions live in `BlessingStore` (singleton): a JSON file, `Sinners:BlessingsPath` (default `sinners.blessings.json` in the content root), sections `I.compositionProperties` (`"compositionAlias.propertyAlias"`), `V.settings`, `VI.aliases`, `VI.translationKeys`. Written pretty-printed, all sections always present, values sorted ordinally, LF + trailing newline, so `git diff` reads well on stage; re-read when its write time changes. The `Sinners*Blessing` DB tables are still created by the migrations but no longer used. reset.ps1 deletes the file.
+
+### Pretences and confessions
+`PenanceStateStore` (singleton) keeps server-side demo state in `umbraco/Data/Sinners/penance-state.json` (wiped by the reset): the root media keys pretended away (III; the pretence holds while root media is exactly that set), whether X's ✨ injected uSync (`pretended` in the status while uSync is in the csproj), and VII's confessed hit signatures.
 
 ### Rule I detail
 Surfaces compositions that expose BlockList, BlockGrid, or RichText. For each sinful property:
 - **Fold In**: moves the property from the composition directly onto every page type that uses it, preserving all content values via a 4-step tmp-alias dance.
-- **Bless**: marks a property as intentionally composable (persisted in `SinnersBlessing` table); chip turns green, property still shows, fold-in still offered.
+- **Bless**: marks a property as intentionally composable (persisted in the blessings file); chip turns green, property still shows, fold-in still offered.
 - **Empty compositions**: doc types with zero property types (e.g. post-fold-in) are listed in a sub-section with a Delete button. Only shown if a composition is classified as "Composition" in Rule II. Does NOT contribute to the status badge count (it's a cleanup helper, not a rule violation).
 
 #### Fold-in algorithm
@@ -118,26 +137,20 @@ Surfaces compositions that expose BlockList, BlockGrid, or RichText. For each si
 
 Content nodes are saved as drafts only — published nodes need manual re-publish.
 
-### Rule III detail
-Auto-moves data types at root (`ParentId == -1`) into folders. Built-in data types (`Id < 0`) are included.
-- With `DatatypePrefix` config: `/<prefix>/<datatype-alias>/<name>`
-- Without prefix: `/Umbraco/<datatype-alias>/<name>`
-- Uses `IDataTypeContainerService.CreateAsync` + `IDataTypeService.MoveAsync`.
+### Rule III detail (three parts, one count)
+- **Data types**: auto-moves data types at root (`ParentId == -1`) into folders. Built-in data types (`Id < 0`) are included. With `DatatypePrefix` config: `/<prefix>/<datatype-alias>/<name>`; without: `/Umbraco/<datatype-alias>/<name>`. Uses `IDataTypeContainerService.CreateAsync` + `IDataTypeService.MoveAsync`.
+- **Dictionary** (`translation-audit` with `mode="grouping"`): finds root-level items with dot-notation keys that share a prefix (e.g. `Article.By` + `Article.On` → suggests creating an `Article` parent, which holds no translations: a folder is only a folder). Children keep their full key after move. One sin per suggested group (Clean has 6); the clicker step groups them all in one beat.
+- **Media** (`root-media`): non-folder media at the media root. No real fix: `POST pretend-root-media` stores the keys, ✨.
 
-### Rule VI detail
-Checks every content type alias is:
-1. Valid camelCase: `^[a-z][a-zA-Z0-9]*$`
-2. Made of recognized English words (Hunspell) after splitting on camelCase boundaries
-- Tech allowlist prevents false positives for common terms
-- Per-alias blessing persisted in `SinnersAliasBlessing` table
+### Rule VI detail (two parts, one count)
+Checks every content type alias is valid camelCase (`^[a-z][a-zA-Z0-9]*$`) and every dictionary `ItemKey` is PascalCase per `.`-separated segment (`^[A-Z][a-zA-Z0-9]*$`; PascalCase, NOT camelCase, on purpose), both made of recognized English words (Hunspell, tech allowlist) after splitting on case boundaries. Per-alias and per-key blessings in the blessings file. Clean's only sinner is `sEOControls` ("eo"); its keys are all clean, so only the alias part has a clicker step.
 
 ### Rule VII detail
-Checks every dictionary item `ItemKey` is:
-1. Valid PascalCase per segment: each `.`-separated segment matches `^[A-Z][a-zA-Z0-9]*$`
-2. Made of recognized English words after splitting on boundaries
-- Translation keys use PascalCase (e.g. `Article.By`), NOT camelCase — this is intentional
-- **Grouping helper**: finds root-level items with dot-notation keys that share a prefix (e.g. `Article.By` + `Article.On` → suggests creating `Article` parent). Children keep their full key after move.
-- Per-key blessing persisted in `SinnersTranslationBlessing` table
+`ViewConfessionService` greps `Views/**/*.cshtml` under the content root for `.Descendants(` / `.Descendants<T>(`, `DescendantsOrSelf(` / `DescendantsOrSelf<T>(` and `@inject IContentService` (optionally fully qualified); one sin per matching line per pattern. Before confession the Board only shows the count per file; **Confess** (`POST confess`) stores each hit's signature (`file|pattern|trimmed line text`, so moving code doesn't unconfess it, editing the line does) and then shows file, line and code. Confessed hits don't count. After a reset: 4 sins (3 in the planted `megaMenu.cshtml`, 1 in Clean's own `Partials/authors.cshtml`).
+
+### Rule VIII detail
+`ExodusService`: two grouped SQL queries over `umbracoNode`/`umbracoContent`/`umbracoContentVersion` (documents, not trashed): parents with more than `Sinners:ExodusChildThreshold` (500) children of one content type ("warehouse"), nodes with more than `Sinners:ExodusVersionThreshold` (100) versions ("versions"). One sin per finding. **Exodus** (`POST exodus`) writes `<alias>.json` (all children with properties) and `<alias>.versions.json` (every version) to `Sinners:ExodusPath` (default `umbraco/Data/sinners-exodus`, never overwrites: `-2`, `-3`…), then deletes the children (`Delete` per node in one ambient scope; `DeleteOfType` measured slower) and deletes every version except the current draft and the published one. The container and the counter node stay. ~6.5 s for the seeded 600 + 119 with per-node deletes on SQLite.
+- `DemoSinSeeder` (`UmbracoApplicationStartedNotification`, background task): only with `Sinners:SeedSins`, in Development, when the node `FormSubmissionsKey` doesn't exist. Creates doc types `formSubmission`, `visitorCounter`, `formSubmissions` (collection, allowed at root) in the root `Data` folder, a root "Form submissions" node with threshold + 100 submissions (saved in batches of 100 in one scope) and a "Visitor counter" inside it saved + published threshold + 20 times. ~20 s on a first boot. The Umbraco `ContentVersionCleanupJob` keeps all versions for 7 days by default, so the counter survives until the talk if the reset is within a week.
 
 ### Rule IX detail (Library era — Umbraco 18)
 Checks whether any root content node is *renderable*: sinner if the node has a template assigned (`TemplateId`), or its content type has a `DefaultTemplate` or any `AllowedTemplates`. Repository classification is no longer involved.
@@ -165,18 +178,19 @@ Inspects the project's `.csproj` file (found via `IWebHostEnvironment.ContentRoo
 - **Rule I**: Surface and fix compositions that *contain* a complex editor — not block adding them. Reason: blocking would prevent loading the existing backoffice.
 - **Rule III**: Auto-move data type to folder — don't warn, just fix.
 - **Rule V**: Umbraco already has a Live Environment health check — add as a reminder on the Penance board only, don't implement from scratch.
-- **Rule VIII**: Read-only list only — no automated fix, user moves media manually.
+- **Media at root** (old VIII, now part of III): no automated fix, user moves media manually (or pretends).
 
 ## DB tables
 
 | Table | Key | Purpose | Migration |
 |---|---|---|---|
 | `SinnersDocTypeClassification` | `ContentTypeAlias` | Manual + auto classifications for Rule II | v1 |
-| `SinnersBlessing` | `Id` (auto-increment) | Blessed composition properties for Rule I | v2 |
-| `SinnersAliasBlessing` | `Id` (auto-increment) | Blessed content type aliases for Rule VI | v3 |
-| `SinnersTranslationBlessing` | `Id` (auto-increment) | Blessed translation keys for Rule VII | v4 |
+| `SinnersBlessing` | `Id` (auto-increment) | Unused since blessings moved to the JSON file (was Rule I) | v2 |
+| `SinnersAliasBlessing` | `Id` (auto-increment) | Unused (was Rule VI aliases) | v3 |
+| `SinnersTranslationBlessing` | `Id` (auto-increment) | Unused (was translation keys) | v4 |
+| `SinnersProductionSettingBlessing` | `Id` (auto-increment) | Unused (was Rule V) | v5 |
 
-Migration plan: `SinnersMigrationPlan` chains v1 → v2 → v3 → v4.
+Migration plan: `SinnersMigrationPlan` chains v1 → v5. Only v1 is still read; the blessing tables stay so existing sites migrate cleanly.
 
 ## Root folder mapping (Rule II auto-categorize)
 The Four Sacred Types (Umbraco 18's Library owns shared content now, so Repository/RepositoryItem are gone; legacy rows with those classifications are surfaced as unclassified and skipped by auto-categorize):

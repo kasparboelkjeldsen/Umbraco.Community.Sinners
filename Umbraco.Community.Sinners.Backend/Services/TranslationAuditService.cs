@@ -2,8 +2,6 @@ using System.Text.RegularExpressions;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
-using Umbraco.Cms.Infrastructure.Scoping;
-using Umbraco.Community.Sinners.Backend.Models;
 
 namespace Umbraco.Community.Sinners.Backend.Services;
 
@@ -15,12 +13,12 @@ public class TranslationAuditService
         RegexOptions.Compiled);
 
     private readonly IDictionaryItemService _dictionaryItemService;
-    private readonly IScopeProvider _scopeProvider;
+    private readonly BlessingStore _blessingStore;
 
-    public TranslationAuditService(IDictionaryItemService dictionaryItemService, IScopeProvider scopeProvider)
+    public TranslationAuditService(IDictionaryItemService dictionaryItemService, BlessingStore blessingStore)
     {
         _dictionaryItemService = dictionaryItemService;
-        _scopeProvider = scopeProvider;
+        _blessingStore = blessingStore;
     }
 
     public async Task<TranslationAuditResult> GetAuditAsync()
@@ -85,30 +83,10 @@ public class TranslationAuditService
         return true;
     }
 
-    public HashSet<string> GetBlessedKeys()
-    {
-        using var scope = _scopeProvider.CreateScope();
-        var rows = scope.Database.Fetch<TranslationBlessingDto>();
-        scope.Complete();
-        return rows.Select(r => r.ItemKey).ToHashSet(StringComparer.OrdinalIgnoreCase);
-    }
+    public HashSet<string> GetBlessedKeys() => _blessingStore.GetBlessed(BlessingKind.TranslationKey);
 
-    public void SetKeyBlessed(string itemKey, bool blessed)
-    {
-        using var scope = _scopeProvider.CreateScope();
-        if (blessed)
-        {
-            var existing = scope.Database.FirstOrDefault<TranslationBlessingDto>(
-                "WHERE ItemKey = @0", itemKey);
-            if (existing is null)
-                scope.Database.Insert(new TranslationBlessingDto { ItemKey = itemKey });
-        }
-        else
-        {
-            scope.Database.Delete<TranslationBlessingDto>("WHERE ItemKey = @0", itemKey);
-        }
-        scope.Complete();
-    }
+    public void SetKeyBlessed(string itemKey, bool blessed) =>
+        _blessingStore.SetBlessed(BlessingKind.TranslationKey, itemKey, blessed);
 
     // A key is valid if every dot-separated segment is PascalCase
     private static bool IsPascalCaseKey(string key) =>

@@ -4,6 +4,7 @@ import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
 import { showMagic } from '../magic.js';
 import { presenter } from '../presenter.js';
+import { absolved } from '../bridge.js';
 
 interface USyncAuditResult {
     csprojFound: boolean;
@@ -108,14 +109,17 @@ export class USyncAuditElement extends UmbElementMixin(LitElement) {
             method: 'POST',
             headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
-        showMagic(() => void this.#load());
+        showMagic(() => {
+            absolved(10, 'pretend-usync', true);
+            void this.#load();
+        });
     }
 
     override render() {
         const r = this._result;
 
         return html`
-            <uui-box headline="X — uSync is installed">
+            <uui-box headline="X — uSync when not on Umbraco Cloud">
                 ${this._loading
                     ? html`<uui-loader-bar></uui-loader-bar>`
                     : !r?.csprojFound

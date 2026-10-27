@@ -1,7 +1,5 @@
 using System.Text.RegularExpressions;
 using Umbraco.Cms.Core.Services;
-using Umbraco.Cms.Infrastructure.Scoping;
-using Umbraco.Community.Sinners.Backend.Models;
 using WeCantSpell.Hunspell;
 
 namespace Umbraco.Community.Sinners.Backend.Services;
@@ -18,16 +16,16 @@ public class AliasAuditService
 
     private readonly IContentTypeService _contentTypeService;
     private readonly IContentTypeContainerService _containerService;
-    private readonly IScopeProvider _scopeProvider;
+    private readonly BlessingStore _blessingStore;
 
     public AliasAuditService(
         IContentTypeService contentTypeService,
         IContentTypeContainerService containerService,
-        IScopeProvider scopeProvider)
+        BlessingStore blessingStore)
     {
         _contentTypeService = contentTypeService;
         _containerService = containerService;
-        _scopeProvider = scopeProvider;
+        _blessingStore = blessingStore;
     }
 
     public async Task<IEnumerable<AliasIssueModel>> GetAliasIssuesAsync()
@@ -63,30 +61,10 @@ public class AliasAuditService
         return results.OrderBy(r => r.IsCamelCase).ThenBy(r => r.ContentTypeName);
     }
 
-    public HashSet<string> GetBlessedAliases()
-    {
-        using var scope = _scopeProvider.CreateScope();
-        var rows = scope.Database.Fetch<AliasBlessingDto>();
-        scope.Complete();
-        return rows.Select(r => r.ContentTypeAlias).ToHashSet(StringComparer.OrdinalIgnoreCase);
-    }
+    public HashSet<string> GetBlessedAliases() => _blessingStore.GetBlessed(BlessingKind.Alias);
 
-    public void SetAliasBlessed(string contentTypeAlias, bool blessed)
-    {
-        using var scope = _scopeProvider.CreateScope();
-        if (blessed)
-        {
-            var existing = scope.Database.FirstOrDefault<AliasBlessingDto>(
-                "WHERE ContentTypeAlias = @0", contentTypeAlias);
-            if (existing is null)
-                scope.Database.Insert(new AliasBlessingDto { ContentTypeAlias = contentTypeAlias });
-        }
-        else
-        {
-            scope.Database.Delete<AliasBlessingDto>("WHERE ContentTypeAlias = @0", contentTypeAlias);
-        }
-        scope.Complete();
-    }
+    public void SetAliasBlessed(string contentTypeAlias, bool blessed) =>
+        _blessingStore.SetBlessed(BlessingKind.Alias, contentTypeAlias, blessed);
 
     private static List<string> FindUnrecognizedWords(string alias, WordList wordList)
     {

@@ -3,6 +3,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
 import { presenter } from '../presenter.js';
+import { absolved } from '../bridge.js';
 
 interface SinfulProperty {
     propertyAlias: string;
@@ -347,7 +348,10 @@ export class ContentNotComposableElement extends UmbElementMixin(LitElement) {
             });
             const result = (await res.json()) as FoldInResult;
             this._lastResult = { key, result };
-            if (result.success) await this.#load();
+            if (result.success) {
+                await this.#load();
+                absolved(1, 'fold-in');
+            }
         } catch (e) {
             this._lastResult = {
                 key,
@@ -385,7 +389,10 @@ export class ContentNotComposableElement extends UmbElementMixin(LitElement) {
             });
             const result = (await res.json()) as FoldInResult;
             this._lastResult = { key, result };
-            if (result.success) await this.#load();
+            if (result.success) {
+                await this.#load();
+                absolved(1, 'fold-in');
+            }
         } catch (e) {
             this._lastResult = {
                 key,
@@ -426,6 +433,7 @@ export class ContentNotComposableElement extends UmbElementMixin(LitElement) {
                 }),
             });
             await this.#load();
+            if (blessed) absolved(1, 'bless');
         } finally {
             this._blessing = new Set([...this._blessing].filter((k) => k !== key));
         }

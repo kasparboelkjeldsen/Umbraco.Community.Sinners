@@ -3,6 +3,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
 import { presenter } from '../presenter.js';
+import { absolved } from '../bridge.js';
 
 interface AliasIssue {
     contentTypeAlias: string;
@@ -144,7 +145,7 @@ export class AliasAuditElement extends UmbElementMixin(LitElement) {
                     if (first) return this.#bless(first, true);
                 },
             },
-        ]);
+        ], 'aliases');
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;
             void this.#load();
@@ -191,6 +192,7 @@ export class AliasAuditElement extends UmbElementMixin(LitElement) {
                 body: JSON.stringify({ contentTypeAlias: item.contentTypeAlias, blessed }),
             });
             await this.#load();
+            if (blessed) absolved(6, 'bless');
         } finally {
             this._blessing = new Set([...this._blessing].filter((a) => a !== item.contentTypeAlias));
         }
@@ -228,7 +230,7 @@ export class AliasAuditElement extends UmbElementMixin(LitElement) {
 
     override render() {
         return html`
-            <uui-box headline="VI — Document type aliases are camelCase English">
+            <uui-box headline="VI — Thy names: aliases are English camelCase">
                 ${this._loading
                     ? html`<uui-loader-bar></uui-loader-bar>`
                     : this._items.length === 0

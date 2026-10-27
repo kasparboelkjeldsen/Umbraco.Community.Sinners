@@ -1,6 +1,7 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { presenter } from '../presenter.js';
-import { customElement, state } from 'lit/decorators.js';
+import { absolved } from '../bridge.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
 
@@ -29,9 +30,13 @@ interface TranslationAuditResult {
 
 const API_BASE = '/umbraco/management/api/v1/sinners';
 
+// One dictionary audit, two commandments: mode="naming" is VI (keys are PascalCase English, dot-separated),
+// mode="grouping" is III (dotted keys at the root belong under a parent that is only a folder).
 @customElement('sinners-translation-audit')
 export class TranslationAuditElement extends UmbElementMixin(LitElement) {
     #authCtx?: typeof UMB_AUTH_CONTEXT.TYPE;
+
+    @property() mode: 'naming' | 'grouping' = 'naming';
 
     @state() private _result: TranslationAuditResult | null = null;
     @state() private _loading = true;
@@ -180,13 +185,13 @@ export class TranslationAuditElement extends UmbElementMixin(LitElement) {
 
     override connectedCallback() {
         super.connectedCallback();
-        presenter.registerSteps('VII', this, [0, 1, 2, 3, 4, 5].map((i) => ({
-            label: `Create group ${i + 1} of 6`,
-            run: () => {
-                const next = this._result?.groupSuggestions[0];
-                if (next) return this.#createGroup(next);
-            },
-        })));
+        if (this.mode === 'grouping') {
+            presenter.registerSteps('III', this, [
+                { label: 'Group all dictionary keys', run: () => this.#groupAll() },
+            ], 'dictionary');
+        }
+        // Naming has no clicker step: the Clean starter kit's keys are all PascalCase English, so a
+        // "bless the first key" beat would be a dead press. The Bless buttons still work by hand.
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;
             void this.#load();
@@ -215,8 +220,10 @@ export class TranslationAuditElement extends UmbElementMixin(LitElement) {
             const unblessedErrors = result?.issues.filter((i) => !i.isBlessed && !i.isPascalCase).length ?? 0;
             const unblessedWarnings = result?.issues.filter((i) => !i.isBlessed && i.isPascalCase && i.unrecognizedWords.length > 0).length ?? 0;
             const groups = result?.groupSuggestions.length ?? 0;
-            const issueCount = unblessedErrors + unblessedWarnings + groups;
-            const severity = unblessedErrors > 0 ? 'error' : (issueCount > 0 ? 'warning' : 'ok');
+            const issueCount = this.mode === 'grouping' ? groups : unblessedErrors + unblessedWarnings;
+            const severity = this.mode === 'grouping'
+                ? (groups > 0 ? 'warning' : 'ok')
+                : unblessedErrors > 0 ? 'error' : (issueCount > 0 ? 'warning' : 'ok');
 
             this.dispatchEvent(new CustomEvent('sinners-status', {
                 bubbles: true, composed: true,
@@ -235,12 +242,23 @@ export class TranslationAuditElement extends UmbElementMixin(LitElement) {
                 body: JSON.stringify({ itemKey: item.itemKey, blessed }),
             });
             await this.#load();
+            if (blessed) absolved(6, 'bless');
         } finally {
             this._blessing = new Set([...this._blessing].filter((k) => k !== item.itemKey));
         }
     }
 
-    async #createGroup(suggestion: GroupSuggestion) {
+    // The clicker groups the whole dictionary in one beat, and tells the deck once
+    async #groupAll() {
+        for (let guard = 0; guard < 50; guard++) {
+            const next = this._result?.groupSuggestions[0];
+            if (!next) break;
+            await this.#createGroup(next, false);
+        }
+        absolved(3, 'group-dictionary');
+    }
+
+    async #createGroup(suggestion: GroupSuggestion, announce = true) {
         this._grouping = new Set([...this._grouping, suggestion.proposedParentKey]);
         try {
             await this.#fetchAuth(`${API_BASE}/create-translation-group`, {
@@ -251,6 +269,7 @@ export class TranslationAuditElement extends UmbElementMixin(LitElement) {
                 }),
             });
             await this.#load();
+            if (announce) absolved(3, 'group-dictionary');
         } finally {
             this._grouping = new Set([...this._grouping].filter((k) => k !== suggestion.proposedParentKey));
         }
@@ -316,19 +335,26 @@ export class TranslationAuditElement extends UmbElementMixin(LitElement) {
 
     override render() {
         const result = this._result;
-        const hasIssues = (result?.issues.length ?? 0) > 0;
-        const hasGroups = (result?.groupSuggestions.length ?? 0) > 0;
+        const grouping = this.mode === 'grouping';
+        const hasContent = grouping
+            ? (result?.groupSuggestions.length ?? 0) > 0
+            : (result?.issues.length ?? 0) > 0;
+        const headline = grouping
+            ? 'III — A folder is only a folder: dotted keys nest under a parent'
+            : 'VI — Thy names: translation keys are PascalCase, dot-separated';
+        const clean = grouping
+            ? '✓ No dotted keys loose at the root — every group has its folder.'
+            : '✓ All translation keys are PascalCase English.';
 
         return html`
-            <uui-box headline="VII — Translation keys are PascalCase English and nested in folders">
+            <uui-box headline=${headline}>
                 ${this._loading
                     ? html`<uui-loader-bar></uui-loader-bar>`
-                    : !hasIssues && !hasGroups
-                      ? html`<div class="clean">✓ All translation keys are valid camelCase English with no grouping suggestions.</div>`
-                      : html`
-                            ${result ? this.#renderIssueSection(result.issues) : nothing}
-                            ${result ? this.#renderGroupSection(result.groupSuggestions) : nothing}
-                        `}
+                    : !hasContent || !result
+                      ? html`<div class="clean">${clean}</div>`
+                      : grouping
+                        ? this.#renderGroupSection(result.groupSuggestions)
+                        : this.#renderIssueSection(result.issues)}
             </uui-box>
         `;
     }

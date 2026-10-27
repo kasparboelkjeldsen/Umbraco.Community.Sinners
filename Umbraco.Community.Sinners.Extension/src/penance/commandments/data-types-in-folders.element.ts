@@ -3,6 +3,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
 import { presenter } from '../presenter.js';
+import { absolved } from '../bridge.js';
 
 interface UnorganizedDataType {
     key: string;
@@ -131,7 +132,7 @@ export class DataTypesInFoldersElement extends UmbElementMixin(LitElement) {
         super.connectedCallback();
         presenter.registerSteps('III', this, [
             { label: 'Organize data types', run: () => this.#organizeAll() },
-        ]);
+        ], 'data-types');
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;
             void this.#load();
@@ -178,6 +179,7 @@ export class DataTypesInFoldersElement extends UmbElementMixin(LitElement) {
                     text: `Organized ${result.organizedCount} data type(s) into folders.`,
                 };
                 await this.#load();
+                absolved(3, 'organize-data-types');
             } else {
                 this._lastMessage = { success: false, text: `Failed to organize data types (HTTP ${res.status}).` };
             }
@@ -201,7 +203,7 @@ export class DataTypesInFoldersElement extends UmbElementMixin(LitElement) {
     override render() {
         const msg = this._lastMessage;
         return html`
-            <uui-box headline="III — Data types live in folders">
+            <uui-box headline="III — The root is bare: data types live in folders">
                 ${msg
                     ? html`<div class="result-banner ${msg.success ? 'success' : 'error'}">${msg.text}</div>`
                     : nothing}

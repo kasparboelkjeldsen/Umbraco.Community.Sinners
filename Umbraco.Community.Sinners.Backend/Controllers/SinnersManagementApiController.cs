@@ -8,6 +8,7 @@ namespace Umbraco.Community.Sinners.Backend.Controllers;
 
 [ApiVersion("1.0")]
 [Route("umbraco/management/api/v{version:apiVersion}/sinners")]
+[InvalidateSinStatus]
 public class SinnersManagementApiController : ManagementApiControllerBase
 {
     private readonly DocTypeClassificationService _classificationService;
@@ -22,6 +23,8 @@ public class SinnersManagementApiController : ManagementApiControllerBase
     private readonly RootMediaService _rootMediaService;
     private readonly RootContentAuditService _rootContentAuditService;
     private readonly USyncAuditService _uSyncAuditService;
+    private readonly ViewConfessionService _viewConfessionService;
+    private readonly ExodusService _exodusService;
 
     public SinnersManagementApiController(
         DocTypeClassificationService classificationService,
@@ -35,7 +38,9 @@ public class SinnersManagementApiController : ManagementApiControllerBase
         TranslationAuditService translationAuditService,
         RootMediaService rootMediaService,
         RootContentAuditService rootContentAuditService,
-        USyncAuditService uSyncAuditService)
+        USyncAuditService uSyncAuditService,
+        ViewConfessionService viewConfessionService,
+        ExodusService exodusService)
     {
         _classificationService = classificationService;
         _compositionService = compositionService;
@@ -49,6 +54,8 @@ public class SinnersManagementApiController : ManagementApiControllerBase
         _rootMediaService = rootMediaService;
         _rootContentAuditService = rootContentAuditService;
         _uSyncAuditService = uSyncAuditService;
+        _viewConfessionService = viewConfessionService;
+        _exodusService = exodusService;
     }
 
     [HttpGet("sinful-compositions")]
@@ -172,9 +179,25 @@ public class SinnersManagementApiController : ManagementApiControllerBase
     }
 
     [HttpGet("root-media")]
-    [ProducesResponseType<IEnumerable<RootMediaItemModel>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<RootMediaAuditResult>(StatusCodes.Status200OK)]
     public IActionResult GetRootMedia() =>
-        Ok(_rootMediaService.GetRootMediaItems());
+        Ok(_rootMediaService.Audit());
+
+    [HttpPost("pretend-root-media")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public IActionResult PretendRootMedia()
+    {
+        _rootMediaService.Pretend();
+        return Ok();
+    }
+
+    [HttpPost("forget-pretences")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public IActionResult ForgetPretences()
+    {
+        _rootMediaService.ForgetPretence();
+        return Ok();
+    }
 
     [HttpPost("create-translation-group")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -205,6 +228,29 @@ public class SinnersManagementApiController : ManagementApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult InjectUSync() =>
         _uSyncAuditService.InjectUSync() ? Ok() : NotFound();
+
+    [HttpGet("views-confession")]
+    [ProducesResponseType<ViewConfessionResult>(StatusCodes.Status200OK)]
+    public IActionResult GetViewsConfession() =>
+        Ok(_viewConfessionService.Audit());
+
+    [HttpPost("confess")]
+    [ProducesResponseType<ViewConfessionResult>(StatusCodes.Status200OK)]
+    public IActionResult Confess()
+    {
+        _viewConfessionService.Confess();
+        return Ok(_viewConfessionService.Audit());
+    }
+
+    [HttpGet("exodus-audit")]
+    [ProducesResponseType<ExodusAuditResult>(StatusCodes.Status200OK)]
+    public IActionResult GetExodusAudit() =>
+        Ok(_exodusService.Audit());
+
+    [HttpPost("exodus")]
+    [ProducesResponseType<ExodusResult>(StatusCodes.Status200OK)]
+    public IActionResult Exodus() =>
+        Ok(_exodusService.LeadThemOut());
 }
 
 public record SetClassificationRequest

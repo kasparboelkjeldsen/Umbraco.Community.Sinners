@@ -3,6 +3,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
 import { presenter } from '../presenter.js';
+import { absolved } from '../bridge.js';
 
 interface MissingProductionSetting {
     key: string;
@@ -185,6 +186,7 @@ export class ProductionSettingsElement extends UmbElementMixin(LitElement) {
                 body: JSON.stringify({ settingKey: setting.key, blessed }),
             });
             await this.#load();
+            if (blessed) absolved(5, 'bless');
         } finally {
             this._blessing = new Set([...this._blessing].filter((k) => k !== setting.key));
         }
@@ -197,7 +199,7 @@ export class ProductionSettingsElement extends UmbElementMixin(LitElement) {
             : null;
 
         return html`
-            <uui-box headline="V — Live environment is production-ready">
+            <uui-box headline="V — A production site runs in production mode">
                 ${this._loading
                     ? html`<uui-loader-bar></uui-loader-bar>`
                     : !result

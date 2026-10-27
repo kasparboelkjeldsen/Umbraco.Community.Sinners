@@ -1,11 +1,8 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Hosting;
-using Umbraco.Cms.Infrastructure.Scoping;
-using Umbraco.Community.Sinners.Backend.Models;
-
 namespace Umbraco.Community.Sinners.Backend.Services;
 
-public class ProductionReadinessService(IWebHostEnvironment env, IScopeProvider scopeProvider)
+public class ProductionReadinessService(IWebHostEnvironment env, BlessingStore blessingStore)
 {
     private record RequiredSetting(string Key, string ExpectedValue, Func<string, bool> Validate);
 
@@ -35,30 +32,10 @@ public class ProductionReadinessService(IWebHostEnvironment env, IScopeProvider 
                  && (uri.Scheme == "https" || uri.Scheme == "http")),
     ];
 
-    public HashSet<string> GetBlessedSettings()
-    {
-        using var scope = scopeProvider.CreateScope();
-        var rows = scope.Database.Fetch<ProductionSettingBlessingDto>();
-        scope.Complete();
-        return rows.Select(r => r.SettingKey).ToHashSet(StringComparer.OrdinalIgnoreCase);
-    }
+    public HashSet<string> GetBlessedSettings() => blessingStore.GetBlessed(BlessingKind.ProductionSetting);
 
-    public void SetSettingBlessed(string settingKey, bool blessed)
-    {
-        using var scope = scopeProvider.CreateScope();
-        if (blessed)
-        {
-            var existing = scope.Database.FirstOrDefault<ProductionSettingBlessingDto>(
-                "WHERE SettingKey = @0", settingKey);
-            if (existing is null)
-                scope.Database.Insert(new ProductionSettingBlessingDto { SettingKey = settingKey });
-        }
-        else
-        {
-            scope.Database.Delete<ProductionSettingBlessingDto>("WHERE SettingKey = @0", settingKey);
-        }
-        scope.Complete();
-    }
+    public void SetSettingBlessed(string settingKey, bool blessed) =>
+        blessingStore.SetBlessed(BlessingKind.ProductionSetting, settingKey, blessed);
 
     public ProductionReadinessResult Audit()
     {

@@ -8,11 +8,14 @@ export interface PresenterStep {
 export const TAB_ORDER = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'] as const;
 
 const STORAGE_KEY = 'sinners-presenter-state';
+/** Set by the '0' reset: the Board asks the server to forget its pretences (✨) before it counts. */
+export const FORGET_PRETENCES_KEY = 'sinners-forget-pretences';
 
 interface PersistedState {
     activeTab: string;
     indices: Record<string, number>;
-    exhibited?: string[];
+    /** How many of the tab's exhibits have been shown */
+    exhibits?: Record<string, number>;
 }
 
 function loadState(): PersistedState {
@@ -24,12 +27,13 @@ function loadState(): PersistedState {
 }
 
 const _persisted = loadState();
-// The backoffice may construct a dashboard twice and throw one copy away, so every
-// registration remembers its element and the one still on the page wins.
-const _steps = new Map<string, Array<{ host: Element; steps: PresenterStep[] }>>();
-const _indices = new Map<string, number>(Object.entries(_persisted.indices));
-// Tabs whose sin has already been exhibited — the clicker shows each one once
-const _exhibited = new Set<string>(_persisted.exhibited ?? []);
+// tab → part → registrations. A commandment that merges several audits (III, VI) has one part per
+// audit element; its script is the parts' steps in TAB_PARTS order. The backoffice may construct a
+// dashboard twice and throw one copy away, so every registration remembers its element and the one
+// still on the page wins.
+const _steps = new Map<string, Map<string, Array<{ host: Element; steps: PresenterStep[] }>>>();
+const _indices = new Map<string, number>(Object.entries(_persisted.indices ?? {}));
+const _exhibits = new Map<string, number>(Object.entries(_persisted.exhibits ?? {}));
 let _activeTab = _persisted.activeTab;
 let _nextTab: Array<{ host: Element; fn: () => void }> = [];
 // A clicker press while a step is still running would run that step twice
@@ -40,30 +44,57 @@ function persist() {
         sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
             activeTab: _activeTab,
             indices: Object.fromEntries(_indices),
-            exhibited: [..._exhibited],
+            exhibits: Object.fromEntries(_exhibits),
         } satisfies PersistedState));
     } catch { /* storage unavailable — presenter still works, just forgets on reload */ }
 }
 
 const PENANCE_URL = '/umbraco/section/settings/dashboard/penance';
 
-const TAB_URLS: Partial<Record<string, string>> = {
-    'I':    '/umbraco/section/content/workspace/document/edit/704a66de-b213-44fe-815a-f988c0707bbf/invariant/view/info/modal/umb-modal-workspace/invariant/general/document-type/edit/b871f83c-2395-4894-be0f-5422c1a71e48/tab/content',
-    'II':   '/umbraco/section/settings/workspace/document-type/edit/a95360e8-ff04-40b1-8f46-7aa4b5983096/tab/content',
-    'III':  '/umbraco/section/settings/workspace/data-type/edit/b5922818-d8d8-43df-88ed-4582a24c0fa6',
-    'VII':  '/umbraco/section/translation',
-    'VIII': '/umbraco/section/media/collection',
-    'IX':   '/umbraco/section/content',
+/**
+ * Where each commandment's sin lives in Umbraco. Exhibit k is shown right before fix step k, so a tab
+ * with several sins walks "show it, fix it" per sin: III shows the loose data type, organizes, shows
+ * the flat dictionary, groups it, shows the media root, pretends.
+ */
+const TAB_EXHIBITS: Partial<Record<string, string[]>> = {
+    'I':    ['/umbraco/section/content/workspace/document/edit/704a66de-b213-44fe-815a-f988c0707bbf/invariant/view/info/modal/umb-modal-workspace/invariant/general/document-type/edit/b871f83c-2395-4894-be0f-5422c1a71e48/tab/content'],
+    'II':   ['/umbraco/section/settings/workspace/document-type/edit/a95360e8-ff04-40b1-8f46-7aa4b5983096/tab/content'],
+    'III':  [
+        '/umbraco/section/settings/workspace/data-type/edit/b5922818-d8d8-43df-88ed-4582a24c0fa6',
+        '/umbraco/section/translation',
+        '/umbraco/section/media/collection',
+    ],
+    // The partial reset.ps1 plants (server path "megaMenu.cshtml", '.' encoded as %dot%)
+    'VII':  ['/umbraco/section/settings/workspace/partial-view/edit/megaMenu%25dot%25cshtml'],
+    // The "Form submissions" collection the seeder plants (DemoSinSeeder.FormSubmissionsKey)
+    'VIII': ['/umbraco/section/content/workspace/document/edit/0d1e5e08-8a2e-4f0e-9d7b-5f0a5b5e0008'],
+    'IX':   ['/umbraco/section/content'],
+};
+
+/** Script order of the parts of a merged commandment (others have one part, 'main'). */
+const TAB_PARTS: Partial<Record<string, string[]>> = {
+    'III': ['data-types', 'dictionary', 'media'],
+    'VI':  ['aliases', 'keys'],
 };
 
 const ELSEWHERE_RULES: Array<{ match: string; target: string }> = [
     { match: '/umbraco/section/content', target: '/umbraco/section/settings' },
 ];
 
+function liveSteps(registrations: Array<{ host: Element; steps: PresenterStep[] }>): PresenterStep[] {
+    const live = registrations.filter((r) => r.host.isConnected);
+    return (live.length ? live : registrations).at(-1)?.steps ?? [];
+}
+
 function stepsFor(tabId: string): PresenterStep[] {
-    const all = _steps.get(tabId) ?? [];
-    const live = all.filter((r) => r.host.isConnected);
-    return (live.length ? live : all).at(-1)?.steps ?? [];
+    const parts = _steps.get(tabId);
+    if (!parts) return [];
+    const order = TAB_PARTS[tabId] ?? [...parts.keys()];
+    return order.flatMap((part) => liveSteps(parts.get(part) ?? []));
+}
+
+function exhibitsFor(tabId: string): string[] {
+    return TAB_EXHIBITS[tabId] ?? [];
 }
 
 function onBoard(): boolean {
@@ -80,14 +111,17 @@ export const presenter = {
         persist();
     },
 
-    /** Exhibit the active tab's sin (on the Board), or return to the Board (anywhere else). */
+    /** Exhibit the active tab's next sin (on the Board), or return to the Board (anywhere else). */
     dot() {
         const path = window.location.pathname;
 
         if (onBoard()) {
-            const url = TAB_URLS[_activeTab] ?? PENANCE_URL;
-            if (TAB_URLS[_activeTab]) {
-                _exhibited.add(_activeTab);
+            const exhibits = exhibitsFor(_activeTab);
+            const shown = _exhibits.get(_activeTab) ?? 0;
+            // Past the last exhibit, '.' shows the last one again
+            const url = exhibits.length ? exhibits[Math.min(shown, exhibits.length - 1)] : PENANCE_URL;
+            if (exhibits.length && shown < exhibits.length) {
+                _exhibits.set(_activeTab, shown + 1);
                 persist();
             }
             console.log(`[PRESENTER] dot() on penance tab="${_activeTab}" → ${url}`);
@@ -111,12 +145,15 @@ export const presenter = {
         (live.length ? live : _nextTab).at(-1)?.fn();
     },
 
-    registerSteps(tabId: string, host: Element, steps: PresenterStep[]) {
-        const kept = (_steps.get(tabId) ?? []).filter((r) => r.host !== host && r.host.isConnected);
-        _steps.set(tabId, [...kept, { host, steps }]);
-        // Restore a persisted index (survives exhibit round-trips) but never point past the end
-        const stored = _indices.get(tabId) ?? 0;
-        _indices.set(tabId, Math.min(stored, steps.length));
+    /**
+     * Register a tab's fix steps. `part` names one audit of a merged commandment (see TAB_PARTS);
+     * single-audit commandments leave it out.
+     */
+    registerSteps(tabId: string, host: Element, steps: PresenterStep[], part = 'main') {
+        const parts = _steps.get(tabId) ?? new Map<string, Array<{ host: Element; steps: PresenterStep[] }>>();
+        const kept = (parts.get(part) ?? []).filter((r) => r.host !== host && r.host.isConnected);
+        parts.set(part, [...kept, { host, steps }]);
+        _steps.set(tabId, parts);
     },
 
     async next() {
@@ -141,9 +178,9 @@ export const presenter = {
 
     /**
      * The clicker's "next": one press, one beat of the demo. Per commandment it walks
-     * exhibit the sin → return to the Board → each fix step → next commandment, and
-     * stops after the last step of the last commandment. Off the Board it always
-     * means "return to the Board".
+     * exhibit a sin → return to the Board → its fix step (repeated per exhibit) → the remaining
+     * fix steps → next commandment, and stops after the last step of the last commandment.
+     * Off the Board it always means "return to the Board".
      */
     async forward() {
         if (_busy) return;
@@ -154,13 +191,17 @@ export const presenter = {
         // The dashboard hasn't told us which tab it shows yet — don't guess
         if (!_activeTab || !_nextTab.some((r) => r.host.isConnected)) return;
 
-        if (TAB_URLS[_activeTab] && !_exhibited.has(_activeTab)) {
+        const steps = stepsFor(_activeTab);
+        const idx = Math.min(_indices.get(_activeTab) ?? 0, steps.length);
+        const shown = _exhibits.get(_activeTab) ?? 0;
+
+        // Exhibit k comes right before step k
+        if (shown < exhibitsFor(_activeTab).length && shown <= idx) {
             this.dot();
             return;
         }
 
-        const steps = stepsFor(_activeTab);
-        if ((_indices.get(_activeTab) ?? 0) < steps.length) {
+        if (idx < steps.length) {
             await this.next();
             return;
         }
@@ -173,13 +214,14 @@ export const presenter = {
     },
 
     /**
-     * Wipe all demo state and reload — the "0" panic reset. Clears presenter
-     * progress, exhibited sins and the Rule VIII pretend flag.
+     * Wipe all demo state and reload — the "0" panic reset. Clears presenter progress and
+     * exhibited sins here, and has the Board tell the server to forget its pretences (✨).
      */
     reset() {
         try {
             sessionStorage.removeItem(STORAGE_KEY);
-            localStorage.removeItem('sinners-media-pretend');
+            sessionStorage.setItem(FORGET_PRETENCES_KEY, '1');
+            localStorage.removeItem('sinners-media-pretend'); // the pretence used to live here
         } catch { /* ignore */ }
         window.location.href = PENANCE_URL;
     },

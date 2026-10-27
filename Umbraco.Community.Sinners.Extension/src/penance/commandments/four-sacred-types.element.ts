@@ -3,6 +3,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
 import { presenter } from '../presenter.js';
+import { absolved } from '../bridge.js';
 
 type SacredType = 'Page' | 'Block' | 'Data' | 'Composition';
 
@@ -230,15 +231,18 @@ export class FourSacredTypesElement extends UmbElementMixin(LitElement) {
         try {
             const res = await this.#fetchAuth(`${API_BASE}/content-type-classifications`);
             if (res.ok) this._items = (await res.json()) as ContentTypeClassification[];
-
-            const unclassified = this._items.filter((i) => !i.classification).length;
-            this.dispatchEvent(new CustomEvent('sinners-status', {
-                bubbles: true, composed: true,
-                detail: { issueCount: unclassified, severity: unclassified > 0 ? 'error' : 'ok' },
-            }));
+            this.#reportStatus();
         } finally {
             this._loading = false;
         }
+    }
+
+    #reportStatus() {
+        const unclassified = this._items.filter((i) => !i.classification).length;
+        this.dispatchEvent(new CustomEvent('sinners-status', {
+            bubbles: true, composed: true,
+            detail: { issueCount: unclassified, severity: unclassified > 0 ? 'error' : 'ok' },
+        }));
     }
 
     #onSelect(alias: string, value: string) {
@@ -284,7 +288,10 @@ export class FourSacredTypesElement extends UmbElementMixin(LitElement) {
         this._categorizing = true;
         try {
             const res = await this.#fetchAuth(`${API_BASE}/auto-categorize`, { method: 'POST' });
-            if (res.ok) await this.#load();
+            if (res.ok) {
+                await this.#load();
+                absolved(2, 'auto-categorize');
+            }
         } finally {
             this._categorizing = false;
         }
@@ -295,12 +302,14 @@ export class FourSacredTypesElement extends UmbElementMixin(LitElement) {
 
         this._saving = true;
         try {
+            let saved = 0;
             for (const [alias, classification] of this._pendingChanges) {
                 const res = await this.#fetchAuth(`${API_BASE}/content-type-classifications`, {
                     method: 'POST',
                     body: JSON.stringify({ contentTypeAlias: alias, classification }),
                 });
                 if (res.ok) {
+                    saved++;
                     this._items = this._items.map((i) =>
                         i.contentTypeAlias === alias
                             ? { ...i, classification, suggestedClassification: null }
@@ -310,6 +319,11 @@ export class FourSacredTypesElement extends UmbElementMixin(LitElement) {
                     map.delete(alias);
                     this._pendingChanges = map;
                 }
+            }
+            // Saving a classification is what lowers the count (autofill only fills the dropdowns)
+            if (saved > 0) {
+                this.#reportStatus();
+                absolved(2, 'classify');
             }
         } finally {
             this._saving = false;
@@ -377,7 +391,7 @@ export class FourSacredTypesElement extends UmbElementMixin(LitElement) {
         const totalUnclassified = unclassified.length;
 
         return html`
-            <uui-box headline="II — The Four Sacred Types">
+            <uui-box headline="II — Four content types: Page, Block, Data, Composition">
                 ${this._loading
                     ? html`<uui-loader-bar></uui-loader-bar>`
                     : this._items.length === 0

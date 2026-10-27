@@ -3,6 +3,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
 import { presenter } from '../presenter.js';
+import { absolved } from '../bridge.js';
 
 interface RootNodeModel {
     key: string;
@@ -192,7 +193,10 @@ export class RootContentElement extends UmbElementMixin(LitElement) {
                 this._sanctuaryMessage = result.success
                     ? result.message
                     : `⚠ ${result.message}`;
-                if (result.success) await this.#load();
+                if (result.success) {
+                    await this.#load();
+                    absolved(9, 'root-sanctuary');
+                }
             }
         } finally {
             this._seeking = false;
@@ -204,7 +208,7 @@ export class RootContentElement extends UmbElementMixin(LitElement) {
         const sinners = result?.rootNodes.filter((n) => n.hasTemplate) ?? [];
 
         return html`
-            <uui-box headline="IX — The root shall not render">
+            <uui-box headline="IX — A root node is not a rendering node">
                 ${this._loading
                     ? html`<uui-loader-bar></uui-loader-bar>`
                     : result?.isClean

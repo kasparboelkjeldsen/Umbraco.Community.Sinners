@@ -689,10 +689,10 @@ var Je = [
 	"VIII",
 	"IX",
 	"X"
-], M = "sinners-presenter-state";
-function Ye() {
+], Ye = "sinners-presenter-state", Xe = "sinners-forget-pretences";
+function Ze() {
 	try {
-		let e = sessionStorage.getItem(M);
+		let e = sessionStorage.getItem(Ye);
 		if (e) return JSON.parse(e);
 	} catch {}
 	return {
@@ -700,103 +700,119 @@ function Ye() {
 		indices: {}
 	};
 }
-var N = Ye(), P = /* @__PURE__ */ new Map(), F = new Map(Object.entries(N.indices)), Xe = new Set(N.exhibited ?? []), I = N.activeTab, L = [], R = !1;
-function Ze() {
+var Qe = Ze(), $e = /* @__PURE__ */ new Map(), M = new Map(Object.entries(Qe.indices ?? {})), et = new Map(Object.entries(Qe.exhibits ?? {})), N = Qe.activeTab, P = [], F = !1;
+function tt() {
 	try {
-		sessionStorage.setItem(M, JSON.stringify({
-			activeTab: I,
-			indices: Object.fromEntries(F),
-			exhibited: [...Xe]
+		sessionStorage.setItem(Ye, JSON.stringify({
+			activeTab: N,
+			indices: Object.fromEntries(M),
+			exhibits: Object.fromEntries(et)
 		}));
 	} catch {}
 }
-var Qe = "/umbraco/section/settings/dashboard/penance", $e = {
-	I: "/umbraco/section/content/workspace/document/edit/704a66de-b213-44fe-815a-f988c0707bbf/invariant/view/info/modal/umb-modal-workspace/invariant/general/document-type/edit/b871f83c-2395-4894-be0f-5422c1a71e48/tab/content",
-	II: "/umbraco/section/settings/workspace/document-type/edit/a95360e8-ff04-40b1-8f46-7aa4b5983096/tab/content",
-	III: "/umbraco/section/settings/workspace/data-type/edit/b5922818-d8d8-43df-88ed-4582a24c0fa6",
-	VII: "/umbraco/section/translation",
-	VIII: "/umbraco/section/media/collection",
-	IX: "/umbraco/section/content"
-}, et = [{
+var nt = "/umbraco/section/settings/dashboard/penance", rt = {
+	I: ["/umbraco/section/content/workspace/document/edit/704a66de-b213-44fe-815a-f988c0707bbf/invariant/view/info/modal/umb-modal-workspace/invariant/general/document-type/edit/b871f83c-2395-4894-be0f-5422c1a71e48/tab/content"],
+	II: ["/umbraco/section/settings/workspace/document-type/edit/a95360e8-ff04-40b1-8f46-7aa4b5983096/tab/content"],
+	III: [
+		"/umbraco/section/settings/workspace/data-type/edit/b5922818-d8d8-43df-88ed-4582a24c0fa6",
+		"/umbraco/section/translation",
+		"/umbraco/section/media/collection"
+	],
+	VII: ["/umbraco/section/settings/workspace/partial-view/edit/megaMenu%25dot%25cshtml"],
+	VIII: ["/umbraco/section/content/workspace/document/edit/0d1e5e08-8a2e-4f0e-9d7b-5f0a5b5e0008"],
+	IX: ["/umbraco/section/content"]
+}, it = {
+	III: [
+		"data-types",
+		"dictionary",
+		"media"
+	],
+	VI: ["aliases", "keys"]
+}, at = [{
 	match: "/umbraco/section/content",
 	target: "/umbraco/section/settings"
 }];
-function tt(e) {
-	let t = P.get(e) ?? [], n = t.filter((e) => e.host.isConnected);
-	return (n.length ? n : t).at(-1)?.steps ?? [];
+function ot(e) {
+	let t = e.filter((e) => e.host.isConnected);
+	return (t.length ? t : e).at(-1)?.steps ?? [];
 }
-function nt() {
+function st(e) {
+	let t = $e.get(e);
+	return t ? (it[e] ?? [...t.keys()]).flatMap((e) => ot(t.get(e) ?? [])) : [];
+}
+function ct(e) {
+	return rt[e] ?? [];
+}
+function lt() {
 	return window.location.pathname.includes("/dashboard/penance");
 }
-var z = {
+var I = {
 	get activeTab() {
-		return I;
+		return N;
 	},
 	setActiveTab(e) {
-		I = e, Ze();
+		N = e, tt();
 	},
 	dot() {
 		let e = window.location.pathname;
-		if (nt()) {
-			let e = $e[I] ?? Qe;
-			$e[I] && (Xe.add(I), Ze()), console.log(`[PRESENTER] dot() on penance tab="${I}" → ${e}`), window.location.href = e;
+		if (lt()) {
+			let e = ct(N), t = et.get(N) ?? 0, n = e.length ? e[Math.min(t, e.length - 1)] : nt;
+			e.length && t < e.length && (et.set(N, t + 1), tt()), console.log(`[PRESENTER] dot() on penance tab="${N}" → ${n}`), window.location.href = n;
 			return;
 		}
-		let t = et.find((t) => e === t.match), n = t ? t.target : Qe;
+		let t = at.find((t) => e === t.match), n = t ? t.target : nt;
 		console.log(`[PRESENTER] dot() elsewhere path="${e}" → ${n}`), window.location.href = n;
 	},
 	onNextTab(e, t) {
-		L = [...L.filter((t) => t.host !== e && t.host.isConnected), {
+		P = [...P.filter((t) => t.host !== e && t.host.isConnected), {
 			host: e,
 			fn: t
 		}];
 	},
 	nextTab() {
 		console.log("[PRESENTER] nextTab()");
-		let e = L.filter((e) => e.host.isConnected);
-		(e.length ? e : L).at(-1)?.fn();
+		let e = P.filter((e) => e.host.isConnected);
+		(e.length ? e : P).at(-1)?.fn();
 	},
-	registerSteps(e, t, n) {
-		let r = (P.get(e) ?? []).filter((e) => e.host !== t && e.host.isConnected);
-		P.set(e, [...r, {
+	registerSteps(e, t, n, r = "main") {
+		let i = $e.get(e) ?? /* @__PURE__ */ new Map(), a = (i.get(r) ?? []).filter((e) => e.host !== t && e.host.isConnected);
+		i.set(r, [...a, {
 			host: t,
 			steps: n
-		}]);
-		let i = F.get(e) ?? 0;
-		F.set(e, Math.min(i, n.length));
+		}]), $e.set(e, i);
 	},
 	async next() {
-		if (R) return;
-		let e = tt(I), t = F.get(I) ?? 0;
-		if (console.log(`[PRESENTER] next() — tab="${I}" step=${t + 1}/${e.length}`), t >= e.length) {
-			console.log(`[PRESENTER] no more steps on tab "${I}"`);
+		if (F) return;
+		let e = st(N), t = M.get(N) ?? 0;
+		if (console.log(`[PRESENTER] next() — tab="${N}" step=${t + 1}/${e.length}`), t >= e.length) {
+			console.log(`[PRESENTER] no more steps on tab "${N}"`);
 			return;
 		}
-		R = !0;
+		F = !0;
 		try {
 			await e[t].run();
 		} finally {
-			R = !1;
+			F = !1;
 		}
-		F.set(I, t + 1), Ze(), console.log(`[PRESENTER] step ${t + 1} "${e[t].label}" done`);
+		M.set(N, t + 1), tt(), console.log(`[PRESENTER] step ${t + 1} "${e[t].label}" done`);
 	},
 	async forward() {
-		if (R) return;
-		if (!nt()) {
+		if (F) return;
+		if (!lt()) {
 			this.dot();
 			return;
 		}
-		if (!I || !L.some((e) => e.host.isConnected)) return;
-		if ($e[I] && !Xe.has(I)) {
+		if (!N || !P.some((e) => e.host.isConnected)) return;
+		let e = st(N), t = Math.min(M.get(N) ?? 0, e.length), n = et.get(N) ?? 0;
+		if (n < ct(N).length && n <= t) {
 			this.dot();
 			return;
 		}
-		let e = tt(I);
-		if ((F.get(I) ?? 0) < e.length) {
+		if (t < e.length) {
 			await this.next();
 			return;
 		}
-		if (I === Je[Je.length - 1]) {
+		if (N === Je[Je.length - 1]) {
 			console.log("[PRESENTER] forward() — all ten commandments atoned, nothing left");
 			return;
 		}
@@ -804,14 +820,35 @@ var z = {
 	},
 	reset() {
 		try {
-			sessionStorage.removeItem(M), localStorage.removeItem("sinners-media-pretend");
+			sessionStorage.removeItem(Ye), sessionStorage.setItem(Xe, "1"), localStorage.removeItem("sinners-media-pretend");
 		} catch {}
-		window.location.href = Qe;
+		window.location.href = nt;
 	}
 };
 //#endregion
+//#region src/penance/bridge.ts
+function ut(e) {
+	if (window.parent !== window) try {
+		window.parent.postMessage({
+			source: "sinners",
+			...e
+		}, location.origin);
+	} catch {}
+}
+function L(e, t, n = !1) {
+	console.log(`[BRIDGE] absolved commandment=${e} action=${t} pretended=${n}`), ut({
+		type: "absolved",
+		commandment: e,
+		action: t,
+		pretended: n
+	});
+}
+function dt() {
+	ut({ type: "board" });
+}
+//#endregion
 //#region \0@oxc-project+runtime@0.128.0/helpers/decorate.js
-function B(e, t, n, r) {
+function R(e, t, n, r) {
 	var i = arguments.length, a = i < 3 ? t : r === null ? r = Object.getOwnPropertyDescriptor(t, n) : r, o;
 	if (typeof Reflect == "object" && typeof Reflect.decorate == "function") a = Reflect.decorate(e, t, n, r);
 	else for (var s = e.length - 1; s >= 0; s--) (o = e[s]) && (a = (i < 3 ? o(a) : i > 3 ? o(t, n, a) : o(t, n)) || a);
@@ -819,11 +856,11 @@ function B(e, t, n, r) {
 }
 //#endregion
 //#region src/penance/commandments/content-not-composable.element.ts
-var V = "/umbraco/management/api/v1/sinners", rt = {
+var z = "/umbraco/management/api/v1/sinners", ft = {
 	"Umbraco.BlockList": "Block List",
 	"Umbraco.BlockGrid": "Block Grid",
 	"Umbraco.RichText": "Rich Text"
-}, H = class extends e(k) {
+}, B = class extends e(k) {
 	constructor(...e) {
 		super(...e), this._items = [], this._emptyItems = [], this._loading = !0, this._folding = /* @__PURE__ */ new Set(), this._blessing = /* @__PURE__ */ new Set(), this._deleting = /* @__PURE__ */ new Set(), this._lastResult = null;
 	}
@@ -1029,7 +1066,7 @@ var V = "/umbraco/management/api/v1/sinners", rt = {
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), z.registerSteps("I", this, [{
+		super.connectedCallback(), I.registerSteps("I", this, [{
 			label: "Fold In & bless everything",
 			run: async () => {
 				await this.#r("contentRows"), await this.#r("socialIconLinks"), await this.#i("instructionMessage"), await this.#i("successMessage"), await this.#i("errorMessage");
@@ -1052,7 +1089,7 @@ var V = "/umbraco/management/api/v1/sinners", rt = {
 	async #n() {
 		this._loading = !0;
 		try {
-			let [e, t] = await Promise.all([this.#t(`${V}/sinful-compositions`), this.#t(`${V}/empty-compositions`)]);
+			let [e, t] = await Promise.all([this.#t(`${z}/sinful-compositions`), this.#t(`${z}/empty-compositions`)]);
 			e.ok && (this._items = await e.json()), t.ok && (this._emptyItems = await t.json());
 			let n = this._items.reduce((e, t) => e + t.sinfulProperties.filter((e) => !e.isBlessed).length, 0);
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -1095,7 +1132,7 @@ var V = "/umbraco/management/api/v1/sinners", rt = {
 		let n = `${e.contentTypeAlias}:${t.propertyAlias}`;
 		this._folding = new Set([...this._folding, n]), this._lastResult = null;
 		try {
-			let r = await (await this.#t(`${V}/fold-in`, {
+			let r = await (await this.#t(`${z}/fold-in`, {
 				method: "POST",
 				body: JSON.stringify({
 					compositionAlias: e.contentTypeAlias,
@@ -1105,7 +1142,7 @@ var V = "/umbraco/management/api/v1/sinners", rt = {
 			this._lastResult = {
 				key: n,
 				result: r
-			}, r.success && await this.#n();
+			}, r.success && (await this.#n(), L(1, "fold-in"));
 		} catch (e) {
 			this._lastResult = {
 				key: n,
@@ -1125,7 +1162,7 @@ var V = "/umbraco/management/api/v1/sinners", rt = {
 		if (window.confirm(`Fold "${t.propertyAlias}" from "${e.contentTypeName}" into: ${e.usedOn.join(", ")}?\n\nThis will:\n  1. Add "${t.propertyAlias}_fold_tmp" to each target doc type\n  2. Copy all content values across\n  3. Remove the property from the composition\n  4. Rename the temp property back to "${t.propertyAlias}"\n\nContent nodes will be saved as drafts. This cannot be undone.`)) {
 			this._folding = new Set([...this._folding, n]), this._lastResult = null;
 			try {
-				let r = await (await this.#t(`${V}/fold-in`, {
+				let r = await (await this.#t(`${z}/fold-in`, {
 					method: "POST",
 					body: JSON.stringify({
 						compositionAlias: e.contentTypeAlias,
@@ -1135,7 +1172,7 @@ var V = "/umbraco/management/api/v1/sinners", rt = {
 				this._lastResult = {
 					key: n,
 					result: r
-				}, r.success && await this.#n();
+				}, r.success && (await this.#n(), L(1, "fold-in"));
 			} catch (e) {
 				this._lastResult = {
 					key: n,
@@ -1155,7 +1192,7 @@ var V = "/umbraco/management/api/v1/sinners", rt = {
 		if (window.confirm(`Delete "${e.contentTypeName}" (${e.contentTypeAlias})?\n\nThis cannot be undone.`)) {
 			this._deleting = new Set([...this._deleting, e.contentTypeAlias]);
 			try {
-				await this.#t(`${V}/empty-compositions/${encodeURIComponent(e.contentTypeAlias)}`, { method: "DELETE" }), await this.#n();
+				await this.#t(`${z}/empty-compositions/${encodeURIComponent(e.contentTypeAlias)}`, { method: "DELETE" }), await this.#n();
 			} finally {
 				this._deleting = new Set([...this._deleting].filter((t) => t !== e.contentTypeAlias));
 			}
@@ -1165,14 +1202,14 @@ var V = "/umbraco/management/api/v1/sinners", rt = {
 		let r = `${e.contentTypeAlias}:${t.propertyAlias}`;
 		this._blessing = new Set([...this._blessing, r]);
 		try {
-			await this.#t(`${V}/bless`, {
+			await this.#t(`${z}/bless`, {
 				method: "POST",
 				body: JSON.stringify({
 					compositionAlias: e.contentTypeAlias,
 					propertyAlias: t.propertyAlias,
 					blessed: n
 				})
-			}), await this.#n();
+			}), await this.#n(), n && L(1, "bless");
 		} finally {
 			this._blessing = new Set([...this._blessing].filter((e) => e !== r));
 		}
@@ -1188,7 +1225,7 @@ var V = "/umbraco/management/api/v1/sinners", rt = {
 			let n = `${e.contentTypeAlias}:${t.propertyAlias}`, r = this._folding.has(n), i = this._blessing.has(n);
 			return C`
                                 <span class="prop-chip ${t.isBlessed ? "blessed" : ""}">
-                                    ${rt[t.editorAlias] ?? t.editorAlias}
+                                    ${ft[t.editorAlias] ?? t.editorAlias}
                                     <code>${t.propertyAlias}</code>
                                     <button
                                         class="fold-btn"
@@ -1253,15 +1290,15 @@ var V = "/umbraco/management/api/v1/sinners", rt = {
         `;
 	}
 };
-B([j()], H.prototype, "_items", void 0), B([j()], H.prototype, "_emptyItems", void 0), B([j()], H.prototype, "_loading", void 0), B([j()], H.prototype, "_folding", void 0), B([j()], H.prototype, "_blessing", void 0), B([j()], H.prototype, "_deleting", void 0), B([j()], H.prototype, "_lastResult", void 0), H = B([A("sinners-content-not-composable")], H);
+R([j()], B.prototype, "_items", void 0), R([j()], B.prototype, "_emptyItems", void 0), R([j()], B.prototype, "_loading", void 0), R([j()], B.prototype, "_folding", void 0), R([j()], B.prototype, "_blessing", void 0), R([j()], B.prototype, "_deleting", void 0), R([j()], B.prototype, "_lastResult", void 0), B = R([A("sinners-content-not-composable")], B);
 //#endregion
 //#region src/penance/commandments/four-sacred-types.element.ts
-var it = [
+var pt = [
 	"Page",
 	"Block",
 	"Data",
 	"Composition"
-], at = "/umbraco/management/api/v1/sinners", U = class extends e(k) {
+], mt = "/umbraco/management/api/v1/sinners", V = class extends e(k) {
 	constructor(...e) {
 		super(...e), this._items = [], this._loading = !0, this._saving = !1, this._categorizing = !1, this._pendingChanges = /* @__PURE__ */ new Map();
 	}
@@ -1440,18 +1477,18 @@ var it = [
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), z.registerSteps("II", this, [
+		super.connectedCallback(), I.registerSteps("II", this, [
 			{
 				label: "Autofill classifications",
-				run: () => this.#a()
+				run: () => this.#o()
 			},
 			{
 				label: "Save all",
-				run: () => this.#s()
+				run: () => this.#c()
 			},
 			{
 				label: "Auto categorize",
-				run: () => this.#o()
+				run: () => this.#s()
 			}
 		]), this.consumeContext(n, (e) => {
 			this.#e = e, this.#n();
@@ -1471,30 +1508,32 @@ var it = [
 	async #n() {
 		this._loading = !0;
 		try {
-			let e = await this.#t(`${at}/content-type-classifications`);
-			e.ok && (this._items = await e.json());
-			let t = this._items.filter((e) => !e.classification).length;
-			this.dispatchEvent(new CustomEvent("sinners-status", {
-				bubbles: !0,
-				composed: !0,
-				detail: {
-					issueCount: t,
-					severity: t > 0 ? "error" : "ok"
-				}
-			}));
+			let e = await this.#t(`${mt}/content-type-classifications`);
+			e.ok && (this._items = await e.json()), this.#r();
 		} finally {
 			this._loading = !1;
 		}
 	}
-	#r(e, t) {
-		let n = new Map(this._pendingChanges);
-		t ? n.set(e, t) : n.delete(e), this._pendingChanges = n;
+	#r() {
+		let e = this._items.filter((e) => !e.classification).length;
+		this.dispatchEvent(new CustomEvent("sinners-status", {
+			bubbles: !0,
+			composed: !0,
+			detail: {
+				issueCount: e,
+				severity: e > 0 ? "error" : "ok"
+			}
+		}));
 	}
 	#i(e, t) {
 		let n = new Map(this._pendingChanges);
+		t ? n.set(e, t) : n.delete(e), this._pendingChanges = n;
+	}
+	#a(e, t) {
+		let n = new Map(this._pendingChanges);
 		n.set(e, t), this._pendingChanges = n;
 	}
-	#a() {
+	#o() {
 		let e = new Map(this._pendingChanges);
 		for (let t of this._items) if (!t.classification && !e.has(t.contentTypeAlias)) if (t.suggestedClassification) e.set(t.contentTypeAlias, t.suggestedClassification), console.log(`[RULE II] suggestion → ${t.contentTypeAlias} = ${t.suggestedClassification}`);
 		else {
@@ -1503,43 +1542,45 @@ var it = [
 		}
 		this._pendingChanges = e, console.log(`[RULE II] autofill complete — ${e.size} pending`);
 	}
-	async #o() {
+	async #s() {
 		this._categorizing = !0;
 		try {
-			(await this.#t(`${at}/auto-categorize`, { method: "POST" })).ok && await this.#n();
+			(await this.#t(`${mt}/auto-categorize`, { method: "POST" })).ok && (await this.#n(), L(2, "auto-categorize"));
 		} finally {
 			this._categorizing = !1;
 		}
 	}
-	async #s() {
+	async #c() {
 		if (this._pendingChanges.size !== 0) {
 			this._saving = !0;
 			try {
-				for (let [e, t] of this._pendingChanges) if ((await this.#t(`${at}/content-type-classifications`, {
+				let e = 0;
+				for (let [t, n] of this._pendingChanges) if ((await this.#t(`${mt}/content-type-classifications`, {
 					method: "POST",
 					body: JSON.stringify({
-						contentTypeAlias: e,
-						classification: t
+						contentTypeAlias: t,
+						classification: n
 					})
 				})).ok) {
-					this._items = this._items.map((n) => n.contentTypeAlias === e ? {
-						...n,
-						classification: t,
+					e++, this._items = this._items.map((e) => e.contentTypeAlias === t ? {
+						...e,
+						classification: n,
 						suggestedClassification: null
-					} : n);
-					let n = new Map(this._pendingChanges);
-					n.delete(e), this._pendingChanges = n;
+					} : e);
+					let r = new Map(this._pendingChanges);
+					r.delete(t), this._pendingChanges = r;
 				}
+				e > 0 && (this.#r(), L(2, "classify"));
 			} finally {
 				this._saving = !1;
 			}
 		}
 	}
-	#c(e) {
+	#l(e) {
 		return this._pendingChanges.get(e.contentTypeAlias) ?? e.classification ?? "";
 	}
-	#l(e) {
-		let t = this.#c(e), n = this._pendingChanges.has(e.contentTypeAlias);
+	#u(e) {
+		let t = this.#l(e), n = this._pendingChanges.has(e.contentTypeAlias);
 		return C`
             <div class="item-row">
                 <div class="name-col">
@@ -1554,58 +1595,58 @@ var it = [
                     <select
                         class=${t ? "" : "unclassified"}
                         .value=${t}
-                        @change=${(t) => this.#r(e.contentTypeAlias, t.target.value)}
+                        @change=${(t) => this.#i(e.contentTypeAlias, t.target.value)}
                     >
                         <option value="">— Unclassified —</option>
-                        ${it.map((e) => C`<option value=${e} ?selected=${t === e}>${e}</option>`)}
+                        ${pt.map((e) => C`<option value=${e} ?selected=${t === e}>${e}</option>`)}
                     </select>
                     ${e.suggestedClassification && !n ? C`<span
                               class="suggestion"
-                              @click=${() => this.#i(e.contentTypeAlias, e.suggestedClassification)}
+                              @click=${() => this.#a(e.contentTypeAlias, e.suggestedClassification)}
                               >Suggest: ${e.suggestedClassification}</span
                           >` : T}
                 </div>
             </div>
         `;
 	}
-	#u(e, t, n = !1) {
+	#d(e, t, n = !1) {
 		return t.length === 0 ? T : C`
             <details ?open=${n}>
                 <summary>
                     <span class=${e === "Unclassified" ? "sinful-label" : ""}>${e}</span>
                     <span class="group-count">${t.length}</span>
                 </summary>
-                ${t.map((e) => this.#l(e))}
+                ${t.map((e) => this.#u(e))}
             </details>
         `;
 	}
 	render() {
 		let e = this._items.filter((e) => !e.classification), t = (e) => this._items.filter((t) => t.classification === e), n = e.length;
 		return C`
-            <uui-box headline="II — The Four Sacred Types">
+            <uui-box headline="II — Four content types: Page, Block, Data, Composition">
                 ${this._loading ? C`<uui-loader-bar></uui-loader-bar>` : this._items.length === 0 ? C`<div class="empty">No content types found.</div>` : C`
                             <div class="stats">
                                 <uui-button
                                     look="outline"
                                     .disabled=${this._categorizing}
-                                    @click=${() => void this.#o()}
+                                    @click=${() => void this.#s()}
                                 >
                                     ${this._categorizing ? "Categorizing…" : "Auto Categorize"}
                                 </uui-button>
                                 ${n > 0 ? C`<span class="stat-chip sinful">⚠ ${n} unclassified</span>` : C`<span class="stat-chip clean">✓ All classified</span>`}
-                                ${it.map((e) => {
+                                ${pt.map((e) => {
 			let n = t(e).length;
 			return n > 0 ? C`<span class="stat-chip">${e}: ${n}</span>` : T;
 		})}
                             </div>
 
-                            ${this.#u("Unclassified", e, !0)}
-                            ${it.map((e) => this.#u(e, t(e)))}
+                            ${this.#d("Unclassified", e, !0)}
+                            ${pt.map((e) => this.#d(e, t(e)))}
                             <div class="save-bar">
                                 <uui-button
                                     look="primary"
                                     .disabled=${this._pendingChanges.size === 0 || this._saving}
-                                    @click=${() => void this.#s()}
+                                    @click=${() => void this.#c()}
                                 >
                                     ${this._saving ? "Saving…" : "Save"}
                                 </uui-button>
@@ -1615,10 +1656,10 @@ var it = [
         `;
 	}
 };
-B([j()], U.prototype, "_items", void 0), B([j()], U.prototype, "_loading", void 0), B([j()], U.prototype, "_saving", void 0), B([j()], U.prototype, "_categorizing", void 0), B([j()], U.prototype, "_pendingChanges", void 0), U = B([A("sinners-four-sacred-types")], U);
+R([j()], V.prototype, "_items", void 0), R([j()], V.prototype, "_loading", void 0), R([j()], V.prototype, "_saving", void 0), R([j()], V.prototype, "_categorizing", void 0), R([j()], V.prototype, "_pendingChanges", void 0), V = R([A("sinners-four-sacred-types")], V);
 //#endregion
 //#region src/penance/commandments/data-types-in-folders.element.ts
-var ot = "/umbraco/management/api/v1/sinners", W = class extends e(k) {
+var ht = "/umbraco/management/api/v1/sinners", H = class extends e(k) {
 	constructor(...e) {
 		super(...e), this._items = [], this._loading = !0, this._organizing = !1, this._lastMessage = null;
 	}
@@ -1729,10 +1770,10 @@ var ot = "/umbraco/management/api/v1/sinners", W = class extends e(k) {
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), z.registerSteps("III", this, [{
+		super.connectedCallback(), I.registerSteps("III", this, [{
 			label: "Organize data types",
 			run: () => this.#r()
-		}]), this.consumeContext(n, (e) => {
+		}], "data-types"), this.consumeContext(n, (e) => {
 			this.#e = e, this.#n();
 		});
 	}
@@ -1750,7 +1791,7 @@ var ot = "/umbraco/management/api/v1/sinners", W = class extends e(k) {
 	async #n() {
 		this._loading = !0;
 		try {
-			let e = await this.#t(`${ot}/unorganized-data-types`);
+			let e = await this.#t(`${ht}/unorganized-data-types`);
 			e.ok && (this._items = await e.json());
 			let t = this._items.length;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -1768,13 +1809,13 @@ var ot = "/umbraco/management/api/v1/sinners", W = class extends e(k) {
 	async #r() {
 		this._organizing = !0, this._lastMessage = null;
 		try {
-			let e = await this.#t(`${ot}/organize-data-types`, { method: "POST" });
+			let e = await this.#t(`${ht}/organize-data-types`, { method: "POST" });
 			if (e.ok) {
 				let t = await e.json();
 				this._lastMessage = {
 					success: !0,
 					text: `Organized ${t.organizedCount} data type(s) into folders.`
-				}, await this.#n();
+				}, await this.#n(), L(3, "organize-data-types");
 			} else this._lastMessage = {
 				success: !1,
 				text: `Failed to organize data types (HTTP ${e.status}).`
@@ -1799,7 +1840,7 @@ var ot = "/umbraco/management/api/v1/sinners", W = class extends e(k) {
 	render() {
 		let e = this._lastMessage;
 		return C`
-            <uui-box headline="III — Data types live in folders">
+            <uui-box headline="III — The root is bare: data types live in folders">
                 ${e ? C`<div class="result-banner ${e.success ? "success" : "error"}">${e.text}</div>` : T}
                 ${this._loading ? C`<uui-loader-bar></uui-loader-bar>` : this._items.length === 0 ? C`<div class="clean">✓ All data types are in folders.</div>` : C`
                             <div class="toolbar">
@@ -1827,17 +1868,17 @@ var ot = "/umbraco/management/api/v1/sinners", W = class extends e(k) {
         `;
 	}
 };
-B([j()], W.prototype, "_items", void 0), B([j()], W.prototype, "_loading", void 0), B([j()], W.prototype, "_organizing", void 0), B([j()], W.prototype, "_lastMessage", void 0), W = B([A("sinners-data-types-in-folders")], W);
+R([j()], H.prototype, "_items", void 0), R([j()], H.prototype, "_loading", void 0), R([j()], H.prototype, "_organizing", void 0), R([j()], H.prototype, "_lastMessage", void 0), H = R([A("sinners-data-types-in-folders")], H);
 //#endregion
 //#region src/penance/magic.ts
-var st = !1;
-function ct() {
-	if (st) return;
+var gt = !1;
+function _t() {
+	if (gt) return;
 	let e = document.createElement("style");
-	e.textContent = "\n        @keyframes sinners-magic-fade {\n            0%   { opacity: 0; }\n            20%  { opacity: 1; }\n            80%  { opacity: 1; }\n            100% { opacity: 0; }\n        }\n        .sinners-magic-overlay {\n            position: fixed !important;\n            top: 0 !important;\n            left: 0 !important;\n            width: 100vw !important;\n            height: 100vh !important;\n            z-index: 2147483647 !important;\n            background: rgba(0, 0, 0, 0.85) !important;\n            display: flex !important;\n            align-items: center !important;\n            justify-content: center !important;\n            pointer-events: none !important;\n            animation: sinners-magic-fade 1.8s ease forwards !important;\n        }\n        .sinners-magic-word {\n            font-size: 96px !important;\n            font-weight: 900 !important;\n            font-style: italic !important;\n            background: linear-gradient(90deg, #ff6b35, #f7c59f, #efefd0, #00b4d8, #9b5de5) !important;\n            -webkit-background-clip: text !important;\n            -webkit-text-fill-color: transparent !important;\n            background-clip: text !important;\n            white-space: nowrap !important;\n        }\n    ", document.head.appendChild(e), st = !0;
+	e.textContent = "\n        @keyframes sinners-magic-fade {\n            0%   { opacity: 0; }\n            20%  { opacity: 1; }\n            80%  { opacity: 1; }\n            100% { opacity: 0; }\n        }\n        .sinners-magic-overlay {\n            position: fixed !important;\n            top: 0 !important;\n            left: 0 !important;\n            width: 100vw !important;\n            height: 100vh !important;\n            z-index: 2147483647 !important;\n            background: rgba(0, 0, 0, 0.85) !important;\n            display: flex !important;\n            align-items: center !important;\n            justify-content: center !important;\n            pointer-events: none !important;\n            animation: sinners-magic-fade 1.8s ease forwards !important;\n        }\n        .sinners-magic-word {\n            font-size: 96px !important;\n            font-weight: 900 !important;\n            font-style: italic !important;\n            background: linear-gradient(90deg, #ff6b35, #f7c59f, #efefd0, #00b4d8, #9b5de5) !important;\n            -webkit-background-clip: text !important;\n            -webkit-text-fill-color: transparent !important;\n            background-clip: text !important;\n            white-space: nowrap !important;\n        }\n    ", document.head.appendChild(e), gt = !0;
 }
-function lt(e) {
-	ct();
+function vt(e) {
+	_t();
 	let t = document.createElement("div");
 	t.className = "sinners-magic-overlay";
 	let n = document.createElement("span");
@@ -1847,7 +1888,7 @@ function lt(e) {
 }
 //#endregion
 //#region src/penance/commandments/program-cs-clean.element.ts
-var ut = "/umbraco/management/api/v1/sinners", dt = "var i̸̖l̷̼l̴̮i̵̗g̸̫a̷̮l̶̼ = app.UseUmbraco();\n\ni̸̖l̷̼l̴̮i̵̗g̸̫a̷̮l̶̼.WithMiddleware(u =>\n    {\n        u.UseBackOffice();\n        u.UseWebsite();\n    })\n    .WithEndpoints(u =>\n    {\n        u.UseBackOfficeEndpoints();\n        u.UseWebsiteEndpoints();\n    });", ft = "app.UseUmbraco()\n    .WithMiddleware(u =>\n    {\n        u.UseBackOffice();\n        u.UseWebsite();\n    })\n    .WithEndpoints(u =>\n    {\n        u.UseBackOfficeEndpoints();\n        u.UseWebsiteEndpoints();\n    });\n\nawait app.RunAsync();", G = class extends e(k) {
+var yt = "/umbraco/management/api/v1/sinners", bt = "var i̸̖l̷̼l̴̮i̵̗g̸̫a̷̮l̶̼ = app.UseUmbraco();\n\ni̸̖l̷̼l̴̮i̵̗g̸̫a̷̮l̶̼.WithMiddleware(u =>\n    {\n        u.UseBackOffice();\n        u.UseWebsite();\n    })\n    .WithEndpoints(u =>\n    {\n        u.UseBackOfficeEndpoints();\n        u.UseWebsiteEndpoints();\n    });", xt = "app.UseUmbraco()\n    .WithMiddleware(u =>\n    {\n        u.UseBackOffice();\n        u.UseWebsite();\n    })\n    .WithEndpoints(u =>\n    {\n        u.UseBackOfficeEndpoints();\n        u.UseWebsiteEndpoints();\n    });\n\nawait app.RunAsync();", U = class extends e(k) {
 	constructor(...e) {
 		super(...e), this._result = null, this._loading = !0;
 	}
@@ -1967,7 +2008,7 @@ var ut = "/umbraco/management/api/v1/sinners", dt = "var i̸̖l̷̼l̴̮i̵̗g̸
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), z.registerSteps("IV", this, [{
+		super.connectedCallback(), I.registerSteps("IV", this, [{
 			label: "Cleanse Program.cs",
 			run: () => this.#n()
 		}]), this.consumeContext(n, (e) => {
@@ -1977,7 +2018,7 @@ var ut = "/umbraco/management/api/v1/sinners", dt = "var i̸̖l̷̼l̴̮i̵̗g̸
 	async #t() {
 		this._loading = !0;
 		try {
-			let e = await this.#e?.getLatestToken(), t = await fetch(`${ut}/program-cs-audit`, { headers: e ? { Authorization: `Bearer ${e}` } : {} });
+			let e = await this.#e?.getLatestToken(), t = await fetch(`${yt}/program-cs-audit`, { headers: e ? { Authorization: `Bearer ${e}` } : {} });
 			t.ok && (this._result = await t.json());
 			let n = this._result ? +!!this._result.useUmbracoSavedToVariable + this._result.extraMiddleware.length + this._result.extraEndpoints.length : 0;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -1994,10 +2035,12 @@ var ut = "/umbraco/management/api/v1/sinners", dt = "var i̸̖l̷̼l̴̮i̵̗g̸
 	}
 	async #n() {
 		let e = await this.#e?.getLatestToken();
-		await fetch(`${ut}/fix-program-cs`, {
+		await fetch(`${yt}/fix-program-cs`, {
 			method: "POST",
 			headers: e ? { Authorization: `Bearer ${e}` } : {}
-		}), lt(() => void this.#t());
+		}), vt(() => {
+			L(4, "cleanse-program-cs"), this.#t();
+		});
 	}
 	#r(e) {
 		let t = [];
@@ -2014,12 +2057,12 @@ var ut = "/umbraco/management/api/v1/sinners", dt = "var i̸̖l̷̼l̴̮i̵̗g̸
                 <div class="diff-block">
                     <div class="diff-side">
                         <div class="diff-label before">Before — thy sin</div>
-                        <pre class="before">${dt}</pre>
+                        <pre class="before">${bt}</pre>
                     </div>
                     <div class="diff-arrow">→</div>
                     <div class="diff-side">
                         <div class="diff-label after">After — absolved</div>
-                        <pre class="after">${ft}</pre>
+                        <pre class="after">${xt}</pre>
                     </div>
                 </div>
                 <uui-button class="fix-btn" look="secondary" @click=${() => void this.#n()}>
@@ -2044,16 +2087,16 @@ var ut = "/umbraco/management/api/v1/sinners", dt = "var i̸̖l̷̼l̴̮i̵̗g̸
 	render() {
 		let e = this._result;
 		return C`
-            <uui-box headline="IV — Program.cs is clean">
+            <uui-box headline="IV — Compose in thy IComposer, not Program.cs">
                 ${this._loading ? C`<uui-loader-bar></uui-loader-bar>` : !e || !e.found ? C`<div class="not-found">Program.cs not found at the application root.</div>` : e.isClean ? C`<div class="clean">✓ Program.cs looks clean.</div>` : this.#r(e)}
             </uui-box>
         `;
 	}
 };
-B([j()], G.prototype, "_result", void 0), B([j()], G.prototype, "_loading", void 0), G = B([A("sinners-program-cs-clean")], G);
+R([j()], U.prototype, "_result", void 0), R([j()], U.prototype, "_loading", void 0), U = R([A("sinners-program-cs-clean")], U);
 //#endregion
 //#region src/penance/commandments/production-settings.element.ts
-var pt = "/umbraco/management/api/v1/sinners", K = class extends e(k) {
+var St = "/umbraco/management/api/v1/sinners", W = class extends e(k) {
 	constructor(...e) {
 		super(...e), this._result = null, this._loading = !0, this._blessing = /* @__PURE__ */ new Set();
 	}
@@ -2161,7 +2204,7 @@ var pt = "/umbraco/management/api/v1/sinners", K = class extends e(k) {
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), z.registerSteps("V", this, [{
+		super.connectedCallback(), I.registerSteps("V", this, [{
 			label: "Bless all settings",
 			run: () => this.#t()
 		}]), this.consumeContext(n, (e) => {
@@ -2189,7 +2232,7 @@ var pt = "/umbraco/management/api/v1/sinners", K = class extends e(k) {
 	async #r() {
 		this._loading = !0;
 		try {
-			let e = await this.#n(`${pt}/production-readiness`);
+			let e = await this.#n(`${St}/production-readiness`);
 			e.ok && (this._result = await e.json());
 			let t = this._result?.missingSettings.filter((e) => !e.isBlessed).length ?? 0;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -2207,13 +2250,13 @@ var pt = "/umbraco/management/api/v1/sinners", K = class extends e(k) {
 	async #i(e, t) {
 		this._blessing = new Set([...this._blessing, e.key]);
 		try {
-			await this.#n(`${pt}/bless-production-setting`, {
+			await this.#n(`${St}/bless-production-setting`, {
 				method: "POST",
 				body: JSON.stringify({
 					settingKey: e.key,
 					blessed: t
 				})
-			}), await this.#r();
+			}), await this.#r(), t && L(5, "bless");
 		} finally {
 			this._blessing = new Set([...this._blessing].filter((t) => t !== e.key));
 		}
@@ -2221,7 +2264,7 @@ var pt = "/umbraco/management/api/v1/sinners", K = class extends e(k) {
 	render() {
 		let e = this._result, t = e ? C`<div class="scanned">Scanned: ${e.scannedFiles.join(", ")}</div>` : null;
 		return C`
-            <uui-box headline="V — Live environment is production-ready">
+            <uui-box headline="V — A production site runs in production mode">
                 ${this._loading ? C`<uui-loader-bar></uui-loader-bar>` : e ? e.isReady ? C`
                               <div class="clean">✓ Production settings found across your appsettings files.</div>
                               ${t}
@@ -2253,10 +2296,10 @@ var pt = "/umbraco/management/api/v1/sinners", K = class extends e(k) {
         `;
 	}
 };
-B([j()], K.prototype, "_result", void 0), B([j()], K.prototype, "_loading", void 0), B([j()], K.prototype, "_blessing", void 0), K = B([A("sinners-production-settings")], K);
+R([j()], W.prototype, "_result", void 0), R([j()], W.prototype, "_loading", void 0), R([j()], W.prototype, "_blessing", void 0), W = R([A("sinners-production-settings")], W);
 //#endregion
 //#region src/penance/commandments/alias-audit.element.ts
-var mt = "/umbraco/management/api/v1/sinners", q = class extends e(k) {
+var Ct = "/umbraco/management/api/v1/sinners", G = class extends e(k) {
 	constructor(...e) {
 		super(...e), this._items = [], this._loading = !0, this._blessing = /* @__PURE__ */ new Set();
 	}
@@ -2374,13 +2417,13 @@ var mt = "/umbraco/management/api/v1/sinners", q = class extends e(k) {
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), z.registerSteps("VI", this, [{
+		super.connectedCallback(), I.registerSteps("VI", this, [{
 			label: "Bless first alias",
 			run: () => {
 				let e = this._items.find((e) => !e.isBlessed);
 				if (e) return this.#r(e, !0);
 			}
-		}]), this.consumeContext(n, (e) => {
+		}], "aliases"), this.consumeContext(n, (e) => {
 			this.#e = e, this.#n();
 		});
 	}
@@ -2398,7 +2441,7 @@ var mt = "/umbraco/management/api/v1/sinners", q = class extends e(k) {
 	async #n() {
 		this._loading = !0;
 		try {
-			let e = await this.#t(`${mt}/alias-issues`);
+			let e = await this.#t(`${Ct}/alias-issues`);
 			e.ok && (this._items = await e.json());
 			let t = this._items.filter((e) => !e.isBlessed && !e.isCamelCase).length, n = this._items.filter((e) => !e.isBlessed && e.isCamelCase && e.unrecognizedWords.length > 0).length, r = t + n, i = t > 0 ? "error" : n > 0 ? "warning" : "ok";
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -2416,13 +2459,13 @@ var mt = "/umbraco/management/api/v1/sinners", q = class extends e(k) {
 	async #r(e, t) {
 		this._blessing = new Set([...this._blessing, e.contentTypeAlias]);
 		try {
-			await this.#t(`${mt}/bless-alias`, {
+			await this.#t(`${Ct}/bless-alias`, {
 				method: "POST",
 				body: JSON.stringify({
 					contentTypeAlias: e.contentTypeAlias,
 					blessed: t
 				})
-			}), await this.#n();
+			}), await this.#n(), t && L(6, "bless");
 		} finally {
 			this._blessing = new Set([...this._blessing].filter((t) => t !== e.contentTypeAlias));
 		}
@@ -2454,18 +2497,18 @@ var mt = "/umbraco/management/api/v1/sinners", q = class extends e(k) {
 	}
 	render() {
 		return C`
-            <uui-box headline="VI — Document type aliases are camelCase English">
+            <uui-box headline="VI — Thy names: aliases are English camelCase">
                 ${this._loading ? C`<uui-loader-bar></uui-loader-bar>` : this._items.length === 0 ? C`<div class="clean">✓ All document type aliases are valid camelCase English.</div>` : C`${this._items.map((e) => this.#i(e))}`}
             </uui-box>
         `;
 	}
 };
-B([j()], q.prototype, "_items", void 0), B([j()], q.prototype, "_loading", void 0), B([j()], q.prototype, "_blessing", void 0), q = B([A("sinners-alias-audit")], q);
+R([j()], G.prototype, "_items", void 0), R([j()], G.prototype, "_loading", void 0), R([j()], G.prototype, "_blessing", void 0), G = R([A("sinners-alias-audit")], G);
 //#endregion
 //#region src/penance/commandments/translation-audit.element.ts
-var ht = "/umbraco/management/api/v1/sinners", J = class extends e(k) {
+var wt = "/umbraco/management/api/v1/sinners", K = class extends e(k) {
 	constructor(...e) {
-		super(...e), this._result = null, this._loading = !0, this._blessing = /* @__PURE__ */ new Set(), this._grouping = /* @__PURE__ */ new Set();
+		super(...e), this.mode = "naming", this._result = null, this._loading = !0, this._blessing = /* @__PURE__ */ new Set(), this._grouping = /* @__PURE__ */ new Set();
 	}
 	#e;
 	static {
@@ -2610,20 +2653,10 @@ var ht = "/umbraco/management/api/v1/sinners", J = class extends e(k) {
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), z.registerSteps("VII", this, [
-			0,
-			1,
-			2,
-			3,
-			4,
-			5
-		].map((e) => ({
-			label: `Create group ${e + 1} of 6`,
-			run: () => {
-				let e = this._result?.groupSuggestions[0];
-				if (e) return this.#i(e);
-			}
-		}))), this.consumeContext(n, (e) => {
+		super.connectedCallback(), this.mode === "grouping" && I.registerSteps("III", this, [{
+			label: "Group all dictionary keys",
+			run: () => this.#i()
+		}], "dictionary"), this.consumeContext(n, (e) => {
 			this.#e = e, this.#n();
 		});
 	}
@@ -2641,9 +2674,9 @@ var ht = "/umbraco/management/api/v1/sinners", J = class extends e(k) {
 	async #n() {
 		this._loading = !0;
 		try {
-			let e = await this.#t(`${ht}/translation-audit`);
+			let e = await this.#t(`${wt}/translation-audit`);
 			e.ok && (this._result = await e.json());
-			let t = this._result, n = t?.issues.filter((e) => !e.isBlessed && !e.isPascalCase).length ?? 0, r = t?.issues.filter((e) => !e.isBlessed && e.isPascalCase && e.unrecognizedWords.length > 0).length ?? 0, i = t?.groupSuggestions.length ?? 0, a = n + r + i, o = n > 0 ? "error" : a > 0 ? "warning" : "ok";
+			let t = this._result, n = t?.issues.filter((e) => !e.isBlessed && !e.isPascalCase).length ?? 0, r = t?.issues.filter((e) => !e.isBlessed && e.isPascalCase && e.unrecognizedWords.length > 0).length ?? 0, i = t?.groupSuggestions.length ?? 0, a = this.mode === "grouping" ? i : n + r, o = this.mode === "grouping" ? i > 0 ? "warning" : "ok" : n > 0 ? "error" : a > 0 ? "warning" : "ok";
 			this.dispatchEvent(new CustomEvent("sinners-status", {
 				bubbles: !0,
 				composed: !0,
@@ -2659,32 +2692,40 @@ var ht = "/umbraco/management/api/v1/sinners", J = class extends e(k) {
 	async #r(e, t) {
 		this._blessing = new Set([...this._blessing, e.itemKey]);
 		try {
-			await this.#t(`${ht}/bless-translation`, {
+			await this.#t(`${wt}/bless-translation`, {
 				method: "POST",
 				body: JSON.stringify({
 					itemKey: e.itemKey,
 					blessed: t
 				})
-			}), await this.#n();
+			}), await this.#n(), t && L(6, "bless");
 		} finally {
 			this._blessing = new Set([...this._blessing].filter((t) => t !== e.itemKey));
 		}
 	}
-	async #i(e) {
+	async #i() {
+		for (let e = 0; e < 50; e++) {
+			let e = this._result?.groupSuggestions[0];
+			if (!e) break;
+			await this.#a(e, !1);
+		}
+		L(3, "group-dictionary");
+	}
+	async #a(e, t = !0) {
 		this._grouping = new Set([...this._grouping, e.proposedParentKey]);
 		try {
-			await this.#t(`${ht}/create-translation-group`, {
+			await this.#t(`${wt}/create-translation-group`, {
 				method: "POST",
 				body: JSON.stringify({
 					parentKey: e.proposedParentKey,
 					childIds: e.children.map((e) => e.id)
 				})
-			}), await this.#n();
+			}), await this.#n(), t && L(3, "group-dictionary");
 		} finally {
 			this._grouping = new Set([...this._grouping].filter((t) => t !== e.proposedParentKey));
 		}
 	}
-	#a(e) {
+	#o(e) {
 		return e.length === 0 ? T : C`
             ${e.map((e) => {
 			let t = this._blessing.has(e.itemKey);
@@ -2711,7 +2752,7 @@ var ht = "/umbraco/management/api/v1/sinners", J = class extends e(k) {
 		})}
         `;
 	}
-	#o(e) {
+	#s(e) {
 		return e.length === 0 ? T : C`
             <div class="section-divider">Ungrouped keys</div>
             ${e.map((e) => {
@@ -2727,7 +2768,7 @@ var ht = "/umbraco/management/api/v1/sinners", J = class extends e(k) {
                         <button
                             class="group-btn"
                             ?disabled=${t}
-                            @click=${() => this.#i(e)}
+                            @click=${() => this.#a(e)}
                             title="Create '${e.proposedParentKey}' as a parent and nest these keys under it">
                             ${t ? "⏳" : "⊞ Group"}
                         </button>
@@ -2737,21 +2778,18 @@ var ht = "/umbraco/management/api/v1/sinners", J = class extends e(k) {
         `;
 	}
 	render() {
-		let e = this._result, t = (e?.issues.length ?? 0) > 0, n = (e?.groupSuggestions.length ?? 0) > 0;
+		let e = this._result, t = this.mode === "grouping", n = t ? (e?.groupSuggestions.length ?? 0) > 0 : (e?.issues.length ?? 0) > 0, r = t ? "III — A folder is only a folder: dotted keys nest under a parent" : "VI — Thy names: translation keys are PascalCase, dot-separated", i = t ? "✓ No dotted keys loose at the root — every group has its folder." : "✓ All translation keys are PascalCase English.";
 		return C`
-            <uui-box headline="VII — Translation keys are PascalCase English and nested in folders">
-                ${this._loading ? C`<uui-loader-bar></uui-loader-bar>` : !t && !n ? C`<div class="clean">✓ All translation keys are valid camelCase English with no grouping suggestions.</div>` : C`
-                            ${e ? this.#a(e.issues) : T}
-                            ${e ? this.#o(e.groupSuggestions) : T}
-                        `}
+            <uui-box headline=${r}>
+                ${this._loading ? C`<uui-loader-bar></uui-loader-bar>` : !n || !e ? C`<div class="clean">${i}</div>` : t ? this.#s(e.groupSuggestions) : this.#o(e.issues)}
             </uui-box>
         `;
 	}
 };
-B([j()], J.prototype, "_result", void 0), B([j()], J.prototype, "_loading", void 0), B([j()], J.prototype, "_blessing", void 0), B([j()], J.prototype, "_grouping", void 0), J = B([A("sinners-translation-audit")], J);
+R([Ve()], K.prototype, "mode", void 0), R([j()], K.prototype, "_result", void 0), R([j()], K.prototype, "_loading", void 0), R([j()], K.prototype, "_blessing", void 0), R([j()], K.prototype, "_grouping", void 0), K = R([A("sinners-translation-audit")], K);
 //#endregion
 //#region src/penance/commandments/root-media.element.ts
-var gt = "/umbraco/management/api/v1/sinners", Y = class extends e(k) {
+var Tt = "/umbraco/management/api/v1/sinners", q = class extends e(k) {
 	constructor(...e) {
 		super(...e), this._items = [], this._loading = !0, this._pretending = !1;
 	}
@@ -2813,56 +2851,66 @@ var gt = "/umbraco/management/api/v1/sinners", Y = class extends e(k) {
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), z.registerSteps("VIII", this, [{
-			label: "Pretend to fix ✨",
-			run: () => this.#n()
-		}]), this.consumeContext(n, (e) => {
-			this.#e = e, this.#t();
+		super.connectedCallback(), I.registerSteps("III", this, [{
+			label: "Pretend to fix the media root ✨",
+			run: () => this.#i()
+		}], "media"), this.consumeContext(n, (e) => {
+			this.#e = e, this.#n();
 		});
 	}
-	async #t() {
+	async #t(e, t = {}) {
+		let n = await this.#e?.getLatestToken();
+		return fetch(e, {
+			...t,
+			headers: {
+				...n ? { Authorization: `Bearer ${n}` } : {},
+				...t.headers ?? {}
+			}
+		});
+	}
+	async #n() {
 		this._loading = !0;
 		try {
-			let e = await this.#e?.getLatestToken(), t = await fetch(`${gt}/root-media`, { headers: e ? { Authorization: `Bearer ${e}` } : {} });
-			t.ok && (this._items = await t.json());
-			let n = localStorage.getItem("sinners-media-pretend");
-			if (n) {
-				let e = [];
+			let e = !1;
+			try {
+				e = sessionStorage.getItem(Xe) === "1";
+			} catch {}
+			if (e) {
+				await this.#t(`${Tt}/forget-pretences`, { method: "POST" });
 				try {
-					e = JSON.parse(n);
+					sessionStorage.removeItem(Xe);
 				} catch {}
-				let t = this._items.map((e) => e.key).sort().join(",");
-				Array.isArray(e) && e.slice().sort().join(",") === t ? this._pretending = !0 : (localStorage.removeItem("sinners-media-pretend"), this._pretending = !1);
 			}
-			let r = this._pretending ? 0 : this._items.length;
-			this.dispatchEvent(new CustomEvent("sinners-status", {
-				bubbles: !0,
-				composed: !0,
-				detail: {
-					issueCount: r,
-					severity: r > 0 ? "error" : "ok"
-				}
-			}));
+			let t = await this.#t(`${Tt}/root-media`);
+			if (t.ok) {
+				let e = await t.json();
+				this._items = e.items, this._pretending = e.pretending;
+			}
+			this.#r();
 		} finally {
 			this._loading = !1;
 		}
 	}
-	#n() {
-		lt(() => {
-			this._pretending = !0, localStorage.setItem("sinners-media-pretend", JSON.stringify(this._items.map((e) => e.key))), this.dispatchEvent(new CustomEvent("sinners-status", {
-				bubbles: !0,
-				composed: !0,
-				detail: {
-					issueCount: 0,
-					severity: "ok"
-				}
-			}));
+	#r() {
+		let e = this._pretending ? 0 : this._items.length;
+		this.dispatchEvent(new CustomEvent("sinners-status", {
+			bubbles: !0,
+			composed: !0,
+			detail: {
+				issueCount: e,
+				severity: e > 0 ? "error" : "ok"
+			}
+		}));
+	}
+	async #i() {
+		this._items.length !== 0 && (await this.#t(`${Tt}/pretend-root-media`, { method: "POST" })).ok && vt(() => {
+			this._pretending = !0, this.#r(), L(3, "pretend-media", !0);
 		});
 	}
 	render() {
 		let e = this._pretending ? [] : this._items;
 		return C`
-            <uui-box headline="VIII — No media items at root">
+            <uui-box headline="III — The root is bare: no media at the root">
                 ${this._loading ? C`<uui-loader-bar></uui-loader-bar>` : e.length === 0 ? C`<div class="clean">✓ No media items loose at root — everything is in a folder.</div>` : C`
                             <div class="info">
                                 ${e.length} media item(s) are sitting directly at root.
@@ -2875,7 +2923,7 @@ var gt = "/umbraco/management/api/v1/sinners", Y = class extends e(k) {
                                     <span class="item-date">${new Date(e.createDate).toLocaleDateString()}</span>
                                 </div>
                             `)}
-                            <uui-button class="pretend-btn" look="secondary" @click=${() => this.#n()}>
+                            <uui-button class="pretend-btn" look="secondary" @click=${() => this.#i()}>
                                 ✨ Let's pretend it's fixed
                             </uui-button>
                         `}
@@ -2883,10 +2931,381 @@ var gt = "/umbraco/management/api/v1/sinners", Y = class extends e(k) {
         `;
 	}
 };
-B([j()], Y.prototype, "_items", void 0), B([j()], Y.prototype, "_loading", void 0), B([j()], Y.prototype, "_pretending", void 0), Y = B([A("sinners-root-media")], Y);
+R([j()], q.prototype, "_items", void 0), R([j()], q.prototype, "_loading", void 0), R([j()], q.prototype, "_pretending", void 0), q = R([A("sinners-root-media")], q);
+//#endregion
+//#region src/penance/commandments/views-confession.element.ts
+var Et = "/umbraco/management/api/v1/sinners", J = class extends e(k) {
+	constructor(...e) {
+		super(...e), this._result = null, this._loading = !0, this._confessing = !1;
+	}
+	#e;
+	static {
+		this.styles = l`
+        .clean {
+            padding: 16px;
+            color: var(--uui-color-positive-standalone, #0d7a54);
+            font-weight: 600;
+        }
+
+        .info {
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--uui-color-text-alt, #666);
+            line-height: 1.6;
+        }
+
+        .file-row {
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-top: 1px solid var(--uui-color-border-standalone, #f0f0f0);
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        .count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 22px;
+            height: 22px;
+            padding: 0 6px;
+            border-radius: 11px;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+            background: var(--uui-color-danger-standalone, #d42054);
+        }
+
+        .hit {
+            padding: 10px 16px;
+            border-top: 1px solid var(--uui-color-border-standalone, #f0f0f0);
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            align-items: start;
+        }
+
+        .where {
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--uui-color-text-alt, #888);
+        }
+
+        .code {
+            display: block;
+            margin-top: 4px;
+            padding: 6px 8px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            background: var(--uui-color-surface-emphasis, #f0f0f0);
+        }
+
+        .tag {
+            padding: 2px 7px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            color: white;
+            background: var(--uui-color-danger-standalone, #d42054);
+        }
+
+        .tag.confessed {
+            background: var(--uui-color-positive-standalone, #0d7a54);
+        }
+
+        .confess-btn {
+            margin: 12px 16px 16px;
+        }
+    `;
+	}
+	connectedCallback() {
+		super.connectedCallback(), I.registerSteps("VII", this, [{
+			label: "Confess",
+			run: () => this.#i()
+		}]), this.consumeContext(n, (e) => {
+			this.#e = e, this.#n();
+		});
+	}
+	async #t(e, t = {}) {
+		let n = await this.#e?.getLatestToken();
+		return fetch(e, {
+			...t,
+			headers: {
+				...n ? { Authorization: `Bearer ${n}` } : {},
+				...t.headers ?? {}
+			}
+		});
+	}
+	async #n() {
+		this._loading = !0;
+		try {
+			let e = await this.#t(`${Et}/views-confession`);
+			e.ok && (this._result = await e.json()), this.#r();
+		} finally {
+			this._loading = !1;
+		}
+	}
+	#r() {
+		let e = this._result?.hits.filter((e) => !e.isConfessed).length ?? 0;
+		this.dispatchEvent(new CustomEvent("sinners-status", {
+			bubbles: !0,
+			composed: !0,
+			detail: {
+				issueCount: e,
+				severity: e > 0 ? "error" : "ok"
+			}
+		}));
+	}
+	async #i() {
+		if (this._result?.hits.some((e) => !e.isConfessed)) {
+			this._confessing = !0;
+			try {
+				let e = await this.#t(`${Et}/confess`, { method: "POST" });
+				e.ok && (this._result = await e.json(), this.#r(), L(7, "confess"));
+			} finally {
+				this._confessing = !1;
+			}
+		}
+	}
+	#a(e) {
+		let t = /* @__PURE__ */ new Map();
+		for (let n of e) t.set(n.file, (t.get(n.file) ?? 0) + 1);
+		return C`
+            <div class="info">
+                ${e.length} sin(s) hide in thy views: tree walks and the content service, run on every
+                request. A view shall render what it is given. The code cannot be fixed from here — but it can be confessed.
+            </div>
+            ${[...t.entries()].map(([e, t]) => C`
+                <div class="file-row"><span>${e}</span><span class="count">${t}</span></div>
+            `)}
+            <uui-button class="confess-btn" look="primary" color="danger"
+                ?disabled=${this._confessing}
+                @click=${() => void this.#i()}>
+                ${this._confessing ? "⏳ Confessing…" : "🕯 Confess"}
+            </uui-button>
+        `;
+	}
+	#o(e) {
+		return e.map((e) => C`
+            <div class="hit">
+                <div>
+                    <span class="where">${e.file}:${e.line} — ${e.pattern}</span>
+                    <code class="code">${e.text}</code>
+                </div>
+                <span class="tag ${e.isConfessed ? "confessed" : ""}">${e.isConfessed ? "✓ Confessed" : "✕ Unconfessed"}</span>
+            </div>
+        `);
+	}
+	render() {
+		let e = this._result, t = e?.hits ?? [], n = t.filter((e) => !e.isConfessed);
+		return C`
+            <uui-box headline="VII — Views render; they don’t search">
+                ${this._loading && !e ? C`<uui-loader-bar></uui-loader-bar>` : e?.viewsFound ? t.length === 0 ? C`<div class="clean">✓ No view searcheth the tree. Thy views render what they are given.</div>` : n.length > 0 && n.length === t.length ? this.#a(t) : C`
+                                <div class="info">
+                                    ${n.length === 0 ? C`Thou hast confessed. The code is as sinful as before; thy conscience is not.` : T}
+                                </div>
+                                ${this.#o(t)}
+                                ${n.length > 0 ? C`<uui-button class="confess-btn" look="primary" color="danger"
+                                            ?disabled=${this._confessing}
+                                            @click=${() => void this.#i()}>🕯 Confess the rest</uui-button>` : T}
+                            ` : C`<div class="info">No Views folder at the content root — nothing to confess.</div>`}
+            </uui-box>
+        `;
+	}
+};
+R([j()], J.prototype, "_result", void 0), R([j()], J.prototype, "_loading", void 0), R([j()], J.prototype, "_confessing", void 0), J = R([A("sinners-views-confession")], J);
+//#endregion
+//#region src/penance/commandments/exodus.element.ts
+var Dt = "/umbraco/management/api/v1/sinners", Y = class extends e(k) {
+	constructor(...e) {
+		super(...e), this._audit = null, this._loading = !0, this._leading = !1, this._result = null, this._error = null;
+	}
+	#e;
+	static {
+		this.styles = l`
+        .clean {
+            padding: 16px;
+            color: var(--uui-color-positive-standalone, #0d7a54);
+            font-weight: 600;
+        }
+
+        .info {
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--uui-color-text-alt, #666);
+            line-height: 1.6;
+        }
+
+        .sinner {
+            padding: 12px 16px;
+            border-top: 1px solid var(--uui-color-border-standalone, #f0f0f0);
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .name {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .detail {
+            margin-top: 3px;
+            font-size: 12px;
+            color: var(--uui-color-text-alt, #888);
+        }
+
+        .detail code {
+            font-family: monospace;
+        }
+
+        .count {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--uui-color-danger-standalone, #d42054);
+            white-space: nowrap;
+        }
+
+        .count small {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--uui-color-text-alt, #888);
+        }
+
+        .banner {
+            margin: 12px 16px 4px;
+            padding: 10px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: white;
+            background: var(--uui-color-positive-standalone, #0d7a54);
+        }
+
+        .banner.error {
+            background: var(--uui-color-danger-standalone, #d42054);
+        }
+
+        .banner code {
+            font-family: monospace;
+        }
+
+        .exodus-btn {
+            margin: 12px 16px 16px;
+        }
+    `;
+	}
+	connectedCallback() {
+		super.connectedCallback(), I.registerSteps("VIII", this, [{
+			label: "Exodus",
+			run: () => this.#r()
+		}]), this.consumeContext(n, (e) => {
+			this.#e = e, this.#n();
+		});
+	}
+	async #t(e, t = {}) {
+		let n = await this.#e?.getLatestToken();
+		return fetch(e, {
+			...t,
+			headers: {
+				...n ? { Authorization: `Bearer ${n}` } : {},
+				...t.headers ?? {}
+			}
+		});
+	}
+	async #n() {
+		this._loading = !0;
+		try {
+			let e = await this.#t(`${Dt}/exodus-audit`);
+			e.ok && (this._audit = await e.json());
+			let t = this._audit?.sinners.length ?? 0;
+			this.dispatchEvent(new CustomEvent("sinners-status", {
+				bubbles: !0,
+				composed: !0,
+				detail: {
+					issueCount: t,
+					severity: t > 0 ? "error" : "ok"
+				}
+			}));
+		} finally {
+			this._loading = !1;
+		}
+	}
+	async #r() {
+		if (this._audit?.sinners.length) {
+			this._leading = !0, this._error = null;
+			try {
+				let e = await this.#t(`${Dt}/exodus`, { method: "POST" });
+				if (!e.ok) {
+					this._error = `The sea did not part (HTTP ${e.status}).`;
+					return;
+				}
+				this._result = await e.json(), await this.#n(), L(8, "exodus");
+			} catch (e) {
+				this._error = String(e);
+			} finally {
+				this._leading = !1;
+			}
+		}
+	}
+	#i(e) {
+		return C`
+            <div class="sinner">
+                <div>
+                    <div class="name">${e.name}</div>
+                    <div class="detail">
+                        ${e.kind === "warehouse" ? C`${e.contentTypeName} nodes (<code>${e.contentTypeAlias}</code>) under one parent — a warehouse, not a website. Limit ${e.threshold}.` : C`${e.contentTypeName} (<code>${e.contentTypeAlias}</code>) saved again and again — a log table in disguise. Limit ${e.threshold} versions.`}
+                    </div>
+                </div>
+                <div class="count">${e.count} <small>${e.kind === "warehouse" ? "children" : "versions"}</small></div>
+            </div>
+        `;
+	}
+	#a(e) {
+		return C`
+            <div class="banner">
+                Let my content go. ${e.deletedNodes} node(s) left the tree and ${e.prunedVersions} version(s) were pruned,
+                in ${(e.elapsedMs / 1e3).toFixed(1)} s. They dwell now in
+                ${e.files.map((t, n) => C`${n > 0 ? ", " : ""}<code>${e.exportFolder}/${t.file}</code>`)} —
+                put them in a real database.
+            </div>
+        `;
+	}
+	render() {
+		let e = this._audit;
+		return C`
+            <uui-box headline="VIII — Umbraco is not thy database">
+                ${this._result ? this.#a(this._result) : T}
+                ${this._error ? C`<div class="banner error">${this._error}</div>` : T}
+                ${this._loading && !e ? C`<uui-loader-bar></uui-loader-bar>` : !e || e.sinners.length === 0 ? C`<div class="clean">✓ No warehouses, no log tables. Thy content tree holdeth only content.</div>` : C`
+                            <div class="info">
+                                More than ${e.childThreshold} children of one type under one parent, or more than
+                                ${e.versionThreshold} versions of one node: that is data, and data belongeth in a database.
+                            </div>
+                            ${e.sinners.map((e) => this.#i(e))}
+                            <uui-button class="exodus-btn" look="primary" color="danger"
+                                ?disabled=${this._leading}
+                                @click=${() => void this.#r()}>
+                                ${this._leading ? "⏳ Parting the sea…" : "🌊 Exodus: export and lead them out"}
+                            </uui-button>
+                        `}
+            </uui-box>
+        `;
+	}
+};
+R([j()], Y.prototype, "_audit", void 0), R([j()], Y.prototype, "_loading", void 0), R([j()], Y.prototype, "_leading", void 0), R([j()], Y.prototype, "_result", void 0), R([j()], Y.prototype, "_error", void 0), Y = R([A("sinners-exodus")], Y);
 //#endregion
 //#region src/penance/commandments/root-content.element.ts
-var _t = "/umbraco/management/api/v1/sinners", X = class extends e(k) {
+var Ot = "/umbraco/management/api/v1/sinners", X = class extends e(k) {
 	constructor(...e) {
 		super(...e), this._result = null, this._loading = !0, this._seeking = !1, this._sanctuaryMessage = null;
 	}
@@ -3002,7 +3421,7 @@ var _t = "/umbraco/management/api/v1/sinners", X = class extends e(k) {
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), z.registerSteps("IX", this, [{
+		super.connectedCallback(), I.registerSteps("IX", this, [{
 			label: "Seek Root Sanctuary",
 			run: () => this.#r()
 		}]), this.consumeContext(n, (e) => {
@@ -3023,7 +3442,7 @@ var _t = "/umbraco/management/api/v1/sinners", X = class extends e(k) {
 	async #n() {
 		this._loading = !0;
 		try {
-			let e = await this.#t(`${_t}/root-content-audit`);
+			let e = await this.#t(`${Ot}/root-content-audit`);
 			e.ok && (this._result = await e.json());
 			let t = this._result?.rootNodes.filter((e) => e.hasTemplate).length ?? 0;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -3041,10 +3460,10 @@ var _t = "/umbraco/management/api/v1/sinners", X = class extends e(k) {
 	async #r() {
 		this._seeking = !0, this._sanctuaryMessage = null;
 		try {
-			let e = await this.#t(`${_t}/seek-root-sanctuary`, { method: "POST" });
+			let e = await this.#t(`${Ot}/seek-root-sanctuary`, { method: "POST" });
 			if (e.ok) {
 				let t = await e.json();
-				this._sanctuaryMessage = t.success ? t.message : `⚠ ${t.message}`, t.success && await this.#n();
+				this._sanctuaryMessage = t.success ? t.message : `⚠ ${t.message}`, t.success && (await this.#n(), L(9, "root-sanctuary"));
 			}
 		} finally {
 			this._seeking = !1;
@@ -3053,7 +3472,7 @@ var _t = "/umbraco/management/api/v1/sinners", X = class extends e(k) {
 	render() {
 		let e = this._result, t = e?.rootNodes.filter((e) => e.hasTemplate) ?? [];
 		return C`
-            <uui-box headline="IX — The root shall not render">
+            <uui-box headline="IX — A root node is not a rendering node">
                 ${this._loading ? C`<uui-loader-bar></uui-loader-bar>` : e?.isClean ? C`<div class="clean">✓ No root node beareth a template. The root is unrenderable and righteous.</div>` : C`
                             <div class="info">
                                 ${t.length} root node(s) beareth a template. The Library now shelters thy shared
@@ -3083,10 +3502,10 @@ var _t = "/umbraco/management/api/v1/sinners", X = class extends e(k) {
         `;
 	}
 };
-B([j()], X.prototype, "_result", void 0), B([j()], X.prototype, "_loading", void 0), B([j()], X.prototype, "_seeking", void 0), B([j()], X.prototype, "_sanctuaryMessage", void 0), X = B([A("sinners-root-content")], X);
+R([j()], X.prototype, "_result", void 0), R([j()], X.prototype, "_loading", void 0), R([j()], X.prototype, "_seeking", void 0), R([j()], X.prototype, "_sanctuaryMessage", void 0), X = R([A("sinners-root-content")], X);
 //#endregion
 //#region src/penance/commandments/usync-audit.element.ts
-var vt = "/umbraco/management/api/v1/sinners", Z = class extends e(k) {
+var kt = "/umbraco/management/api/v1/sinners", Z = class extends e(k) {
 	constructor(...e) {
 		super(...e), this._result = null, this._loading = !0;
 	}
@@ -3143,7 +3562,7 @@ var vt = "/umbraco/management/api/v1/sinners", Z = class extends e(k) {
     `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), z.registerSteps("X", this, [{
+		super.connectedCallback(), I.registerSteps("X", this, [{
 			label: "Pretend to uSync ✨",
 			run: () => this.#n()
 		}]), this.consumeContext(n, (e) => {
@@ -3153,7 +3572,7 @@ var vt = "/umbraco/management/api/v1/sinners", Z = class extends e(k) {
 	async #t() {
 		this._loading = !0;
 		try {
-			let e = await this.#e?.getLatestToken(), t = await fetch(`${vt}/usync-audit`, { headers: e ? { Authorization: `Bearer ${e}` } : {} });
+			let e = await this.#e?.getLatestToken(), t = await fetch(`${kt}/usync-audit`, { headers: e ? { Authorization: `Bearer ${e}` } : {} });
 			t.ok && (this._result = await t.json());
 			let n = this._result, r = n?.csprojFound && !n.hasUSync && !n.hasUmbracoDeploy ? 1 : 0;
 			this.dispatchEvent(new CustomEvent("sinners-status", {
@@ -3170,15 +3589,17 @@ var vt = "/umbraco/management/api/v1/sinners", Z = class extends e(k) {
 	}
 	async #n() {
 		let e = await this.#e?.getLatestToken();
-		await fetch(`${vt}/inject-usync`, {
+		await fetch(`${kt}/inject-usync`, {
 			method: "POST",
 			headers: e ? { Authorization: `Bearer ${e}` } : {}
-		}), lt(() => void this.#t());
+		}), vt(() => {
+			L(10, "pretend-usync", !0), this.#t();
+		});
 	}
 	render() {
 		let e = this._result;
 		return C`
-            <uui-box headline="X — uSync is installed">
+            <uui-box headline="X — uSync when not on Umbraco Cloud">
                 ${this._loading ? C`<uui-loader-bar></uui-loader-bar>` : e?.csprojFound ? e.hasUSync ? C`<div class="clean">✓ uSync is installed in <span class="code">${e.csprojName}</span> — thy schema walketh not alone.</div>` : e.hasUmbracoDeploy ? C`<div class="clean">✓ Umbraco.Deploy is installed in <span class="code">${e.csprojName}</span> — thy schema walketh not alone.</div>` : C`
                                 <div class="error-block">
                                     <div class="error-heading">✕ No schema versioning tool is installed</div>
@@ -3200,51 +3621,69 @@ var vt = "/umbraco/management/api/v1/sinners", Z = class extends e(k) {
         `;
 	}
 };
-B([j()], Z.prototype, "_result", void 0), B([j()], Z.prototype, "_loading", void 0), Z = B([A("sinners-usync-audit")], Z);
+R([j()], Z.prototype, "_result", void 0), R([j()], Z.prototype, "_loading", void 0), Z = R([A("sinners-usync-audit")], Z);
 //#endregion
 //#region src/penance/penance-dashboard.element.ts
 var Q = [
 	{
 		id: "I",
-		label: "I — Content is not composable"
+		label: "I — Content is not composable",
+		parts: ["I"]
 	},
 	{
 		id: "II",
-		label: "II — The Four Sacred Types"
+		label: "II — Four content types",
+		parts: ["II"]
 	},
 	{
 		id: "III",
-		label: "III — Data types live in folders"
+		label: "III — The root is bare, a folder is only a folder",
+		parts: [
+			"III.data-types",
+			"III.dictionary",
+			"III.media"
+		]
 	},
 	{
 		id: "IV",
-		label: "IV — Program.cs is clean"
+		label: "IV — Compose in thy IComposer, not Program.cs",
+		parts: ["IV"]
 	},
 	{
 		id: "V",
-		label: "V — Live environment is production-ready"
+		label: "V — Production runs in production mode",
+		parts: ["V"]
 	},
 	{
 		id: "VI",
-		label: "VI — Aliases are camelCase English"
+		label: "VI — Thy names",
+		parts: ["VI.aliases", "VI.keys"]
 	},
 	{
 		id: "VII",
-		label: "VII — Translation keys are PascalCase and nested"
+		label: "VII — Views render; they don’t search",
+		parts: ["VII"]
 	},
 	{
 		id: "VIII",
-		label: "VIII — No media items at root"
+		label: "VIII — Umbraco is not thy database",
+		parts: ["VIII"]
 	},
 	{
 		id: "IX",
-		label: "IX — The root shall not render"
+		label: "IX — A root node is not a rendering node",
+		parts: ["IX"]
 	},
 	{
 		id: "X",
-		label: "X — uSync is installed"
+		label: "X — uSync when not on Umbraco Cloud",
+		parts: ["X"]
 	}
-], yt = {
+], At = {
+	ok: 0,
+	warning: 1,
+	error: 2
+}, jt = Q.flatMap((e) => e.parts), Mt = {
 	0: "Righteous — thy backoffice is clean",
 	1: "A whisper of darkness",
 	2: "The shadows stir",
@@ -3405,52 +3844,69 @@ var Q = [
         .debug-strip input[type=range] {
             width: 100%;
         }
+
+        .pane {
+            flex-direction: column;
+            gap: var(--uui-size-space-5, 24px);
+        }
     `;
 	}
 	connectedCallback() {
 		super.connectedCallback();
-		let e = z.activeTab;
-		e && Q.some((t) => t.id === e) && (this._activeTab = e, this.#n = !0), z.setActiveTab(this._activeTab), z.onNextTab(this, () => {
+		let e = I.activeTab;
+		e && Q.some((t) => t.id === e) && (this._activeTab = e, this.#n = !0), I.setActiveTab(this._activeTab), I.onNextTab(this, () => {
 			this.#n = !0;
 			let e = Q.map((e) => e.id), t = e[(e.indexOf(this._activeTab) + 1) % e.length];
-			this._activeTab = t, z.setActiveTab(t);
+			this._activeTab = t, I.setActiveTab(t);
 		}), this.consumeContext(t, (e) => {
-			this.#e = e, this.#a();
-		});
+			this.#e = e, this.#o();
+		}), dt();
 	}
-	get #r() {
-		let e = 0;
-		return this._statuses.forEach((t) => {
-			t.issueCount > 0 && e++;
-		}), e;
+	#r(e) {
+		let t = e.parts.map((e) => this._statuses.get(e));
+		if (t.some((e) => !e)) return;
+		let n = t;
+		return {
+			issueCount: n.reduce((e, t) => e + t.issueCount, 0),
+			severity: n.filter((e) => e.issueCount > 0).reduce((e, t) => At[t.severity] > At[e] ? t.severity : e, "ok")
+		};
 	}
 	get #i() {
-		return this._spookyFactor > 0 ? this._spookyFactor : this.#r;
+		return Q.filter((e) => (this.#r(e)?.issueCount ?? 0) > 0).length;
 	}
-	#a() {
-		let e = this.#i;
+	get #a() {
+		return this._spookyFactor > 0 ? this._spookyFactor : this.#i;
+	}
+	#o() {
+		let e = this.#a;
 		this.#e?.setThemeByAlias(e > 0 ? Ke(e) : "umb-light-theme");
 	}
-	#o(e) {
-		this._spookyFactor = +e.target.value, this.#a();
+	#s(e) {
+		this._spookyFactor = +e.target.value, this.#o();
 	}
-	#s(e, t) {
-		if (this._statuses = new Map(this._statuses).set(e, t), this._spookyFactor === 0 && this.#a(), !this.#n && this._statuses.size === Q.length) {
+	#c(e, t) {
+		if (this._statuses = new Map(this._statuses).set(e, t), this._spookyFactor === 0 && this.#o(), !this.#n && jt.every((e) => this._statuses.has(e))) {
 			this.#n = !0;
-			let e = Q.find((e) => (this._statuses.get(e.id)?.issueCount ?? 0) > 0);
-			e && (this._activeTab = e.id, z.setActiveTab(e.id));
+			let e = Q.find((e) => (this.#r(e)?.issueCount ?? 0) > 0);
+			e && (this._activeTab = e.id, I.setActiveTab(e.id));
 		}
 	}
-	#c(e) {
-		let t = this._statuses.get(e);
+	#l(e) {
+		let t = this.#r(e);
 		return t ? t.issueCount === 0 ? C`<span class="status-badge ok">✓</span>` : C`<span class="status-badge ${t.severity}">${t.issueCount}</span>` : C`<span class="status-badge pending"></span>`;
+	}
+	#u(e, t) {
+		return C`<div class="pane" style="display:${this._activeTab === e ? "flex" : "none"}">${t}</div>`;
+	}
+	#d(e) {
+		return (t) => this.#c(e, t.detail);
 	}
 	render() {
 		return C`
             <div class="hero">
                 <h1>Penance Board</h1>
                 <p>Confess your sins. Audit your Umbraco installation against the Ten UmbraCommandments.</p>
-                ${this._statuses.size > 0 ? C`<p class="verdict">${yt[this.#i]}</p>` : ""}
+                ${this._statuses.size > 0 ? C`<p class="verdict">${Mt[this.#a]}</p>` : T}
             </div>
 
             <div class="layout">
@@ -3459,86 +3915,59 @@ var Q = [
                     <button
                         class="tab-btn ${this._activeTab === e.id ? "active" : ""}"
                         @click=${() => {
-			this.#n = !0, this._activeTab = e.id, z.setActiveTab(e.id);
+			this.#n = !0, this._activeTab = e.id, I.setActiveTab(e.id);
 		}}>
                         ${e.label}
-                        ${this.#c(e.id)}
+                        ${this.#l(e)}
                     </button>
                 `)}
             </div>
 
             <div class="tab-content">
-                <div style="display:${this._activeTab === "I" ? "block" : "none"}">
-                    <sinners-content-not-composable
-                        @sinners-status=${(e) => this.#s("I", e.detail)}>
-                    </sinners-content-not-composable>
-                </div>
-                <div style="display:${this._activeTab === "II" ? "block" : "none"}">
-                    <sinners-four-sacred-types
-                        @sinners-status=${(e) => this.#s("II", e.detail)}>
-                    </sinners-four-sacred-types>
-                </div>
-                <div style="display:${this._activeTab === "III" ? "block" : "none"}">
-                    <sinners-data-types-in-folders
-                        @sinners-status=${(e) => this.#s("III", e.detail)}>
-                    </sinners-data-types-in-folders>
-                </div>
-                <div style="display:${this._activeTab === "IV" ? "block" : "none"}">
-                    <sinners-program-cs-clean
-                        @sinners-status=${(e) => this.#s("IV", e.detail)}>
-                    </sinners-program-cs-clean>
-                </div>
-                <div style="display:${this._activeTab === "V" ? "block" : "none"}">
-                    <sinners-production-settings
-                        @sinners-status=${(e) => this.#s("V", e.detail)}>
-                    </sinners-production-settings>
-                </div>
-                <div style="display:${this._activeTab === "VI" ? "block" : "none"}">
-                    <sinners-alias-audit
-                        @sinners-status=${(e) => this.#s("VI", e.detail)}>
-                    </sinners-alias-audit>
-                </div>
-                <div style="display:${this._activeTab === "VII" ? "block" : "none"}">
-                    <sinners-translation-audit
-                        @sinners-status=${(e) => this.#s("VII", e.detail)}>
-                    </sinners-translation-audit>
-                </div>
-                <div style="display:${this._activeTab === "VIII" ? "block" : "none"}">
-                    <sinners-root-media
-                        @sinners-status=${(e) => this.#s("VIII", e.detail)}>
-                    </sinners-root-media>
-                </div>
-                <div style="display:${this._activeTab === "IX" ? "block" : "none"}">
-                    <sinners-root-content
-                        @sinners-status=${(e) => this.#s("IX", e.detail)}>
-                    </sinners-root-content>
-                </div>
-                <div style="display:${this._activeTab === "X" ? "block" : "none"}">
-                    <sinners-usync-audit
-                        @sinners-status=${(e) => this.#s("X", e.detail)}>
-                    </sinners-usync-audit>
-                </div>
+                ${this.#u("I", C`
+                    <sinners-content-not-composable @sinners-status=${this.#d("I")}></sinners-content-not-composable>`)}
+                ${this.#u("II", C`
+                    <sinners-four-sacred-types @sinners-status=${this.#d("II")}></sinners-four-sacred-types>`)}
+                ${this.#u("III", C`
+                    <sinners-data-types-in-folders @sinners-status=${this.#d("III.data-types")}></sinners-data-types-in-folders>
+                    <sinners-translation-audit mode="grouping" @sinners-status=${this.#d("III.dictionary")}></sinners-translation-audit>
+                    <sinners-root-media @sinners-status=${this.#d("III.media")}></sinners-root-media>`)}
+                ${this.#u("IV", C`
+                    <sinners-program-cs-clean @sinners-status=${this.#d("IV")}></sinners-program-cs-clean>`)}
+                ${this.#u("V", C`
+                    <sinners-production-settings @sinners-status=${this.#d("V")}></sinners-production-settings>`)}
+                ${this.#u("VI", C`
+                    <sinners-alias-audit @sinners-status=${this.#d("VI.aliases")}></sinners-alias-audit>
+                    <sinners-translation-audit mode="naming" @sinners-status=${this.#d("VI.keys")}></sinners-translation-audit>`)}
+                ${this.#u("VII", C`
+                    <sinners-views-confession @sinners-status=${this.#d("VII")}></sinners-views-confession>`)}
+                ${this.#u("VIII", C`
+                    <sinners-exodus @sinners-status=${this.#d("VIII")}></sinners-exodus>`)}
+                ${this.#u("IX", C`
+                    <sinners-root-content @sinners-status=${this.#d("IX")}></sinners-root-content>`)}
+                ${this.#u("X", C`
+                    <sinners-usync-audit @sinners-status=${this.#d("X")}></sinners-usync-audit>`)}
             </div>
             </div>
 
             ${this.#t ? C`
                 <div class="debug-strip">
-                    <label>Debug — Spooky Factor Override (auto: ${this.#r})</label>
-                    <div class="spooky-label">${this.#i} — ${yt[this.#i]}</div>
+                    <label>Debug — Spooky Factor Override (auto: ${this.#i})</label>
+                    <div class="spooky-label">${this.#a} — ${Mt[this.#a]}</div>
                     <input
                         type="range"
                         min="0"
                         max="10"
                         .value=${String(this._spookyFactor)}
-                        @input=${this.#o}>
-                </div>` : ""}
+                        @input=${this.#s}>
+                </div>` : T}
         `;
 	}
 };
-B([j()], $.prototype, "_activeTab", void 0), B([j()], $.prototype, "_statuses", void 0), B([j()], $.prototype, "_spookyFactor", void 0), $ = B([A("sinners-penance-dashboard")], $);
+R([j()], $.prototype, "_activeTab", void 0), R([j()], $.prototype, "_statuses", void 0), R([j()], $.prototype, "_spookyFactor", void 0), $ = R([A("sinners-penance-dashboard")], $);
 //#endregion
 //#region src/index.ts
-var bt = [
+var Nt = [
 	"̀",
 	"́",
 	"̂",
@@ -3558,7 +3987,7 @@ var bt = [
 	"ͦ",
 	"ͬ",
 	"ͯ"
-], xt = [
+], Pt = [
 	"̖",
 	"̗",
 	"̘",
@@ -3579,48 +4008,48 @@ var bt = [
 	"͓",
 	"͚"
 ];
-function St(e) {
+function Ft(e) {
 	return [...e].map((e, t) => {
 		if (e === " ") return e;
 		let n = t * 7 + e.charCodeAt(0) * 13, r = 3 + n % 3, i = e;
-		for (let e = 0; e < r; e++) i += bt[(n + e * 3) % bt.length], i += xt[(n + e * 5 + 2) % xt.length];
+		for (let e = 0; e < r; e++) i += Nt[(n + e * 3) % Nt.length], i += Pt[(n + e * 5 + 2) % Pt.length];
 		return i;
 	}).join("");
 }
-var Ct = [{
+var It = [{
 	type: "dashboard",
 	alias: "Sinners.PenanceDashboard",
 	name: "Penance",
 	element: $,
 	weight: 100,
 	meta: {
-		label: St("Penance"),
+		label: Ft("Penance"),
 		pathname: "penance"
 	},
 	conditions: [{
 		alias: "Umb.Condition.SectionAlias",
 		match: "Umb.Section.Settings"
 	}]
-}], wt = new Set(["PageDown", "ArrowRight"]), Tt = new Set([
+}], Lt = new Set(["PageDown", "ArrowRight"]), Rt = new Set([
 	"PageUp",
 	"ArrowLeft",
 	"Escape"
-]), Et = new Set([
+]), zt = new Set([
 	"1",
 	"2",
 	"3",
 	"4",
 	"0"
 ]);
-function Dt() {
+function Bt() {
 	window.addEventListener("keydown", (e) => {
-		document.documentElement.dataset.sinnersKeys !== "off" && (!wt.has(e.key) && !Tt.has(e.key) && e.key !== "." && !Et.has(e.key) || (e.preventDefault(), e.stopPropagation(), !e.repeat && (console.log(`[CLICKER] key="${e.key}"`), wt.has(e.key) ? z.forward() : e.key === "." || e.key === "3" ? z.dot() : e.key === "1" ? z.next() : e.key === "2" ? z.nextTab() : e.key === "4" ? window.location.reload() : e.key === "0" && z.reset())));
+		document.documentElement.dataset.sinnersKeys !== "off" && (!Lt.has(e.key) && !Rt.has(e.key) && e.key !== "." && !zt.has(e.key) || (e.preventDefault(), e.stopPropagation(), !e.repeat && (console.log(`[CLICKER] key="${e.key}"`), Lt.has(e.key) ? I.forward() : e.key === "." || e.key === "3" ? I.dot() : e.key === "1" ? I.next() : e.key === "2" ? I.nextTab() : e.key === "4" ? window.location.reload() : e.key === "0" && I.reset())));
 	}, !0);
 }
-var Ot = (e, t) => {
-	t.registerMany(Ct), qe(t), Dt();
+var Vt = (e, t) => {
+	t.registerMany(It), qe(t), Bt();
 };
 //#endregion
-export { Ot as onInit };
+export { Vt as onInit };
 
 //# sourceMappingURL=dist.js.map
