@@ -63,8 +63,11 @@ const NUMBER_KEYS = new Set(['1', '2', '3', '4', '0']);
 // Captured globally, even with an input focused: workspaces autofocus their name
 // field, which would otherwise silently eat the keys exactly when presenting blind.
 // The talk script involves no typing.
+// When the backoffice runs inside the talk's deck (an iframe), the deck sets
+// <html data-sinners-keys="off"> while the keys belong to the deck.
 function listenForClicker() {
     window.addEventListener('keydown', (e) => {
+        if (document.documentElement.dataset.sinnersKeys === 'off') return;
         if (!CLICKER_NEXT.has(e.key) && !CLICKER_SWALLOW.has(e.key) && e.key !== '.' && !NUMBER_KEYS.has(e.key)) return;
         e.preventDefault();
         e.stopPropagation();

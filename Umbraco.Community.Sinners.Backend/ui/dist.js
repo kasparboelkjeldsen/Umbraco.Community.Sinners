@@ -3614,7 +3614,7 @@ var Ct = [{
 ]);
 function Dt() {
 	window.addEventListener("keydown", (e) => {
-		!wt.has(e.key) && !Tt.has(e.key) && e.key !== "." && !Et.has(e.key) || (e.preventDefault(), e.stopPropagation(), !e.repeat && (console.log(`[CLICKER] key="${e.key}"`), wt.has(e.key) ? z.forward() : e.key === "." || e.key === "3" ? z.dot() : e.key === "1" ? z.next() : e.key === "2" ? z.nextTab() : e.key === "4" ? window.location.reload() : e.key === "0" && z.reset()));
+		document.documentElement.dataset.sinnersKeys !== "off" && (!wt.has(e.key) && !Tt.has(e.key) && e.key !== "." && !Et.has(e.key) || (e.preventDefault(), e.stopPropagation(), !e.repeat && (console.log(`[CLICKER] key="${e.key}"`), wt.has(e.key) ? z.forward() : e.key === "." || e.key === "3" ? z.dot() : e.key === "1" ? z.next() : e.key === "2" ? z.nextTab() : e.key === "4" ? window.location.reload() : e.key === "0" && z.reset())));
 	}, !0);
 }
 var Ot = (e, t) => {
