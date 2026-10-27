@@ -24,6 +24,9 @@ Read this part twice:
 - It hijacks PageDown, PageUp, the arrow keys, `.`, Escape and the number keys across the
   whole backoffice, so a presentation clicker can drive the demo. Typing in a text field
   while it's installed is a penance of its own.
+- With `Sinners:AutoLoginEmail` set (Development only, local requests only) it **logs you into
+  the backoffice without a password**, every time the login page shows up. That's the point:
+  the demo is always logged in. It is also exactly what it sounds like.
 - It is deliberately **not** on NuGet and **not** tagged for the Umbraco Marketplace,
   and it never will be. The only way it gets into a solution is if you put it there
   with your own hands, knowing exactly what it is.
