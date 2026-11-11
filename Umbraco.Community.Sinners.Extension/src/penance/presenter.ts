@@ -54,23 +54,40 @@ function persist() {
 const PENANCE_URL = '/umbraco/section/settings/dashboard/penance';
 
 /**
- * Where each commandment's sin lives in Umbraco. Exhibit k is shown right before fix step k, so a tab
- * with several sins walks "show it, fix it" per sin: III shows the loose data type, organizes, shows
- * the flat dictionary, groups it, shows the media root, pretends.
+ * Where each commandment's sin lives in Umbraco, and where its fix can be seen. A plain URL at
+ * position k is shown right before fix step k; `{ url, at: n }` is shown once n fix steps are done,
+ * so an exhibit can also be the evidence after a fix. A tab with several sins walks "show it, fix
+ * it" per sin: III shows the loose data type, organizes, shows the data types in their folders,
+ * shows the flat dictionary, groups it, shows it grouped, shows the media root, pretends.
  */
-const TAB_EXHIBITS: Partial<Record<string, string[]>> = {
+type Exhibit = string | { url: string; at: number };
+const DOCUMENT_TYPES = '/umbraco/section/settings/workspace/document-type-root';
+const TAB_EXHIBITS: Partial<Record<string, Exhibit[]>> = {
     'I':    ['/umbraco/section/content/workspace/document/edit/704a66de-b213-44fe-815a-f988c0707bbf/invariant/view/info/modal/umb-modal-workspace/invariant/general/document-type/edit/b871f83c-2395-4894-be0f-5422c1a71e48/tab/content'],
-    'II':   ['/umbraco/section/settings/workspace/document-type/edit/a95360e8-ff04-40b1-8f46-7aa4b5983096/tab/content'],
-    'III':  [
-        '/umbraco/section/settings/workspace/data-type/edit/b5922818-d8d8-43df-88ed-4582a24c0fa6',
-        '/umbraco/section/translation',
-        '/umbraco/section/media/collection',
+    'II':   [
+        '/umbraco/section/settings/workspace/document-type/edit/a95360e8-ff04-40b1-8f46-7aa4b5983096/tab/content',
+        // after Auto categorize (its 3rd step): the folders it made, with the types in them
+        { url: DOCUMENT_TYPES, at: 3 },
     ],
-    // The partial reset.ps1 plants (server path "megaMenu.cshtml", '.' encoded as %dot%)
-    'VII':  ['/umbraco/section/settings/workspace/partial-view/edit/megaMenu%25dot%25cshtml'],
+    'III':  [
+        { url: '/umbraco/section/settings/workspace/data-type/edit/b5922818-d8d8-43df-88ed-4582a24c0fa6', at: 0 },
+        // after Organize: the data types in their folders, before the dictionary
+        { url: '/umbraco/section/settings/workspace/data-type-root', at: 1 },
+        { url: '/umbraco/section/translation', at: 1 },
+        // after grouping the keys: the dictionary again, grouped, before the media root
+        { url: '/umbraco/section/translation', at: 2 },
+        { url: '/umbraco/section/media/collection', at: 2 },
+    ],
+    // The partial reset.ps1 plants: server path "/megaMenu.cshtml", the leading '/' URL-encoded (%2F)
+    // and '.' as %dot% (itself encoded, %25dot%25). Without the '/' the backoffice says "not found"
+    'VII':  ['/umbraco/section/settings/workspace/partial-view/edit/%2FmegaMenu%25dot%25cshtml'],
     // The "Form submissions" collection the seeder plants (DemoSinSeeder.FormSubmissionsKey)
     'VIII': ['/umbraco/section/content/workspace/document/edit/0d1e5e08-8a2e-4f0e-9d7b-5f0a5b5e0008'],
-    'IX':   ['/umbraco/section/content'],
+    'IX':   [
+        '/umbraco/section/content',
+        // after Seek Root Sanctuary: the content tree with its new, template-less root
+        { url: '/umbraco/section/content', at: 1 },
+    ],
 };
 
 /** Script order of the parts of a merged commandment (others have one part, 'main'). */
@@ -79,9 +96,10 @@ const TAB_PARTS: Partial<Record<string, string[]>> = {
     'VI':  ['aliases', 'keys'],
 };
 
-const ELSEWHERE_RULES: Array<{ match: string; target: string }> = [
-    { match: '/umbraco/section/content', target: '/umbraco/section/settings' },
-];
+// Where '.' / next goes from a page that isn't the Board (anything not listed: the Board). Content
+// used to go via Settings, which cost IX's evidence an extra press; every return is a full page
+// load of the Board's URL, so it goes straight there now.
+const ELSEWHERE_RULES: Array<{ match: string; target: string }> = [];
 
 function liveSteps(registrations: Array<{ host: Element; steps: PresenterStep[] }>): PresenterStep[] {
     const live = registrations.filter((r) => r.host.isConnected);
@@ -95,8 +113,8 @@ function stepsFor(tabId: string): PresenterStep[] {
     return order.flatMap((part) => liveSteps(parts.get(part) ?? []));
 }
 
-function exhibitsFor(tabId: string): string[] {
-    return TAB_EXHIBITS[tabId] ?? [];
+function exhibitsFor(tabId: string): Array<{ url: string; at: number }> {
+    return (TAB_EXHIBITS[tabId] ?? []).map((e, k) => (typeof e === 'string' ? { url: e, at: k } : e));
 }
 
 function onBoard(): boolean {
@@ -121,7 +139,7 @@ export const presenter = {
             const exhibits = exhibitsFor(_activeTab);
             const shown = _exhibits.get(_activeTab) ?? 0;
             // Past the last exhibit, '.' shows the last one again
-            const url = exhibits.length ? exhibits[Math.min(shown, exhibits.length - 1)] : PENANCE_URL;
+            const url = exhibits.length ? exhibits[Math.min(shown, exhibits.length - 1)].url : PENANCE_URL;
             if (exhibits.length && shown < exhibits.length) {
                 _exhibits.set(_activeTab, shown + 1);
                 persist();
@@ -198,8 +216,9 @@ export const presenter = {
         const idx = Math.min(_indices.get(_activeTab) ?? 0, steps.length);
         const shown = _exhibits.get(_activeTab) ?? 0;
 
-        // Exhibit k comes right before step k
-        if (shown < exhibitsFor(_activeTab).length && shown <= idx) {
+        // The next exhibit comes once its `at` fix steps are done (a plain one: right before step k)
+        const exhibits = exhibitsFor(_activeTab);
+        if (shown < exhibits.length && exhibits[shown].at <= idx) {
             this.dot();
             return;
         }

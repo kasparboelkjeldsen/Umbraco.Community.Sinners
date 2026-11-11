@@ -46,6 +46,8 @@ $megaMenuContent = @'
 @using ContentModels = Umbraco.Cms.Web.Common.PublishedModels
 @inject IContentService ContentService
 
+@* Planted for the talk by Umbraco.Community.Sinners (reset.ps1): Commandment VII's sinner, written on
+   purpose to walk the whole tree. It is NOT part of the Clean starter kit, which doesn't ship it. *@
 @* Mega menu: every section with every page under it, plus the latest articles *@
 @{
     var root = Model.Root();

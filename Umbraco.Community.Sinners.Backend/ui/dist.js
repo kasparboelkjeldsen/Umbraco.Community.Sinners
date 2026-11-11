@@ -613,51 +613,51 @@ var Ue = {
 	"--uui-color-positive-standalone": "#347d39",
 	"--uui-color-positive-contrast": "#eeeeef"
 }, We = {
-	"--uui-color-selected": "#8b1a1a",
-	"--uui-color-selected-emphasis": "#a52020",
-	"--uui-color-selected-standalone": "#c84040",
-	"--uui-color-selected-contrast": "#f0e8e8",
-	"--uui-color-current": "#8b1a1a",
-	"--uui-color-current-emphasis": "#a52020",
-	"--uui-color-current-standalone": "#c84040",
-	"--uui-color-current-contrast": "#f0e8e8",
-	"--uui-color-disabled": "#2e1a1a",
-	"--uui-color-disabled-standalone": "#3e2a2a",
+	"--uui-color-selected": "#e2440c",
+	"--uui-color-selected-emphasis": "#f45a14",
+	"--uui-color-selected-standalone": "#ff7a22",
+	"--uui-color-selected-contrast": "#fff3df",
+	"--uui-color-current": "#e2440c",
+	"--uui-color-current-emphasis": "#f45a14",
+	"--uui-color-current-standalone": "#ff7a22",
+	"--uui-color-current-contrast": "#fff3df",
+	"--uui-color-disabled": "#3a1407",
+	"--uui-color-disabled-standalone": "#4c1c0a",
 	"--uui-color-disabled-contrast": "#fcfcfc4d",
-	"--uui-color-header-surface": "#0d0606",
-	"--uui-color-header-contrast": "#c8b8b8",
-	"--uui-color-header-contrast-emphasis": "#e8d8d8",
-	"--uui-color-focus": "#8b1a1a",
-	"--uui-color-surface": "#1c0c0c",
-	"--uui-color-surface-alt": "#251414",
-	"--uui-color-surface-emphasis": "#200f0f",
-	"--uui-color-background": "#110808",
-	"--uui-color-text": "#e0d0d0",
-	"--uui-color-text-alt": "#a89090",
-	"--uui-color-interactive": "#e0d0d0",
-	"--uui-color-interactive-emphasis": "#f0e0e0",
-	"--uui-color-border": "#3a1a1a",
-	"--uui-color-border-standalone": "#4e2828",
-	"--uui-color-border-emphasis": "#623a3a",
-	"--uui-color-divider": "#1e1010",
-	"--uui-color-divider-standalone": "#3a1a1a",
-	"--uui-color-divider-emphasis": "#4e2828",
-	"--uui-color-default": "#8b1a1a",
-	"--uui-color-default-emphasis": "#a02020",
-	"--uui-color-default-standalone": "#e0d0d0",
-	"--uui-color-default-contrast": "#f0e0e0",
-	"--uui-color-warning": "#8f5000",
-	"--uui-color-warning-emphasis": "#a06000",
-	"--uui-color-warning-standalone": "#c07000",
-	"--uui-color-warning-contrast": "#f0e0e0",
-	"--uui-color-danger": "#cc1a1a",
-	"--uui-color-danger-emphasis": "#dd2222",
-	"--uui-color-danger-standalone": "#ee4444",
-	"--uui-color-danger-contrast": "#f0e0e0",
-	"--uui-color-positive": "#1a5220",
-	"--uui-color-positive-emphasis": "#1f6226",
-	"--uui-color-positive-standalone": "#2d8c36",
-	"--uui-color-positive-contrast": "#f0e0e0"
+	"--uui-color-header-surface": "#5a1302",
+	"--uui-color-header-contrast": "#ffcf7a",
+	"--uui-color-header-contrast-emphasis": "#fff0c2",
+	"--uui-color-focus": "#ff8f1f",
+	"--uui-color-surface": "#1f0904",
+	"--uui-color-surface-alt": "#2d0e05",
+	"--uui-color-surface-emphasis": "#280c05",
+	"--uui-color-background": "#0e0402",
+	"--uui-color-text": "#ffe8c6",
+	"--uui-color-text-alt": "#f4a35a",
+	"--uui-color-interactive": "#ffd08a",
+	"--uui-color-interactive-emphasis": "#fff0c2",
+	"--uui-color-border": "#6a1f06",
+	"--uui-color-border-standalone": "#8a2c08",
+	"--uui-color-border-emphasis": "#b8410c",
+	"--uui-color-divider": "#331006",
+	"--uui-color-divider-standalone": "#6a1f06",
+	"--uui-color-divider-emphasis": "#8a2c08",
+	"--uui-color-default": "#c8360a",
+	"--uui-color-default-emphasis": "#e2440c",
+	"--uui-color-default-standalone": "#ffd08a",
+	"--uui-color-default-contrast": "#fff3df",
+	"--uui-color-warning": "#d9a400",
+	"--uui-color-warning-emphasis": "#ebb800",
+	"--uui-color-warning-standalone": "#ffd23a",
+	"--uui-color-warning-contrast": "#1d0d00",
+	"--uui-color-danger": "#ff2a0d",
+	"--uui-color-danger-emphasis": "#ff4a1c",
+	"--uui-color-danger-standalone": "#ff6a3a",
+	"--uui-color-danger-contrast": "#fff3df",
+	"--uui-color-positive": "#8f8a12",
+	"--uui-color-positive-emphasis": "#a8a21a",
+	"--uui-color-positive-standalone": "#cfc83a",
+	"--uui-color-positive-contrast": "#1a1500"
 };
 function Ge(e) {
 	let t = (e - 1) / 9, n = Object.keys(Ue).map((e) => `    ${e}: ${He(Ue[e], We[e], t)};`);
@@ -736,15 +736,38 @@ function rt() {
 }
 var it = "/umbraco/section/settings/dashboard/penance", at = {
 	I: ["/umbraco/section/content/workspace/document/edit/704a66de-b213-44fe-815a-f988c0707bbf/invariant/view/info/modal/umb-modal-workspace/invariant/general/document-type/edit/b871f83c-2395-4894-be0f-5422c1a71e48/tab/content"],
-	II: ["/umbraco/section/settings/workspace/document-type/edit/a95360e8-ff04-40b1-8f46-7aa4b5983096/tab/content"],
+	II: ["/umbraco/section/settings/workspace/document-type/edit/a95360e8-ff04-40b1-8f46-7aa4b5983096/tab/content", {
+		url: "/umbraco/section/settings/workspace/document-type-root",
+		at: 3
+	}],
 	III: [
-		"/umbraco/section/settings/workspace/data-type/edit/b5922818-d8d8-43df-88ed-4582a24c0fa6",
-		"/umbraco/section/translation",
-		"/umbraco/section/media/collection"
+		{
+			url: "/umbraco/section/settings/workspace/data-type/edit/b5922818-d8d8-43df-88ed-4582a24c0fa6",
+			at: 0
+		},
+		{
+			url: "/umbraco/section/settings/workspace/data-type-root",
+			at: 1
+		},
+		{
+			url: "/umbraco/section/translation",
+			at: 1
+		},
+		{
+			url: "/umbraco/section/translation",
+			at: 2
+		},
+		{
+			url: "/umbraco/section/media/collection",
+			at: 2
+		}
 	],
-	VII: ["/umbraco/section/settings/workspace/partial-view/edit/megaMenu%25dot%25cshtml"],
+	VII: ["/umbraco/section/settings/workspace/partial-view/edit/%2FmegaMenu%25dot%25cshtml"],
 	VIII: ["/umbraco/section/content/workspace/document/edit/0d1e5e08-8a2e-4f0e-9d7b-5f0a5b5e0008"],
-	IX: ["/umbraco/section/content"]
+	IX: ["/umbraco/section/content", {
+		url: "/umbraco/section/content",
+		at: 1
+	}]
 }, ot = {
 	III: [
 		"data-types",
@@ -752,10 +775,7 @@ var it = "/umbraco/section/settings/dashboard/penance", at = {
 		"media"
 	],
 	VI: ["aliases", "keys"]
-}, st = [{
-	match: "/umbraco/section/content",
-	target: "/umbraco/section/settings"
-}];
+}, st = [];
 function ct(e) {
 	let t = e.filter((e) => e.host.isConnected);
 	return (t.length ? t : e).at(-1)?.steps ?? [];
@@ -765,7 +785,10 @@ function lt(e) {
 	return t ? (ot[e] ?? [...t.keys()]).flatMap((e) => ct(t.get(e) ?? [])) : [];
 }
 function ut(e) {
-	return at[e] ?? [];
+	return (at[e] ?? []).map((e, t) => typeof e == "string" ? {
+		url: e,
+		at: t
+	} : e);
 }
 function dt() {
 	return window.location.pathname.includes("/dashboard/penance");
@@ -780,7 +803,7 @@ var R = {
 	dot() {
 		let e = window.location.pathname;
 		if (dt()) {
-			let e = ut(F), t = P.get(F) ?? 0, n = e.length ? e[Math.min(t, e.length - 1)] : it;
+			let e = ut(F), t = P.get(F) ?? 0, n = e.length ? e[Math.min(t, e.length - 1)].url : it;
 			e.length && t < e.length && (P.set(F, t + 1), rt()), console.log(`[PRESENTER] dot() on penance tab="${F}" → ${n}`), window.location.href = n;
 			return;
 		}
@@ -827,8 +850,8 @@ var R = {
 			return;
 		}
 		if (!F || !I.some((e) => e.host.isConnected)) return;
-		let e = lt(F), t = Math.min(N.get(F) ?? 0, e.length), n = P.get(F) ?? 0;
-		if (n < ut(F).length && n <= t) {
+		let e = lt(F), t = Math.min(N.get(F) ?? 0, e.length), n = P.get(F) ?? 0, r = ut(F);
+		if (n < r.length && r[n].at <= t) {
 			this.dot();
 			return;
 		}

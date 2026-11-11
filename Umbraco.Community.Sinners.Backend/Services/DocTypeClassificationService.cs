@@ -152,6 +152,33 @@ public class DocTypeClassificationService
 
             nextItem:;
         }
+
+        await DeleteEmptiedRootFoldersAsync();
+    }
+
+    /// <summary>
+    /// After the moves, the old top-level folders (Elements, …) are left with nothing in them: delete
+    /// every top-level folder that isn't one of the four roots and has no document type at any depth.
+    /// A folder can only be deleted once it's empty, so its subfolders go first, deepest first.
+    /// </summary>
+    private async Task DeleteEmptiedRootFoldersAsync()
+    {
+        var containers = (await _containerService.GetAllAsync()).ToList();
+        var children = containers.ToLookup(c => c.ParentId);
+        var holdsTypes = _contentTypeService.GetAll().Select(ct => ct.ParentId).ToHashSet();
+        var roots = RootFolderByClassification.Values.ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        bool IsEmpty(Umbraco.Cms.Core.Models.EntityContainer c) =>
+            !holdsTypes.Contains(c.Id) && children[c.Id].All(IsEmpty);
+
+        async Task DeleteTreeAsync(Umbraco.Cms.Core.Models.EntityContainer c)
+        {
+            foreach (var child in children[c.Id]) await DeleteTreeAsync(child);
+            await _containerService.DeleteAsync(c.Key, Constants.Security.SuperUserKey);
+        }
+
+        foreach (var top in children[-1].Where(c => !roots.Contains(c.Name ?? string.Empty) && IsEmpty(c)).ToList())
+            await DeleteTreeAsync(top);
     }
 
     private static string? SuggestFromPath(string path)
