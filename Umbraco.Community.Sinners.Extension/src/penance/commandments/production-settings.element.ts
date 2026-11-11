@@ -39,7 +39,7 @@ export class ProductionSettingsElement extends UmbElementMixin(LitElement) {
 
         .scanned {
             padding: 8px 16px 12px;
-            font-size: 11px;
+            font-size: 12px;
             color: var(--uui-color-text-alt, #888);
         }
 
@@ -50,7 +50,7 @@ export class ProductionSettingsElement extends UmbElementMixin(LitElement) {
             gap: 8px;
             font-size: 13px;
             font-weight: 600;
-            color: #92400e;
+            color: var(--uui-color-warning-standalone, #92400e);
         }
 
         .warning-sub {
@@ -66,7 +66,7 @@ export class ProductionSettingsElement extends UmbElementMixin(LitElement) {
             grid-template-columns: 1fr auto auto;
             gap: 12px;
             align-items: center;
-            background: #fffbeb;
+            background: color-mix(in srgb, #f0ac00 12%, var(--uui-color-surface, #fff));
         }
 
         .setting-row.blessed {
@@ -77,20 +77,20 @@ export class ProductionSettingsElement extends UmbElementMixin(LitElement) {
         .setting-key {
             font-family: monospace;
             font-size: 12px;
-            color: #1c1917;
+            color: var(--uui-color-text, #1c1917);
             word-break: break-all;
         }
 
         .setting-value {
             font-family: monospace;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             padding: 2px 7px;
             border-radius: 3px;
-            background: #fef3c7;
-            color: #92400e;
+            background: color-mix(in srgb, #f0ac00 30%, var(--uui-color-surface, #fff));
+            color: var(--uui-color-text, #92400e);
             white-space: nowrap;
-            border: 1px solid #fcd34d;
+            border: 1px solid color-mix(in srgb, #f0ac00 70%, var(--uui-color-surface, #fff));
         }
 
         .setting-row.blessed .setting-value {
@@ -105,11 +105,11 @@ export class ProductionSettingsElement extends UmbElementMixin(LitElement) {
             gap: 4px;
             padding: 4px 10px;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             border: 1px solid var(--uui-color-border-standalone, #d0d0d0);
             background: var(--uui-color-surface, #fff);
-            color: var(--uui-color-text-alt, #555);
+            color: var(--uui-color-text, #555);
             cursor: pointer;
             white-space: nowrap;
             flex-shrink: 0;

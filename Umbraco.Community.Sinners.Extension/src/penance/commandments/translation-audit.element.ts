@@ -85,13 +85,13 @@ export class TranslationAuditElement extends UmbElementMixin(LitElement) {
             gap: 4px;
             padding: 2px 7px;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             white-space: nowrap;
         }
 
-        .tag.error { background: var(--uui-color-danger-standalone, #d42054); color: white; }
-        .tag.warning { background: #f0ac00; color: white; }
+        .tag.error { background: var(--uui-color-danger-standalone, #d42054); color: var(--sinners-on-bright, white); }
+        .tag.warning { background: #f0ac00; color: #1d0d00; }
         .tag code { font-family: monospace; font-weight: 400; opacity: 0.85; }
 
         .bless-btn {
@@ -100,7 +100,7 @@ export class TranslationAuditElement extends UmbElementMixin(LitElement) {
             gap: 4px;
             padding: 4px 10px;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             border: 1px solid var(--uui-color-border-standalone, #d0d0d0);
             background: var(--uui-color-surface, #fff);
@@ -119,7 +119,7 @@ export class TranslationAuditElement extends UmbElementMixin(LitElement) {
             align-items: center;
             gap: 10px;
             padding: 12px 16px 4px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             letter-spacing: 0.06em;
             text-transform: uppercase;
@@ -156,7 +156,7 @@ export class TranslationAuditElement extends UmbElementMixin(LitElement) {
 
         .child-chip {
             font-family: monospace;
-            font-size: 11px;
+            font-size: 12px;
             padding: 2px 6px;
             border-radius: 3px;
             background: var(--uui-color-surface-emphasis, #e8e8e8);
@@ -169,7 +169,7 @@ export class TranslationAuditElement extends UmbElementMixin(LitElement) {
             gap: 4px;
             padding: 5px 11px;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             border: none;
             background: var(--sinners-action-btn-bg, #1b264f);

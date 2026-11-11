@@ -72,7 +72,7 @@ export class RootContentElement extends UmbElementMixin(LitElement) {
 
         .item-type {
             font-family: monospace;
-            font-size: 11px;
+            font-size: 12px;
             padding: 2px 6px;
             border-radius: 3px;
             background: var(--uui-color-surface-emphasis, #e8e8e8);
@@ -85,19 +85,19 @@ export class RootContentElement extends UmbElementMixin(LitElement) {
             align-items: center;
             padding: 2px 8px;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             white-space: nowrap;
         }
 
         .badge.ok {
             background: var(--uui-color-positive-standalone, #0d7a54);
-            color: white;
+            color: var(--sinners-on-bright, white);
         }
 
         .badge.error {
             background: var(--uui-color-danger-standalone, #d42054);
-            color: white;
+            color: var(--sinners-on-bright, white);
         }
 
         .action-row {

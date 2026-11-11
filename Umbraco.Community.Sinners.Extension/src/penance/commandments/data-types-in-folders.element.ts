@@ -77,7 +77,7 @@ export class DataTypesInFoldersElement extends UmbElementMixin(LitElement) {
         .folder-header {
             padding: 8px 16px;
             background: var(--uui-color-surface-alt, #fafafa);
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             font-family: monospace;
             color: var(--uui-color-text-alt, #888);
@@ -102,7 +102,7 @@ export class DataTypesInFoldersElement extends UmbElementMixin(LitElement) {
         }
 
         .built-in-badge {
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 700;
             padding: 1px 5px;
             border-radius: 3px;
@@ -116,7 +116,7 @@ export class DataTypesInFoldersElement extends UmbElementMixin(LitElement) {
             padding: 8px 12px;
             border-radius: 4px;
             font-size: 12px;
-            color: white;
+            color: var(--sinners-on-bright, white);
         }
 
         .result-banner.success {

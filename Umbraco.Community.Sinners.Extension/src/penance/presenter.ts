@@ -1,4 +1,5 @@
 import { scriptEnded } from './bridge.js';
+import { spotlight, type Highlight } from './spotlight.js';
 
 type StepFn = () => void | Promise<void>;
 
@@ -40,6 +41,9 @@ let _activeTab = _persisted.activeTab;
 let _nextTab: Array<{ host: Element; fn: () => void }> = [];
 // A clicker press while a step is still running would run that step twice
 let _busy = false;
+// On an exhibit page: has this page's highlight been lit? (An exhibit is a full page load, so this
+// starts false on every one.)
+let _lit = false;
 
 function persist() {
     try {
@@ -59,34 +63,59 @@ const PENANCE_URL = '/umbraco/section/settings/dashboard/penance';
  * so an exhibit can also be the evidence after a fix. A tab with several sins walks "show it, fix
  * it" per sin: III shows the loose data type, organizes, shows the data types in their folders,
  * shows the flat dictionary, groups it, shows it grouped, shows the media root, pretends.
+ *
+ * `highlight` is what the page is there to show (spotlight.ts): on the exhibit, the first press puts
+ * a ring round it, the next press goes back to the Board. An exhibit without one leaves on the first.
  */
-type Exhibit = string | { url: string; at: number };
+/** A tree item (and what's under it), by its name in the tree */
+const treeItem = (label: string | string[], more: Partial<Exclude<Highlight, string>> = {}): Highlight =>
+    ({ selector: 'uui-menu-item', label, ...more });
+type Exhibit = string | { url: string; at?: number; highlight?: Highlight };
 const DOCUMENT_TYPES = '/umbraco/section/settings/workspace/document-type-root';
 const TAB_EXHIBITS: Partial<Record<string, Exhibit[]>> = {
-    'I':    ['/umbraco/section/content/workspace/document/edit/704a66de-b213-44fe-815a-f988c0707bbf/invariant/view/info/modal/umb-modal-workspace/invariant/general/document-type/edit/b871f83c-2395-4894-be0f-5422c1a71e48/tab/content'],
+    'I':    [
+        // a page's document type: its one property, 'Inherited from' a composition nothing else uses
+        {
+            url: '/umbraco/section/content/workspace/document/edit/704a66de-b213-44fe-815a-f988c0707bbf/invariant/view/info/modal/umb-modal-workspace/invariant/general/document-type/edit/b871f83c-2395-4894-be0f-5422c1a71e48/tab/content',
+            highlight: 'umb-content-type-design-editor-property',
+        },
+    ],
     'II':   [
-        '/umbraco/section/settings/workspace/document-type/edit/a95360e8-ff04-40b1-8f46-7aa4b5983096/tab/content',
+        // the tree as Clean left it: its own folders, its own names
+        { url: '/umbraco/section/settings/workspace/document-type/edit/a95360e8-ff04-40b1-8f46-7aa4b5983096/tab/content', highlight: treeItem('Document Types') },
         // after Auto categorize (its 3rd step): the folders it made, with the types in them
-        { url: DOCUMENT_TYPES, at: 3 },
+        { url: DOCUMENT_TYPES, at: 3, highlight: treeItem('Document Types', { expand: true }) },
     ],
     'III':  [
-        { url: '/umbraco/section/settings/workspace/data-type/edit/b5922818-d8d8-43df-88ed-4582a24c0fa6', at: 0 },
+        // one loose data type, and next to it the whole root it's loose in
+        { url: '/umbraco/section/settings/workspace/data-type/edit/b5922818-d8d8-43df-88ed-4582a24c0fa6', at: 0, highlight: treeItem('Data Types') },
         // after Organize: the data types in their folders, before the dictionary
-        { url: '/umbraco/section/settings/workspace/data-type-root', at: 1 },
-        { url: '/umbraco/section/translation', at: 1 },
-        // after grouping the keys: the dictionary again, grouped, before the media root
-        { url: '/umbraco/section/translation', at: 2 },
-        { url: '/umbraco/section/media/collection', at: 2 },
+        { url: '/umbraco/section/settings/workspace/data-type-root', at: 1, highlight: treeItem('Data Types', { expand: true }) },
+        // every key at the root, no parents
+        { url: '/umbraco/section/translation', at: 1, highlight: 'umb-tree' },
+        // after grouping the keys: the dictionary again, one group opened to show the keys under it
+        { url: '/umbraco/section/translation', at: 2, highlight: treeItem('ContactForm', { expand: true }) },
+        // the files reset.ps1 drops at the media root (their cards: they come first in the grid)
+        {
+            url: '/umbraco/section/media/collection',
+            at: 2,
+            highlight: { selector: 'uui-card-media[name="logo"], uui-card-media[name="Brochure 2019.pdf"], uui-card-media[name="final-final-v2.jpg"]', all: true },
+        },
     ],
     // The partial reset.ps1 plants: server path "/megaMenu.cshtml", the leading '/' URL-encoded (%2F)
     // and '.' as %dot% (itself encoded, %25dot%25). Without the '/' the backoffice says "not found"
-    'VII':  ['/umbraco/section/settings/workspace/partial-view/edit/%2FmegaMenu%25dot%25cshtml'],
+    'VII':  [
+        // the two lines that walk the tree and ask the content service, on every request
+        { url: '/umbraco/section/settings/workspace/partial-view/edit/%2FmegaMenu%25dot%25cshtml', highlight: { selector: '.view-line', text: ['Descendants<', 'CountDescendants'], all: true } },
+    ],
     // The "Form submissions" collection the seeder plants (DemoSinSeeder.FormSubmissionsKey)
-    'VIII': ['/umbraco/section/content/workspace/document/edit/0d1e5e08-8a2e-4f0e-9d7b-5f0a5b5e0008'],
+    // (all of it ringed: six hundred of these under one node)
+    'VIII': [{ url: '/umbraco/section/content/workspace/document/edit/0d1e5e08-8a2e-4f0e-9d7b-5f0a5b5e0008', highlight: 'umb-document-collection' }],
     'IX':   [
-        '/umbraco/section/content',
-        // after Seek Root Sanctuary: the content tree with its new, template-less root
-        { url: '/umbraco/section/content', at: 1 },
+        // Home, rendering, at the root
+        { url: '/umbraco/section/content', highlight: treeItem('Home') },
+        // after Seek Root Sanctuary: the content tree with its new, template-less root, Home under it
+        { url: '/umbraco/section/content', at: 1, highlight: treeItem('Site', { expand: true }) },
     ],
 };
 
@@ -113,8 +142,15 @@ function stepsFor(tabId: string): PresenterStep[] {
     return order.flatMap((part) => liveSteps(parts.get(part) ?? []));
 }
 
-function exhibitsFor(tabId: string): Array<{ url: string; at: number }> {
-    return (TAB_EXHIBITS[tabId] ?? []).map((e, k) => (typeof e === 'string' ? { url: e, at: k } : e));
+function exhibitsFor(tabId: string): Array<{ url: string; at: number; highlight?: Highlight }> {
+    return (TAB_EXHIBITS[tabId] ?? []).map((e, k) => (typeof e === 'string' ? { url: e, at: k } : { ...e, at: e.at ?? k }));
+}
+
+/** The exhibit this page is (the active tab's last shown one, if we're still on its page). */
+function exhibitHere(): { url: string; highlight?: Highlight } | undefined {
+    const shown = _exhibits.get(_activeTab) ?? 0;
+    const exhibit = exhibitsFor(_activeTab)[shown - 1];
+    return exhibit && window.location.pathname.startsWith(exhibit.url) ? exhibit : undefined;
 }
 
 function onBoard(): boolean {
@@ -206,6 +242,13 @@ export const presenter = {
     async forward() {
         if (_busy) return;
         if (!onBoard()) {
+            // An exhibit with something to point at: the first press lights it, the next one leaves
+            const highlight = exhibitHere()?.highlight;
+            if (highlight && !_lit) {
+                _lit = true;
+                spotlight(highlight);
+                return;
+            }
             this.dot();
             return;
         }
@@ -243,6 +286,8 @@ export const presenter = {
     reset() {
         try {
             sessionStorage.removeItem(STORAGE_KEY);
+            sessionStorage.removeItem('sinners-welcome-seen'); // the Welcome dashboard's reveal plays again (haunt.ts)
+            sessionStorage.removeItem('sinners-avatar-turned'); // …and the avatar's
             sessionStorage.setItem(FORGET_PRETENCES_KEY, '1');
             localStorage.removeItem('sinners-media-pretend'); // the pretence used to live here
         } catch { /* ignore */ }

@@ -96,7 +96,7 @@ export class ContentNotComposableElement extends UmbElementMixin(LitElement) {
         }
 
         .path {
-            font-size: 11px;
+            font-size: 12px;
             color: var(--uui-color-text-alt, #8d8d8d);
             font-family: monospace;
         }
@@ -114,10 +114,10 @@ export class ContentNotComposableElement extends UmbElementMixin(LitElement) {
             gap: 6px;
             padding: 3px 8px;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             background: var(--uui-color-danger-standalone, #d42054);
-            color: white;
+            color: var(--sinners-on-bright, white);
         }
 
         .prop-chip.blessed {
@@ -136,11 +136,11 @@ export class ContentNotComposableElement extends UmbElementMixin(LitElement) {
             gap: 4px;
             padding: 2px 7px;
             border-radius: 3px;
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 700;
             border: 1px solid rgba(255,255,255,0.5);
             background: rgba(0,0,0,0.15);
-            color: white;
+            color: var(--sinners-on-bright, white);
             cursor: pointer;
             white-space: nowrap;
             letter-spacing: 0.02em;
@@ -156,7 +156,7 @@ export class ContentNotComposableElement extends UmbElementMixin(LitElement) {
         }
 
         .used-on {
-            font-size: 11px;
+            font-size: 12px;
             color: var(--uui-color-text-alt, #888);
             margin-top: 4px;
         }
@@ -176,7 +176,7 @@ export class ContentNotComposableElement extends UmbElementMixin(LitElement) {
             font-size: 12px;
             font-weight: 700;
             background: var(--uui-color-danger-standalone, #d42054);
-            color: white;
+            color: var(--sinners-on-bright, white);
             white-space: nowrap;
         }
 
@@ -189,7 +189,7 @@ export class ContentNotComposableElement extends UmbElementMixin(LitElement) {
             align-items: center;
             gap: 10px;
             padding: 12px 16px 4px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             letter-spacing: 0.06em;
             text-transform: uppercase;
@@ -216,11 +216,11 @@ export class ContentNotComposableElement extends UmbElementMixin(LitElement) {
             gap: 4px;
             padding: 3px 9px;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             border: none;
             background: var(--uui-color-danger-standalone, #d42054);
-            color: white;
+            color: var(--sinners-on-bright, white);
             cursor: pointer;
             white-space: nowrap;
             flex-shrink: 0;
@@ -242,13 +242,13 @@ export class ContentNotComposableElement extends UmbElementMixin(LitElement) {
 
         .result-banner.success {
             background: var(--uui-color-positive-standalone, #0d7a54);
-            color: white;
+            color: var(--sinners-on-bright, white);
             border: 1px solid var(--uui-color-positive, #1ab873);
         }
 
         .result-banner.error {
             background: var(--uui-color-danger-standalone, #d42054);
-            color: white;
+            color: var(--sinners-on-bright, white);
             border: 1px solid var(--uui-color-danger, #d42054);
         }
     `;

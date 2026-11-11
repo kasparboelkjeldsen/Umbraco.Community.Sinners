@@ -121,6 +121,9 @@ function buildCss(level: number): string {
     lines.push('    --uui-color-scheme: dark;');
     lines.push('    --sinners-action-btn-bg: #e64241;');
     lines.push('    --sinners-action-btn-color: #ffffff;');
+    // text on the danger / positive fills (badges, tags, banners): they turn bright, fiery orange
+    // and sulphur yellow as the level rises, and white stops reading on them
+    lines.push(`    --sinners-on-bright: ${level >= 5 ? '#1d0d00' : '#ffffff'};`);
     return `:root {\n${lines.join('\n')}\n}`;
 }
 

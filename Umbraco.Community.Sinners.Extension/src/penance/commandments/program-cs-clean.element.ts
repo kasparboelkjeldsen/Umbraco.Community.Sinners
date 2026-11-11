@@ -99,7 +99,7 @@ export class ProgramCsCleanElement extends UmbElementMixin(LitElement) {
         }
 
         .issue-detail {
-            font-size: 11px;
+            font-size: 12px;
             color: var(--uui-color-text-alt, #888);
             font-family: monospace;
         }
@@ -117,7 +117,7 @@ export class ProgramCsCleanElement extends UmbElementMixin(LitElement) {
         }
 
         .diff-label {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.08em;

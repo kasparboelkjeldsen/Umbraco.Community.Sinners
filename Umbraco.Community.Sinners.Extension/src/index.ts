@@ -1,8 +1,10 @@
 import type { UmbEntryPointOnInit } from '@umbraco-cms/backoffice/extension-api';
 import type { ManifestDashboard } from '@umbraco-cms/backoffice/dashboard';
 import { PenanceDashboardElement } from './penance/penance-dashboard.element.js';
+import { UMB_THEME_CONTEXT } from '@umbraco-cms/backoffice/themes';
 import { registerSpookyThemes } from './penance/spooky-themes.js';
 import { presenter } from './penance/presenter.js';
+import { haunt } from './penance/haunt.js';
 
 const ZALGO_ABOVE = [
     '̀', '́', '̂', '̃', '̅', '̈',
@@ -84,8 +86,31 @@ function listenForClicker() {
     }, true);
 }
 
-export const onInit: UmbEntryPointOnInit = (_host, extensionRegistry) => {
+// Umbraco keeps the chosen theme in localStorage, but on every page load it looks the stored alias
+// up before this package has registered its themes, finds nothing, and deletes the key. (It still
+// applies the theme once we register it, so that page looks right; the NEXT page load starts in the
+// light theme.) The demo walks board → exhibit → board with full page loads, so put the key back.
+const THEME_KEY = 'umb-theme-alias';
+function keepSpookyTheme(host: Parameters<UmbEntryPointOnInit>[0]) {
+    host.consumeContext(UMB_THEME_CONTEXT, (ctx) => {
+        if (!ctx) return;
+        host.observe(
+            ctx.theme,
+            (alias) => {
+                if (!alias?.startsWith('sinners-spooky-')) return;
+                try {
+                    localStorage.setItem(THEME_KEY, alias);
+                } catch { /* storage unavailable: the next page starts light, as before */ }
+            },
+            'sinnersKeepTheme',
+        );
+    });
+}
+
+export const onInit: UmbEntryPointOnInit = (host, extensionRegistry) => {
     extensionRegistry.registerMany(manifests);
     registerSpookyThemes(extensionRegistry);
+    keepSpookyTheme(host);
+    haunt(host); // the easter eggs (penance/haunt.ts): delete this line and they are gone
     listenForClicker();
 };

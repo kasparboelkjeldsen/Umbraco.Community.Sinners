@@ -76,7 +76,10 @@ There is no on-screen rig, so the backoffice looks like plain Umbraco from first
 | `0` | Full demo reset: forget progress, back to the Board |
 
 **Next** walks one script per commandment, I to X: *exhibit the sin* (jump to where it lives
-in Umbraco), *return to the Board*, *each fix step*, *next commandment*. III has three sins and
+in Umbraco), *a spotlight on it* (a lime ring round the thing the page is there to show, the rest
+dimmed: a mouse cursor is no use on a projector), *return to the Board*, *each fix step*, *next
+commandment*. Some fixes get an exhibit of their own afterwards (the folders Auto categorize made,
+the dictionary keys under their new parents), with a spotlight too. III has three sins and
 walks them one at a time: the loose data type → organize, the flat dictionary → group, the
 media root → ✨. VII exhibits the sinful partial in the backoffice's partial view editor, VIII
 the "Form submissions" collection. Commandments with nothing to exhibit (IV, V, VI, X) go
@@ -84,6 +87,16 @@ straight to their fixes. Off the Board, next always means "take me back to the B
 the last fix on X, next tells the talk's deck the script is over (`end`, see the sin bridge), so
 the deck can take the clicker back. The keys work even with a text field focused, because
 exhibit pages autofocus their name field.
+
+While any sin is left, Umbraco itself is a little possessed (`penance/haunt.ts`): names in the
+trees flicker into something else for a second (Recycle Sin, Tongues, Dismember Types), a few
+buttons too (Save and perish), and the "Welcome to Umbraco" dashboard in Content turns, card by
+card, about ten seconds after you arrive: Users CRAVE Us, a pawn that ran out of options, and the
+community photo with a rabbit that has seen things. The "A" of your avatar, top right, shakes,
+swells and becomes a glowing pentagram about five seconds after the Board first opens (and a
+letter again at zero sins), and in VII's partial view a comment nobody wrote types itself after
+the lines that walk the tree. Nothing is changed for good, it all stops at
+zero sins, and `localStorage.setItem('sinners-eggs', 'off')` switches it off without a build.
 
 Progress lives in `sessionStorage`, so the full-page jumps between the Board and the
 exhibits pick up where they left off. If the clicker dies, the fallback is walking over to

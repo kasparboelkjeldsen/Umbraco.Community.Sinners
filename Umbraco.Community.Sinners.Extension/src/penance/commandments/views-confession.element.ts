@@ -65,9 +65,9 @@ export class ViewsConfessionElement extends UmbElementMixin(LitElement) {
             padding: 0 6px;
             border-radius: 11px;
             font-family: inherit;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
-            color: white;
+            color: var(--sinners-on-bright, white);
             background: var(--uui-color-danger-standalone, #d42054);
         }
 
@@ -101,10 +101,10 @@ export class ViewsConfessionElement extends UmbElementMixin(LitElement) {
         .tag {
             padding: 2px 7px;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             white-space: nowrap;
-            color: white;
+            color: var(--sinners-on-bright, white);
             background: var(--uui-color-danger-standalone, #d42054);
         }
 

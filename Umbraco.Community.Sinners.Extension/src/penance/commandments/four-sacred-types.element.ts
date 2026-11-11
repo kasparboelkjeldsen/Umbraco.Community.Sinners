@@ -51,12 +51,12 @@ export class FourSacredTypesElement extends UmbElementMixin(LitElement) {
 
         .stat-chip.sinful {
             background: var(--uui-color-danger-standalone, #d42054);
-            color: white;
+            color: var(--sinners-on-bright, white);
         }
 
         .stat-chip.clean {
             background: var(--uui-color-positive-standalone, #0d7a54);
-            color: white;
+            color: var(--sinners-on-bright, white);
         }
 
         details {
@@ -83,7 +83,7 @@ export class FourSacredTypesElement extends UmbElementMixin(LitElement) {
 
         summary::before {
             content: '▶';
-            font-size: 10px;
+            font-size: 12px;
             transition: transform 0.15s ease;
             color: var(--uui-color-text-alt, #888);
         }
@@ -106,7 +106,7 @@ export class FourSacredTypesElement extends UmbElementMixin(LitElement) {
 
         .item-row {
             display: grid;
-            grid-template-columns: 1fr 160px 140px 200px;
+            grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 84px 168px;
             align-items: center;
             gap: 12px;
             padding: 10px 16px;
@@ -134,7 +134,7 @@ export class FourSacredTypesElement extends UmbElementMixin(LitElement) {
         }
 
         .path {
-            font-size: 11px;
+            font-size: 12px;
             color: var(--uui-color-text-alt, #8d8d8d);
             font-family: monospace;
             white-space: nowrap;
@@ -147,21 +147,21 @@ export class FourSacredTypesElement extends UmbElementMixin(LitElement) {
             background: var(--uui-color-surface-alt, #f4f4f4);
             padding: 2px 6px;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 12px;
         }
 
         .badge {
             display: inline-block;
             padding: 2px 8px;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             background: var(--uui-color-surface-alt, #f4f4f4);
         }
 
         .badge.element {
             background: var(--uui-color-selected, #3544b1);
-            color: white;
+            color: var(--sinners-on-bright, white);
         }
 
         select {
@@ -178,7 +178,7 @@ export class FourSacredTypesElement extends UmbElementMixin(LitElement) {
         }
 
         .suggestion {
-            font-size: 10px;
+            font-size: 12px;
             color: var(--uui-color-interactive, #3544b1);
             cursor: pointer;
             text-decoration: underline dotted;

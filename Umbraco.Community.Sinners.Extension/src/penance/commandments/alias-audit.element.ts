@@ -67,7 +67,7 @@ export class AliasAuditElement extends UmbElementMixin(LitElement) {
         }
 
         .path {
-            font-size: 11px;
+            font-size: 12px;
             color: var(--uui-color-text-alt, #8d8d8d);
             font-family: monospace;
         }
@@ -85,19 +85,19 @@ export class AliasAuditElement extends UmbElementMixin(LitElement) {
             gap: 4px;
             padding: 2px 7px;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             white-space: nowrap;
         }
 
         .tag.error {
             background: var(--uui-color-danger-standalone, #d42054);
-            color: white;
+            color: var(--sinners-on-bright, white);
         }
 
         .tag.warning {
             background: #f0ac00;
-            color: white;
+            color: #1d0d00;
         }
 
         .tag code {
@@ -112,7 +112,7 @@ export class AliasAuditElement extends UmbElementMixin(LitElement) {
             gap: 4px;
             padding: 4px 10px;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             border: 1px solid var(--uui-color-border-standalone, #d0d0d0);
             background: var(--uui-color-surface, #fff);

@@ -64,7 +64,7 @@ export class RootMediaElement extends UmbElementMixin(LitElement) {
 
         .item-type {
             font-family: monospace;
-            font-size: 11px;
+            font-size: 12px;
             padding: 2px 6px;
             border-radius: 3px;
             background: var(--uui-color-surface-emphasis, #e8e8e8);
@@ -73,7 +73,7 @@ export class RootMediaElement extends UmbElementMixin(LitElement) {
         }
 
         .item-date {
-            font-size: 11px;
+            font-size: 12px;
             color: var(--uui-color-text-alt, #aaa);
             white-space: nowrap;
         }

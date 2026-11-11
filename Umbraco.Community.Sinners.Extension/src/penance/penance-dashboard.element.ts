@@ -68,116 +68,167 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
     @state() private _spookyFactor = 0;
     #userNavigated = false;
 
+    // Sized for a projector, not a desk: the Board is shown framed in the talk's deck, on a big
+    // screen in a big room. The chrome here (title, tally, the row of ten) is set in large type; the
+    // commandments' own panes were drawn at a 12–13 px UI size and are scaled up as a whole (zoom on
+    // .tab-content), which keeps their proportions and makes their text about 20 px.
     static override styles = css`
         :host {
             display: block;
-            padding: var(--uui-size-space-5, 24px);
-            max-width: 1200px;
+            padding: 14px 24px 48px;
         }
 
         .hero {
-            margin-bottom: var(--uui-size-space-5, 24px);
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 24px;
+            margin-bottom: 16px;
         }
 
         .hero h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin: 0 0 var(--uui-size-space-2, 8px) 0;
-        }
-
-        .hero p {
+            font-size: 38px;
+            line-height: 1;
+            font-weight: 900;
+            letter-spacing: 0.01em;
             margin: 0;
-            color: var(--uui-color-text-alt, #8d8d8d);
         }
 
+        /* the verdict: the one line the room should read */
         .verdict {
-            margin: 8px 0 0 0;
-            font-size: 12px;
+            margin: 10px 0 0 0;
+            font-size: 24px;
+            line-height: 1.1;
             font-style: italic;
+            font-weight: 700;
+            /* the theme's accent, leaned towards the text colour: on its own it goes dull in the middle levels */
+            color: color-mix(in srgb, var(--uui-color-selected-standalone, #3544b1) 55%, var(--uui-color-text, #1b264f));
+            letter-spacing: 0.05em;
+        }
+
+        /* every sin on the site, counted: it falls as they're absolved */
+        .tally {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .tally b {
+            font-size: 62px;
+            font-weight: 900;
+            font-variant-numeric: tabular-nums;
+            color: var(--uui-color-danger-standalone, #d42054);
+        }
+
+        .tally.clean b { color: var(--uui-color-positive-standalone, #0d7a54); }
+
+        .tally span {
+            font-size: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
             color: var(--uui-color-text-alt, #8d8d8d);
-            letter-spacing: 0.02em;
         }
 
-        .layout {
-            display: flex;
-            gap: 0;
-            align-items: flex-start;
-        }
-
+        /* the ten, in a row: numeral and count. The commandment's name is the heading of its pane */
         .tab-strip {
-            display: flex;
-            flex-direction: column;
-            width: 260px;
-            flex-shrink: 0;
-            border-right: 2px solid var(--uui-color-border, #d8d7d9);
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 8px;
+            margin-bottom: 18px;
         }
 
         .tab-btn {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            padding: 12px 16px;
-            border: none;
-            border-left: 3px solid transparent;
-            background: none;
+            justify-content: center;
+            gap: 6px;
+            height: 86px;
+            padding: 0;
+            border: 2px solid var(--uui-color-border, #d8d7d9);
+            border-radius: 10px;
+            background: var(--uui-color-surface, #fff);
             cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--uui-color-text-alt, #888);
-            text-align: left;
-            transition: color 0.12s, border-color 0.12s, background 0.12s;
+            font: inherit;
+            color: var(--uui-color-text, #333);
+            transition: color 0.15s, border-color 0.15s, background 0.15s, box-shadow 0.15s, transform 0.15s;
         }
 
-        .tab-btn:hover {
-            background: var(--uui-color-surface-alt, #fafafa);
-            color: var(--uui-color-text, #333);
+        .tab-btn .numeral {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 30px;
+            line-height: 1;
+            font-weight: 700;
+            letter-spacing: 0.06em;
         }
+
+        .tab-btn:hover { border-color: var(--uui-color-border-emphasis, #a1a1a1); }
 
         .tab-btn.active {
-            color: var(--uui-color-interactive, #1b264f);
-            border-left-color: var(--uui-color-selected, #3544b1);
-            background: var(--uui-color-surface-alt, #fafafa);
-            font-weight: 600;
+            color: var(--uui-color-selected-contrast, #fff);
+            border-color: var(--uui-color-selected-standalone, #3544b1);
+            background: var(--uui-color-selected, #3544b1);
+            box-shadow: 0 0 22px color-mix(in srgb, var(--uui-color-selected-standalone, #3544b1) 60%, transparent);
+            transform: translateY(-2px);
         }
+
+        /* a commandment kept: its tile is ringed in the theme's green */
+        .tab-btn.absolved { border-color: var(--uui-color-positive-standalone, #0d7a54); }
 
         .status-badge {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 20px;
-            height: 20px;
-            padding: 0 5px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: 700;
+            min-width: 40px;
+            height: 30px;
+            padding: 0 10px;
+            border-radius: 15px;
+            font-size: 22px;
+            line-height: 1;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
             flex-shrink: 0;
         }
 
         .status-badge.pending {
             background: var(--uui-color-border-standalone, #e0e0e0);
-            width: 20px;
+            width: 40px;
         }
 
         .status-badge.ok {
             background: var(--uui-color-positive-standalone, #0d7a54);
-            color: white;
+            color: var(--sinners-on-bright, white);
         }
 
         .status-badge.warning {
             background: #f0ac00;
-            color: white;
+            color: #1d0d00;
         }
 
         .status-badge.error {
             background: var(--uui-color-danger-standalone, #d42054);
-            color: white;
+            color: var(--sinners-on-bright, white);
+        }
+
+        /* on the lit tile the count sits on a dark plate, so it still reads */
+        .tab-btn.active .status-badge.error,
+        .tab-btn.active .status-badge.warning {
+            background: rgba(20, 6, 2, 0.78);
+            color: #fff3df;
         }
 
         .tab-content {
-            flex: 1;
             min-width: 0;
-            padding-left: 24px;
+            /* the panes are drawn small (see the top): shown at 1.6×, about 20 px text */
+            zoom: 1.6;
+            /* each pane's box: its heading is the commandment, so it's set large, and the box's own
+               padding is cut (the panes pad themselves) to keep the fix buttons above the fold */
+            --uui-type-h5-size: 19px;
+            --uui-box-header-padding: 10px 16px;
+            --uui-box-default-padding: 4px 6px;
         }
 
         .debug-strip {
@@ -262,6 +313,10 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
     }
 
     #applyTheme() {
+        // Not before every part has counted: until then the level is that of the few that have, so a
+        // freshly loaded Board went light, then level 1, 2, 3… up to its real one, a flash on every
+        // return from an exhibit. The page arrives in the theme it was left in; keep that meanwhile.
+        if (this._spookyFactor === 0 && !ALL_PARTS.every((p) => this._statuses.has(p))) return;
         const level = this.#effectiveLevel;
         this.#themeCtx?.setThemeByAlias(level > 0 ? SPOOKY_ALIAS(level) : 'umb-light-theme');
     }
@@ -291,6 +346,13 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
         return html`<span class="status-badge ${status.severity}">${status.issueCount}</span>`;
     }
 
+    /** Every sin still on the site, as one big number (once every part has counted). */
+    #renderTally() {
+        if (!ALL_PARTS.every((p) => this._statuses.has(p))) return nothing;
+        const total = [...this._statuses.values()].reduce((sum, s) => sum + s.issueCount, 0);
+        return html`<div class="tally ${total === 0 ? 'clean' : ''}"><b>${total}</b><span>${total === 1 ? 'sin' : 'sins'}</span></div>`;
+    }
+
     #pane(tab: TabId, content: unknown) {
         return html`<div class="pane" style="display:${this._activeTab === tab ? 'flex' : 'none'}">${content}</div>`;
     }
@@ -302,18 +364,20 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
     override render() {
         return html`
             <div class="hero">
-                <h1>Penance Board</h1>
-                <p>Confess your sins. Audit your Umbraco installation against the Ten UmbraCommandments.</p>
-                ${this._statuses.size > 0 ? html`<p class="verdict">${SPOOKY_LABELS[this.#effectiveLevel]}</p>` : nothing}
+                <div>
+                    <h1>Penance Board</h1>
+                    ${ALL_PARTS.every((p) => this._statuses.has(p)) ? html`<p class="verdict">${SPOOKY_LABELS[this.#effectiveLevel]}</p>` : nothing}
+                </div>
+                ${this.#renderTally()}
             </div>
 
-            <div class="layout">
             <div class="tab-strip">
                 ${TABS.map((tab) => html`
                     <button
-                        class="tab-btn ${this._activeTab === tab.id ? 'active' : ''}"
+                        class="tab-btn ${this._activeTab === tab.id ? 'active' : ''} ${this.#tabStatus(tab)?.issueCount === 0 ? 'absolved' : ''}"
+                        title=${tab.label}
                         @click=${() => { this.#userNavigated = true; this._activeTab = tab.id; presenter.setActiveTab(tab.id); }}>
-                        ${tab.label}
+                        <span class="numeral">${tab.id}</span>
                         ${this.#renderBadge(tab)}
                     </button>
                 `)}
@@ -343,7 +407,6 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
                     <sinners-root-content @sinners-status=${this.#status('IX')}></sinners-root-content>`)}
                 ${this.#pane('X', html`
                     <sinners-usync-audit @sinners-status=${this.#status('X')}></sinners-usync-audit>`)}
-            </div>
             </div>
 
             ${this.#isDebug ? html`

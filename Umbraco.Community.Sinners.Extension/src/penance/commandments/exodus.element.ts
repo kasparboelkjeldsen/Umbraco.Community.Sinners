@@ -90,7 +90,7 @@ export class ExodusElement extends UmbElementMixin(LitElement) {
         }
 
         .count small {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             color: var(--uui-color-text-alt, #888);
         }
@@ -101,7 +101,7 @@ export class ExodusElement extends UmbElementMixin(LitElement) {
             border-radius: 4px;
             font-size: 12px;
             line-height: 1.6;
-            color: white;
+            color: var(--sinners-on-bright, white);
             background: var(--uui-color-positive-standalone, #0d7a54);
         }
 
