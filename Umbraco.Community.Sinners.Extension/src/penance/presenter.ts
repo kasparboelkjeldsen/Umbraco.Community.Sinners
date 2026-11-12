@@ -13,6 +13,13 @@ export const TAB_ORDER = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'
 const STORAGE_KEY = 'sinners-presenter-state';
 /** Set by the '0' reset: the Board asks the server to forget its pretences (✨) before it counts. */
 export const FORGET_PRETENCES_KEY = 'sinners-forget-pretences';
+/**
+ * The save-me. Set (to a commandment's number, 1…10) by the talk's deck when it is opened with
+ * ?ff=N: the Board then runs, by itself and without exhibits, every fix of every commandment before
+ * N that still has sins, and stops on N with the clicker ready. So a demo that died at VIII can be
+ * picked up at VIII, on a freshly reset site too.
+ */
+export const FAST_FORWARD_KEY = 'sinners-fast-forward';
 
 interface PersistedState {
     activeTab: string;
@@ -81,8 +88,10 @@ const TAB_EXHIBITS: Partial<Record<string, Exhibit[]>> = {
         },
     ],
     'II':   [
-        // the tree as Clean left it: its own folders, its own names
-        { url: '/umbraco/section/settings/workspace/document-type/edit/a95360e8-ff04-40b1-8f46-7aa4b5983096/tab/content', highlight: treeItem('Document Types') },
+        // the document type root as Clean left it: its own folders, its own names (Compositions, Data,
+        // Elements, Pages). The same page as the evidence after the fix, so II reads before and after.
+        // (It used to open the Home document type's editor, which shows nothing about how types are sorted.)
+        { url: DOCUMENT_TYPES, highlight: treeItem('Document Types', { expand: true }) },
         // after Auto categorize (its 3rd step): the folders it made, with the types in them
         { url: DOCUMENT_TYPES, at: 3, highlight: treeItem('Document Types', { expand: true }) },
     ],
@@ -210,6 +219,52 @@ export const presenter = {
         const kept = (parts.get(part) ?? []).filter((r) => r.host !== host && r.host.isConnected);
         parts.set(part, [...kept, { host, steps }]);
         _steps.set(tabId, parts);
+    },
+
+    /** The commandment a save-me asked for (see FAST_FORWARD_KEY), if any. */
+    get fastForwardTo(): string | undefined {
+        try {
+            const n = Number(sessionStorage.getItem(FAST_FORWARD_KEY));
+            return Number.isInteger(n) && n >= 1 && n <= TAB_ORDER.length ? TAB_ORDER[n - 1] : undefined;
+        } catch {
+            return undefined;
+        }
+    },
+
+    /**
+     * Absolve everything before `target`: each earlier commandment's exhibits count as shown, and its
+     * fix steps run one after the other if it still has sins (`sinsLeft`, the Board's own count).
+     * Presses are ignored meanwhile. If a step reloads the page, the Board finds the key still set
+     * and carries on from the step it had reached.
+     */
+    async fastForward(target: string, sinsLeft: (tabId: string) => number, onTab?: (tabId: string) => void) {
+        if (_busy) return;
+        _busy = true;
+        try {
+            for (const tab of TAB_ORDER) {
+                if (tab === target) break;
+                _exhibits.set(tab, exhibitsFor(tab).length);
+                const steps = stepsFor(tab);
+                if (sinsLeft(tab) > 0) {
+                    onTab?.(tab);
+                    for (let i = Math.min(_indices.get(tab) ?? 0, steps.length); i < steps.length; i++) {
+                        console.log(`[PRESENTER] fast-forward — ${tab} "${steps[i].label}"`);
+                        await steps[i].run();
+                        _indices.set(tab, i + 1);
+                        persist();
+                    }
+                }
+                _indices.set(tab, steps.length);
+                persist();
+            }
+            _activeTab = target;
+            persist();
+        } finally {
+            _busy = false;
+            try {
+                sessionStorage.removeItem(FAST_FORWARD_KEY);
+            } catch { /* then a reload fast-forwards again: harmless, nothing is left to fix */ }
+        }
     },
 
     async next() {

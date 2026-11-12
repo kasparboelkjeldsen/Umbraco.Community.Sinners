@@ -66,6 +66,9 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
     /** Keyed by part ('I', 'III.media', …) */
     @state() private _statuses = new Map<string, StatusDetail>();
     @state() private _spookyFactor = 0;
+    /** A save-me in progress: the commandment being absolved right now (presenter.fastForward) */
+    @state() private _fastForward = '';
+    #fastForwarded = false;
     #userNavigated = false;
 
     // Sized for a projector, not a desk: the Board is shown framed in the talk's deck, on a big
@@ -231,6 +234,19 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
             --uui-box-default-padding: 4px 6px;
         }
 
+        /* the save-me at work (presenter.fastForward): say so, large, so nobody presses meanwhile */
+        .fast-forward {
+            margin-bottom: 14px;
+            padding: 12px 18px;
+            border-radius: 10px;
+            background: #f0ac00;
+            color: #1d0d00;
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .fast-forward span { font-weight: 400; }
+
         .debug-strip {
             margin-top: 32px;
             padding: 14px 16px;
@@ -329,6 +345,7 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
     #onStatus(part: string, detail: StatusDetail) {
         this._statuses = new Map(this._statuses).set(part, detail);
         if (this._spookyFactor === 0) this.#applyTheme();
+        this.#fastForwardIfAsked();
         if (!this.#userNavigated && ALL_PARTS.every((p) => this._statuses.has(p))) {
             this.#userNavigated = true;
             const first = TABS.find((t) => (this.#tabStatus(t)?.issueCount ?? 0) > 0);
@@ -337,6 +354,26 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
                 presenter.setActiveTab(first.id);
             }
         }
+    }
+
+    /** The save-me (presenter.fastForward): once every part has counted, absolve up to the commandment asked for. */
+    #fastForwardIfAsked() {
+        const target = presenter.fastForwardTo as TabId | undefined;
+        if (!target || this.#fastForwarded || !ALL_PARTS.every((p) => this._statuses.has(p))) return;
+        this.#fastForwarded = true;
+        this.#userNavigated = true;
+        this._fastForward = target;
+        const sinsLeft = (id: string) => this.#tabStatus(TABS.find((t) => t.id === id)!)?.issueCount ?? 0;
+        void presenter
+            .fastForward(target, sinsLeft, (id) => {
+                this._activeTab = id as TabId; // show what is being absolved
+            })
+            .catch((e) => console.error('[PRESENTER] fast-forward failed', e))
+            .finally(() => {
+                this._fastForward = '';
+                this._activeTab = target;
+                presenter.setActiveTab(target);
+            });
     }
 
     #renderBadge(tab: typeof TABS[number]) {
@@ -363,6 +400,7 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
 
     override render() {
         return html`
+            ${this._fastForward ? html`<div class="fast-forward">⏩ Absolving everything before ${this._fastForward}… <span>(now: ${this._activeTab})</span></div>` : nothing}
             <div class="hero">
                 <div>
                     <h1>Penance Board</h1>

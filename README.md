@@ -99,7 +99,10 @@ the lines that walk the tree. Nothing is changed for good, it all stops at
 zero sins, and `localStorage.setItem('sinners-eggs', 'off')` switches it off without a build.
 
 Progress lives in `sessionStorage`, so the full-page jumps between the Board and the
-exhibits pick up where they left off. If the clicker dies, the fallback is walking over to
+exhibits pick up where they left off. And should a demo die halfway: set
+`sessionStorage['sinners-fast-forward']` to a commandment's number and open the Board. It
+absolves everything before that commandment by itself and stops there (the talk's deck does this
+for `npm run dkfestival -- --demo 8`). If the clicker dies, the fallback is walking over to
 the laptop and pressing a number.
 
 ## Blessings live in a file
