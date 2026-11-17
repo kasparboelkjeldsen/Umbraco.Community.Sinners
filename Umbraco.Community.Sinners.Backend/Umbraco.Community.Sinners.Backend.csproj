@@ -9,6 +9,8 @@
     <Authors></Authors>
     <Product>Umbraco.Community.Sinners</Product>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/kasparboelkjeldsen/Umbraco.Community.Sinners</RepositoryUrl>
     <IncludeSymbols>False</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(OutputPath)</PackageOutputPath>
@@ -44,7 +46,9 @@
     <None Include="appsettings-schema.Umbraco.Community.Sinners.json" Pack="true" PackagePath="\" />
   </ItemGroup>
 
-  <Target Name="BuildExtension" AfterTargets="Build">
+  <!-- Rebuilds ui/dist.js from the Extension project, when its dependencies are installed (npm install
+       there). Without them the committed ui/dist.js is used as it is: a clone builds with .NET alone. -->
+  <Target Name="BuildExtension" AfterTargets="Build" Condition="Exists('$(MSBuildProjectDirectory)\..\Umbraco.Community.Sinners.Extension\node_modules')">
     <Exec Command="npm run build" WorkingDirectory="$(MSBuildProjectDirectory)\..\Umbraco.Community.Sinners.Extension" />
   </Target>
 

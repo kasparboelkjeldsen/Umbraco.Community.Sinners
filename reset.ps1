@@ -98,7 +98,12 @@ if (-not $csproj) {
     exit 1
 }
 
-$csprojContent = Get-Content $csproj.FullName -Raw
+# Read and written as UTF-8 by .NET, never Get-Content / Set-Content: Windows PowerShell 5.1 reads a
+# file without a BOM as ANSI and PowerShell 7 writes one without a BOM, so a project file reset by
+# both in turn had its one non-ASCII character (a dash in a comment) re-encoded on every reset, each
+# time two to three times as long. It reached 330 MB.
+$utf8 = [System.Text.UTF8Encoding]::new($false)
+$csprojContent = [System.IO.File]::ReadAllText($csproj.FullName, $utf8)
 $uSyncRef = '<PackageReference Include="uSync"\s*/>'
 if ($csprojContent -match '<PackageReference Include="Clean"\s*/>') {
     # Clean already referenced (v18 template sites) — just remove uSync, don't create a duplicate
@@ -109,13 +114,13 @@ else {
     $newCsprojContent = $csprojContent -replace $uSyncRef, '<PackageReference Include="Clean" />'
     Write-Host "Swapped uSync -> Clean in $($csproj.Name)"
 }
-Set-Content -Path $csproj.FullName -Value $newCsprojContent -Encoding utf8 -NoNewline
+[System.IO.File]::WriteAllText($csproj.FullName, $newCsprojContent, $utf8)
 
 # --- Update Directory.Packages.props ---
 
 $propsFile = Join-Path $root "Directory.Packages.props"
 if (Test-Path $propsFile) {
-    $propsContent = Get-Content $propsFile -Raw
+    $propsContent = [System.IO.File]::ReadAllText($propsFile, $utf8)
     $uSyncVer = '<PackageVersion Include="uSync"\s*Version="[^"]*"\s*/>'
     if ($propsContent -match '<PackageVersion Include="Clean"') {
         $propsContent = $propsContent -replace "\s*$uSyncVer", ''
@@ -123,7 +128,7 @@ if (Test-Path $propsFile) {
     else {
         $propsContent = $propsContent -replace $uSyncVer, '<PackageVersion Include="Clean" Version="7.0.5" />'
     }
-    Set-Content -Path $propsFile -Value $propsContent -Encoding utf8 -NoNewline
+    [System.IO.File]::WriteAllText($propsFile, $propsContent, $utf8)
     Write-Host "Updated Directory.Packages.props"
 }
 

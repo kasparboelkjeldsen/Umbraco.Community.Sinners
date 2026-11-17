@@ -9,6 +9,10 @@ judges you, and offers to absolve your sins — one clicker press at a time.
 
 It is a sermon delivered as software. It is not a product.
 
+The talk itself (the slides, a demo site with every sin planted, and one command that starts both)
+is in [umbdkfestival-2026-talk](https://github.com/kasparboelkjeldsen/umbdkfestival-2026-talk). The
+slides are made with [can-present](https://github.com/kasparboelkjeldsen/can-present).
+
 ---
 
 ## ⚠️ Thou shalt not run this anywhere that matters
@@ -217,5 +221,9 @@ It did, for one trial run. Shouting at a laptop turned out to be less fun than i
 The clicker won. We do not speak of the walrus.
 
 ---
+
+## License
+
+[MIT](LICENSE).
 
 *Built for the talk. Blessed by no one. `git blame` knows what you did.*

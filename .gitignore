@@ -440,5 +440,5 @@ node_modules/
 # Vite build output
 dist/
 
-# PowerPoint (too large for GitHub)
-talk.pptx
+# PowerPoint (too large for GitHub; the talk's slides are in umbdkfestival-2026-talk)
+*.pptx
