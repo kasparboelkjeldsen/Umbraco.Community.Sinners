@@ -204,9 +204,10 @@ export class FourSacredTypesElement extends UmbElementMixin(LitElement) {
     override connectedCallback() {
         super.connectedCallback();
         presenter.registerSteps('II', this, [
-            { label: 'Autofill classifications', run: () => this.#autofillClassifications() },
-            { label: 'Save all', run: () => this.#saveAll() },
-            { label: 'Auto categorize', run: () => this.#autoCategorize() },
+            // (a pointer per dropdown it fills in, as many as there's room for)
+            { label: 'Autofill classifications', clicks: () => [...(this.renderRoot as ParentNode).querySelectorAll('select')], run: () => this.#autofillClassifications() },
+            { label: 'Save all', clicks: () => [...(this.renderRoot as ParentNode).querySelectorAll('.save-bar uui-button')], run: () => this.#saveAll() },
+            { label: 'Auto categorize', clicks: () => [...(this.renderRoot as ParentNode).querySelectorAll('.stats uui-button')], run: () => this.#autoCategorize() },
         ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;

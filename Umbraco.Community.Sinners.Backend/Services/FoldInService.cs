@@ -9,7 +9,8 @@ public class FoldInService(
     IContentTypeService contentTypeService,
     IContentService contentService,
     IDataTypeService dataTypeService,
-    IShortStringHelper shortStringHelper)
+    IShortStringHelper shortStringHelper,
+    TypeWriteScope typeWriteScope)
 {
     public async Task<FoldInResult> FoldInAsync(string compositionAlias, string propertyAlias)
     {
@@ -32,6 +33,10 @@ public class FoldInService(
         var tmpAlias = $"{propertyAlias}_fold_tmp";
         var (groupAlias, groupName, groupType) = FindPropertyGroup(composition, propertyAlias);
 
+        // All four steps in one transaction that can't deadlock against Umbraco's content type cache
+        // (TypeWriteScope says how it did). A step that fails leaves without Complete(): nothing is kept.
+        using var scope = typeWriteScope.Begin();
+
         // Step 1: add {alias}_fold_tmp to every page doc type with the same data type
         foreach (var pageType in pageTypes)
         {
@@ -39,14 +44,25 @@ public class FoldInService(
             {
                 Alias = tmpAlias,
                 Name = $"{sourceProperty.Name ?? propertyAlias} [fold]",
-                SortOrder = 9999,
+                // Everything else as the composition had it: after the fold the property reads the same
+                // on the page type (description, validation, where it sits), only no longer inherited
+                Description = sourceProperty.Description,
+                SortOrder = sourceProperty.SortOrder,
+                Mandatory = sourceProperty.Mandatory,
+                MandatoryMessage = sourceProperty.MandatoryMessage,
+                ValidationRegExp = sourceProperty.ValidationRegExp,
+                ValidationRegExpMessage = sourceProperty.ValidationRegExpMessage,
+                Variations = sourceProperty.Variations,
+                LabelOnTop = sourceProperty.LabelOnTop,
             };
             pageType.AddPropertyType(tmpProp, groupAlias, groupName);
             // Match the composition's group type so Umbraco merges rather than rejects
             var group = pageType.PropertyGroups.FirstOrDefault(g => g.Alias == groupAlias);
             if (group is not null)
                 group.Type = groupType;
-            await contentTypeService.UpdateAsync(pageType, Constants.Security.SuperUserKey);
+            var added = await contentTypeService.UpdateAsync(pageType, Constants.Security.SuperUserKey);
+            if (!added.Success)
+                return Fail($"Could not add '{tmpAlias}' to '{pageType.Alias}': {added.Result}.");
         }
 
         // Step 2: copy existing content values → {alias}_fold_tmp for every node of each page type
@@ -63,14 +79,18 @@ public class FoldInService(
                     if (value is not null)
                         content.SetValue(tmpAlias, value, culture);
                 }
-                contentService.Save(content);
+                var saved = contentService.Save(content);
+                if (!saved.Success)
+                    return Fail($"Could not copy '{propertyAlias}' on '{content.Name}': {saved.Result}.");
                 totalCopied++;
             }
         }
 
         // Step 3: remove the property from the composition (Umbraco will clean up the old property data)
         composition.RemovePropertyType(propertyAlias);
-        await contentTypeService.UpdateAsync(composition, Constants.Security.SuperUserKey);
+        var removed = await contentTypeService.UpdateAsync(composition, Constants.Security.SuperUserKey);
+        if (!removed.Success)
+            return Fail($"Could not remove '{propertyAlias}' from '{compositionAlias}': {removed.Result}.");
 
         // Step 4: rename {alias}_fold_tmp → {alias} on each page type
         //         (only the alias changes; the property type ID and its data stay intact)
@@ -82,9 +102,13 @@ public class FoldInService(
             {
                 tmpPropType.Alias = propertyAlias;
                 tmpPropType.Name = sourceProperty.Name ?? propertyAlias;
-                await contentTypeService.UpdateAsync(reloaded, Constants.Security.SuperUserKey);
+                var renamed = await contentTypeService.UpdateAsync(reloaded, Constants.Security.SuperUserKey);
+                if (!renamed.Success)
+                    return Fail($"Could not rename '{tmpAlias}' on '{reloaded.Alias}': {renamed.Result}.");
             }
         }
+
+        scope.Complete();
 
         return new FoldInResult
         {

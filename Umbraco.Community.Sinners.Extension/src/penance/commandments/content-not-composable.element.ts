@@ -258,6 +258,14 @@ export class ContentNotComposableElement extends UmbElementMixin(LitElement) {
         presenter.registerSteps('I', this, [
             {
                 label: 'Fold In & bless everything',
+                // the Fold In button of the two it folds, the Bless button of the three it blesses
+                clicks: () => [...(this.renderRoot as ParentNode).querySelectorAll('.prop-chip')].flatMap((chip) => {
+                    const alias = chip.querySelector('code')?.textContent?.trim() ?? '';
+                    const buttons = chip.querySelectorAll('.fold-btn');
+                    const which = ['contentRows', 'socialIconLinks'].includes(alias) ? 0
+                        : ['instructionMessage', 'successMessage', 'errorMessage'].includes(alias) ? 1 : -1;
+                    return which >= 0 && buttons[which] ? [buttons[which]] : [];
+                }),
                 run: async () => {
                     await this.#foldInByAlias('contentRows');
                     await this.#foldInByAlias('socialIconLinks');

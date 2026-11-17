@@ -22,6 +22,7 @@ public class ServiceComposer : IComposer
         builder.Services.AddScoped<DocTypeClassificationService>();
         builder.Services.AddScoped<BlessingService>();
         builder.Services.AddScoped<ContentNotComposableService>();
+        builder.Services.AddScoped<TypeWriteScope>();
         builder.Services.AddScoped<FoldInService>();
         builder.Services.AddScoped<DataTypeOrganizationService>();
         builder.Services.AddScoped<ProgramCsAnalyzerService>();

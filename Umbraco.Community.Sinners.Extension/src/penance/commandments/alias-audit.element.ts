@@ -140,6 +140,7 @@ export class AliasAuditElement extends UmbElementMixin(LitElement) {
         presenter.registerSteps('VI', this, [
             {
                 label: 'Bless first alias',
+                clicks: () => [...(this.renderRoot as ParentNode).querySelectorAll('.bless-btn:not(.blessed)')].slice(0, 1),
                 run: () => {
                     const first = this._items.find((i) => !i.isBlessed);
                     if (first) return this.#bless(first, true);

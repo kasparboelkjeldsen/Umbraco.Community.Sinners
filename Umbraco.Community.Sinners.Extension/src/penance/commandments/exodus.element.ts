@@ -121,7 +121,7 @@ export class ExodusElement extends UmbElementMixin(LitElement) {
     override connectedCallback() {
         super.connectedCallback();
         presenter.registerSteps('VIII', this, [
-            { label: 'Exodus', run: () => this.#exodus() },
+            { label: 'Exodus', clicks: () => [...(this.renderRoot as ParentNode).querySelectorAll('.exodus-btn')], run: () => this.#exodus() },
         ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;

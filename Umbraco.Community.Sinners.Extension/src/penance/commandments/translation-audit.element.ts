@@ -187,7 +187,7 @@ export class TranslationAuditElement extends UmbElementMixin(LitElement) {
         super.connectedCallback();
         if (this.mode === 'grouping') {
             presenter.registerSteps('III', this, [
-                { label: 'Group all dictionary keys', run: () => this.#groupAll() },
+                { label: 'Group all dictionary keys', clicks: () => [...(this.renderRoot as ParentNode).querySelectorAll('.group-btn')], run: () => this.#groupAll() },
             ], 'dictionary');
         }
         // Naming has no clicker step: the Clean starter kit's keys are all PascalCase English, so a

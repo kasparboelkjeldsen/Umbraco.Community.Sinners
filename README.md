@@ -78,7 +78,11 @@ There is no on-screen rig, so the backoffice looks like plain Umbraco from first
 **Next** walks one script per commandment, I to X: *exhibit the sin* (jump to where it lives
 in Umbraco), *a spotlight on it* (a lime ring round the thing the page is there to show, the rest
 dimmed: a mouse cursor is no use on a projector), *return to the Board*, *each fix step*, *next
-commandment*. Some fixes get an exhibit of their own afterwards (the folders Auto categorize made,
+commandment*. The Board itself arrives spotless (ten green ticks, 0 sins) and falls to its real
+state a moment later, with fire. Before a fix runs, mock mouse pointers fly in and click the
+buttons it stands for, so a room sees that the fix is something the backoffice lets you do by
+hand. Some fixes get an exhibit of their own afterwards (the same property after Fold In, no longer
+"Inherited from" a composition, the folders Auto categorize made,
 the dictionary keys under their new parents), with a spotlight too. III has three sins and
 walks them one at a time: the loose data type → organize, the flat dictionary → group, the
 media root → ✨. VII exhibits the sinful partial in the backoffice's partial view editor, VIII
@@ -205,8 +209,8 @@ No.
 That is not a question. Seek sanctuary.
 
 **Is the fold-in safe?**
-It preserved every content value in testing, saves drafts only, and was built in two days
-for a talk. You already know the answer.
+It preserved every content value in testing, saves drafts only, runs in one transaction (all
+of it or none of it), and was built in two days for a talk. You already know the answer.
 
 **Didn't this used to be voice-controlled?**
 It did, for one trial run. Shouting at a laptop turned out to be less fun than it sounds.

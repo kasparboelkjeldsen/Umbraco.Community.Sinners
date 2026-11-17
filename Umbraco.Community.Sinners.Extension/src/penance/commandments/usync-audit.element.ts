@@ -75,7 +75,7 @@ export class USyncAuditElement extends UmbElementMixin(LitElement) {
     override connectedCallback() {
         super.connectedCallback();
         presenter.registerSteps('X', this, [
-            { label: 'Pretend to uSync ✨', run: () => this.#pretend() },
+            { label: 'Pretend to uSync ✨', clicks: () => [...(this.renderRoot as ParentNode).querySelectorAll('.pretend-btn')], run: () => this.#pretend() },
         ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;

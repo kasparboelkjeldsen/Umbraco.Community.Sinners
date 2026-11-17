@@ -131,7 +131,7 @@ export class ProductionSettingsElement extends UmbElementMixin(LitElement) {
     override connectedCallback() {
         super.connectedCallback();
         presenter.registerSteps('V', this, [
-            { label: 'Bless all settings', run: () => this.#blessAll() },
+            { label: 'Bless all settings', clicks: () => [...(this.renderRoot as ParentNode).querySelectorAll('.bless-btn:not(.blessed)')], run: () => this.#blessAll() },
         ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;

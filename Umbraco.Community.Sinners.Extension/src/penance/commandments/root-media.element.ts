@@ -86,7 +86,7 @@ export class RootMediaElement extends UmbElementMixin(LitElement) {
     override connectedCallback() {
         super.connectedCallback();
         presenter.registerSteps('III', this, [
-            { label: 'Pretend to fix the media root ✨', run: () => this.#pretend() },
+            { label: 'Pretend to fix the media root ✨', clicks: () => [...(this.renderRoot as ParentNode).querySelectorAll('.pretend-btn')], run: () => this.#pretend() },
         ], 'media');
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;

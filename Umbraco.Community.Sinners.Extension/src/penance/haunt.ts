@@ -4,7 +4,10 @@
 //
 //   welcome   the "Welcome to Umbraco" dashboard in Content: its three news cards turn, one after the
 //             other, into darker versions of themselves (Users CRAVE Us, the pawn that ran out of
-//             options, the community photo with a rabbit that has seen things), and stay that way
+//             options, the community photo with a rabbit that has seen things), and stay that way.
+//             With the talk's clicker driving, each card turns on a press that was meant to light the
+//             exhibit's spotlight: the page refuses ("NO", for a moment, where every word was) and
+//             turns a card instead. Three refusals, then the press gets its spotlight (refuse())
 //   whispers  names in the trees flicker into something else for a moment (Recycle Sin, Tongues…)
 //   buttons   so do a few buttons (Save and perish)
 //   avatar    the user's initial in the header shakes, swells and turns into a glowing pentagram
@@ -192,6 +195,22 @@ const BEAT = 2400; // the dashboard as it should be, before anything happens
 const GAP = 2300; // from one card turning to the next
 const EYES = 2600; // after the photo starts to darken
 const SEEN_KEY = 'sinners-welcome-seen'; // sessionStorage: cleared with the clicker's state ('0', the deck's R)
+const DRIVEN_KEY = 'sinners-presenter-state'; // the clicker's own state: when it's there, the clicker drives the reveal
+const NO_FOR = 900; // ms the page says NO
+const seen = () => {
+    try {
+        return sessionStorage.getItem(SEEN_KEY) === '1';
+    } catch {
+        return false; // then it's a first time every time
+    }
+};
+const driven = () => {
+    try {
+        return sessionStorage.getItem(DRIVEN_KEY) != null;
+    } catch {
+        return false;
+    }
+};
 
 interface Possession {
     /** part of the card image's URL (Umbraco's news feed decides what the cards are) */
@@ -368,7 +387,7 @@ function hold(host: Element): Held | null {
     return h;
 }
 
-function possess(h: Held, on: boolean, atOnce: boolean) {
+function possess(h: Held, on: boolean, atOnce: boolean, wordsAfter?: number) {
     // the overlay covers the picture exactly, whatever size the card is now
     if (on) h.over.style.height = `${h.img.offsetHeight}px`;
     if (h.on === on) return;
@@ -385,7 +404,7 @@ function possess(h: Held, on: boolean, atOnce: boolean) {
         if (on) h.unbutton = h.button && relabel(h.button, h.is.button);
         else h.unbutton?.();
     };
-    if (on && !atOnce) setTimeout(turn, scary ? 900 : 700);
+    if (on && !atOnce) setTimeout(turn, wordsAfter ?? (scary ? 900 : 700));
     else turn();
 }
 
@@ -408,10 +427,12 @@ function welcome(on: boolean) {
         bornFor = mine[0].card;
         born = now;
     }
-    let again = false;
-    try {
-        again = sessionStorage.getItem(SEEN_KEY) === '1';
-    } catch { /* then it's a first time every time */ }
+    const again = seen();
+    if (!again && driven()) {
+        // the clicker turns them, one refusal at a time (refuse()); only keep the turned ones fitted
+        for (const h of mine) if (h.on) possess(h, true, false);
+        return;
+    }
 
     mine.forEach((h, k) => {
         const at = again ? 500 + k * 200 : BEAT + k * GAP;
@@ -425,6 +446,91 @@ function welcome(on: boolean) {
             } catch { /* fine */ }
         }
     });
+}
+
+// ------------------------------------------------------------------------------------ the refusals
+
+let lastRefusal = 0;
+
+/**
+ * The clicker pressed for the spotlight on the Welcome dashboard. While there is a card left to turn
+ * the page refuses: it says NO, turns the next card (the review, the pawn, the photo and its rabbit),
+ * and this returns true, so the press does nothing else. With no card left (or none to begin with:
+ * no news, no pictures, eggs off, no sin) it returns false and the press lights the spotlight.
+ */
+export function refuse(): boolean {
+    if (!EGGS.welcome || level <= 0 || off() || !location.pathname.includes('/section/content') || seen()) return false;
+    const mine = deepQueryAll(document, 'umb-news-card')
+        .map(hold)
+        .filter((h): h is Held => !!h && h.img.complete && h.img.naturalWidth > 0)
+        .sort((a, b) => POSSESSIONS.indexOf(a.is) - POSSESSIONS.indexOf(b.is));
+    const next = mine.find((h) => !h.on);
+    if (!next) return false;
+    const now = performance.now();
+    if (now - lastRefusal < 600) return true; // a double click isn't two refusals
+    lastRefusal = now;
+
+    sayNo();
+    // (its words turn once the page has stopped saying NO)
+    possess(next, true, false, NO_FOR + 150);
+    if (next.is.match === 'one-story-community') {
+        // the photo is the last: it darkens, and then the rabbit opens its eyes
+        setTimeout(() => {
+            next.card.classList.add('eyes');
+            try {
+                sessionStorage.setItem(SEEN_KEY, '1'); // a later visit finds them turned
+            } catch { /* fine */ }
+        }, 1500);
+    }
+    return true;
+}
+
+/** For a moment, everything the page says is NO: every text on it, and a red jolt. */
+function sayNo() {
+    const swapped: Array<[Text, string, string]> = [];
+    const walk = (root: Node) => {
+        for (const n of root.childNodes) {
+            if (n.nodeType === Node.TEXT_NODE) {
+                const text = n as Text;
+                const said = text.data.trim();
+                if (said.length < 2) continue;
+                const parent = text.parentElement;
+                if (parent && parent.getClientRects().length === 0) continue; // not drawn
+                // as many NOs as it had to say (a name: one, a paragraph: a dozen)
+                const words = said.split(/\s+/).length;
+                const no = Array(Math.min(12, Math.ceil(words / 2))).fill('NO').join(' ') + (words > 3 ? '.' : '');
+                swapped.push([text, text.data, no]);
+            } else if (n.nodeType === Node.ELEMENT_NODE) {
+                const el = n as Element;
+                if (/^(STYLE|SCRIPT|TEMPLATE|TEXTAREA|SVG|svg|CODE|NOSCRIPT)$/.test(el.tagName)) continue;
+                if (el.classList.contains('view-lines')) continue; // a code editor's text is the editor's
+                if (el.shadowRoot) walk(el.shadowRoot);
+                walk(el);
+            }
+        }
+    };
+    walk(document.body);
+    for (const [text, , no] of swapped) text.data = no;
+    setTimeout(() => {
+        // (only what still says NO: a text that changed meanwhile has its own new words)
+        for (const [text, was, no] of swapped) if (text.data === no) text.data = was;
+    }, NO_FOR);
+
+    document.body.animate(
+        [0, -14, 12, -9, 7, -4, 0].map((x) => ({ transform: `translateX(${x}px)` })),
+        { duration: 420, easing: 'ease-out' },
+    );
+    const jolt = document.createElement('div');
+    jolt.style.cssText =
+        'position:fixed;inset:0;width:100vw;height:100vh;margin:0;padding:0;border:0;pointer-events:none;' +
+        'background:radial-gradient(circle at 50% 50%, rgba(200,20,12,0) 35%, rgba(200,20,12,0.55) 100%)';
+    document.body.appendChild(jolt);
+    try {
+        jolt.setAttribute('popover', 'manual');
+        jolt.showPopover();
+    } catch { /* fine */ }
+    jolt.animate([{ opacity: 0 }, { opacity: 1, offset: 0.15 }, { opacity: 0 }], { duration: NO_FOR, easing: 'ease-out', fill: 'forwards' });
+    setTimeout(() => jolt.remove(), NO_FOR + 60);
 }
 
 // ------------------------------------------------------------------------------------ avatar

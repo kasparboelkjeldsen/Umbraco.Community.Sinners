@@ -120,7 +120,7 @@ export class ViewsConfessionElement extends UmbElementMixin(LitElement) {
     override connectedCallback() {
         super.connectedCallback();
         presenter.registerSteps('VII', this, [
-            { label: 'Confess', run: () => this.#confess() },
+            { label: 'Confess', clicks: () => [...(this.renderRoot as ParentNode).querySelectorAll('.confess-btn')], run: () => this.#confess() },
         ]);
         this.consumeContext(UMB_AUTH_CONTEXT, (ctx) => {
             this.#authCtx = ctx;

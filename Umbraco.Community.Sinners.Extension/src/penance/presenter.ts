@@ -1,11 +1,19 @@
 import { scriptEnded } from './bridge.js';
 import { spotlight, type Highlight } from './spotlight.js';
+import { clickShow } from './pointer.js';
+import { refuse } from './haunt.js';
 
 type StepFn = () => void | Promise<void>;
 
 export interface PresenterStep {
     label: string;
     run: StepFn;
+    /**
+     * What a person would click to do this by hand (the buttons in the pane). The clicker shows mock
+     * mouse pointers clicking them before it runs the step (pointer.ts); the step itself doesn't
+     * depend on them.
+     */
+    clicks?: () => Element[];
 }
 
 export const TAB_ORDER = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'] as const;
@@ -48,6 +56,10 @@ let _activeTab = _persisted.activeTab;
 let _nextTab: Array<{ host: Element; fn: () => void }> = [];
 // A clicker press while a step is still running would run that step twice
 let _busy = false;
+// A Board that is still arriving (its staged fall from spotless to maximum sin) holds presses back.
+// By element, like the registrations: a copy the backoffice threw away must not release the one on the page.
+const _holders = new Set<Element>();
+const held = () => [..._holders].some((h) => h.isConnected);
 // On an exhibit page: has this page's highlight been lit? (An exhibit is a full page load, so this
 // starts false on every one.)
 let _lit = false;
@@ -79,13 +91,15 @@ const treeItem = (label: string | string[], more: Partial<Exclude<Highlight, str
     ({ selector: 'uui-menu-item', label, ...more });
 type Exhibit = string | { url: string; at?: number; highlight?: Highlight };
 const DOCUMENT_TYPES = '/umbraco/section/settings/workspace/document-type-root';
+/** A page in Content with its document type open over it (the modal from its Info tab), on the type's Content tab */
+const PAGE_TYPE_IN_ITS_PAGE = '/umbraco/section/content/workspace/document/edit/704a66de-b213-44fe-815a-f988c0707bbf/invariant/view/info/modal/umb-modal-workspace/invariant/general/document-type/edit/b871f83c-2395-4894-be0f-5422c1a71e48/tab/content';
 const TAB_EXHIBITS: Partial<Record<string, Exhibit[]>> = {
     'I':    [
         // a page's document type: its one property, 'Inherited from' a composition nothing else uses
-        {
-            url: '/umbraco/section/content/workspace/document/edit/704a66de-b213-44fe-815a-f988c0707bbf/invariant/view/info/modal/umb-modal-workspace/invariant/general/document-type/edit/b871f83c-2395-4894-be0f-5422c1a71e48/tab/content',
-            highlight: 'umb-content-type-design-editor-property',
-        },
+        { url: PAGE_TYPE_IN_ITS_PAGE, highlight: 'umb-content-type-design-editor-property' },
+        // after Fold In (its one step): the very same page, the property now the document type's own,
+        // no 'Inherited from'. (Fold In keeps the property's group, so the same /tab/content opens.)
+        { url: PAGE_TYPE_IN_ITS_PAGE, at: 1, highlight: 'umb-content-type-design-editor-property' },
     ],
     'II':   [
         // the document type root as Clean left it: its own folders, its own names (Compositions, Data,
@@ -174,6 +188,12 @@ export const presenter = {
     setActiveTab(tabId: string) {
         _activeTab = tabId;
         persist();
+    },
+
+    /** A Board that isn't ready for the clicker yet: while one holds, forward() and next() do nothing. */
+    hold(host: Element, on: boolean) {
+        if (on) _holders.add(host);
+        else _holders.delete(host);
     },
 
     /** Exhibit the active tab's next sin (on the Board), or return to the Board (anywhere else). */
@@ -268,7 +288,7 @@ export const presenter = {
     },
 
     async next() {
-        if (_busy) return;
+        if (_busy || held()) return;
         const steps = stepsFor(_activeTab);
         const idx = _indices.get(_activeTab) ?? 0;
         console.log(`[PRESENTER] next() — tab="${_activeTab}" step=${idx + 1}/${steps.length}`);
@@ -278,7 +298,15 @@ export const presenter = {
         }
         _busy = true;
         try {
+            // first the mock mice click what a person would click, then the fix itself
+            let shown = { restore: () => {} };
+            try {
+                shown = await clickShow(steps[idx].clicks?.() ?? []);
+            } catch (e) {
+                console.warn('[PRESENTER] no pointers for this step', e);
+            }
             await steps[idx].run();
+            shown.restore();
         } finally {
             _busy = false;
         }
@@ -295,11 +323,13 @@ export const presenter = {
      * Off the Board it always means "return to the Board".
      */
     async forward() {
-        if (_busy) return;
+        if (_busy || held()) return;
         if (!onBoard()) {
             // An exhibit with something to point at: the first press lights it, the next one leaves
             const highlight = exhibitHere()?.highlight;
             if (highlight && !_lit) {
+                // …unless the page won't have it: the Welcome dashboard says NO three times first (haunt.ts)
+                if (refuse()) return;
                 _lit = true;
                 spotlight(highlight);
                 return;

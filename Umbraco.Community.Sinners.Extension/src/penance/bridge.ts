@@ -25,6 +25,15 @@ export function boardMounted() {
 }
 
 /**
+ * The Board has put on one of its Abyss themes for the first time since it loaded: at once if the page
+ * arrived in one, or at the end of its staged fall (descent.ts). The deck holds its own hell (the film
+ * grain) back until this.
+ */
+export function hellArrived() {
+    post({ type: 'hell' });
+}
+
+/**
  * The clicker pressed next with nothing left in the script (every step of X is done): the deck takes the
  * clicker back and moves on. Posted again on every further press, in case the first one was missed.
  */

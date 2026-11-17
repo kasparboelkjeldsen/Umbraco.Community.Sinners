@@ -12,11 +12,15 @@ namespace Umbraco.Community.Sinners.Backend.Controllers;
 [AttributeUsage(AttributeTargets.Class)]
 public class InvalidateSinStatusAttribute : Attribute, IActionFilter
 {
-    public void OnActionExecuting(ActionExecutingContext context) { }
+    public void OnActionExecuting(ActionExecutingContext context)
+    {
+        if (!HttpMethods.IsGet(context.HttpContext.Request.Method))
+            context.HttpContext.RequestServices.GetRequiredService<SinStatusCache>().BeginWrite();
+    }
 
     public void OnActionExecuted(ActionExecutedContext context)
     {
         if (!HttpMethods.IsGet(context.HttpContext.Request.Method))
-            context.HttpContext.RequestServices.GetRequiredService<SinStatusCache>().Invalidate();
+            context.HttpContext.RequestServices.GetRequiredService<SinStatusCache>().EndWrite();
     }
 }

@@ -4,7 +4,8 @@ import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import { UMB_THEME_CONTEXT } from '@umbraco-cms/backoffice/themes';
 import { SPOOKY_ALIAS } from './spooky-themes.js';
 import { presenter } from './presenter.js';
-import { boardMounted } from './bridge.js';
+import { boardMounted, hellArrived } from './bridge.js';
+import { descend } from './descent.js';
 import './commandments/content-not-composable.element.js';
 import './commandments/four-sacred-types.element.js';
 import './commandments/data-types-in-folders.element.js';
@@ -43,6 +44,16 @@ type TabId = typeof TABS[number]['id'];
 const SEVERITY_RANK = { ok: 0, warning: 1, error: 2 } as const;
 const ALL_PARTS = TABS.flatMap((t) => t.parts as readonly string[]);
 
+// The landing. A Board that arrives on a page still in Umbraco's own theme (the first time in a demo:
+// every later arrival, back from an exhibit, comes in the Abyss theme it left in) doesn't say what it
+// found straight away. It shows a spotless backoffice for a beat (ten green ticks, 0 sins, "Righteous")
+// and then falls (descent.ts): the lights fail, fire comes up, and behind it the real numbers and the
+// theme of its sin level. So a room sees it land in hell, without the speaker having to say so.
+const PURE_BEAT = 1700; // ms of spotless, counted from when every commandment has reported
+const COUNT_UP = 1300; // ms for the tally to run from 0 to the truth
+const THEME_KEY = 'umb-theme-alias';
+const inAbyss = (alias: string | null | undefined) => !!alias?.startsWith('sinners-spooky-');
+
 const SPOOKY_LABELS: Record<number, string> = {
     0: 'Righteous — thy backoffice is clean',
     1: 'A whisper of darkness',
@@ -70,6 +81,14 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
     @state() private _fastForward = '';
     #fastForwarded = false;
     #userNavigated = false;
+    /** The landing (see PURE_BEAT): 'pure' = showing the spotless lie, 'falling' = the descent is playing */
+    @state() private _landing: 'no' | 'pure' | 'falling' = 'no';
+    /** The tally while it counts up after the fall */
+    @state() private _counting: number | null = null;
+    @state() private _slam = false;
+    #themeAlias: string | null = null;
+    #fallBooked = false;
+    #hellSaid = false;
 
     // Sized for a projector, not a desk: the Board is shown framed in the talk's deck, on a big
     // screen in a big room. The chrome here (title, tally, the row of ten) is set in large type; the
@@ -126,6 +145,15 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
         }
 
         .tally.clean b { color: var(--uui-color-positive-standalone, #0d7a54); }
+
+        /* after the fall: the verdict and the tally hit the page */
+        .verdict.slam { transform-origin: 0 50%; animation: slam 0.75s cubic-bezier(0.2, 1.5, 0.35, 1) both; }
+        .tally.slam b { display: inline-block; transform-origin: 100% 100%; animation: slam 0.75s cubic-bezier(0.2, 1.5, 0.35, 1) both; text-shadow: 0 0 28px var(--uui-color-danger-standalone, #d42054); }
+        @keyframes slam {
+            0% { transform: scale(2.6); opacity: 0; }
+            55% { opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
 
         .tally span {
             font-size: 20px;
@@ -293,6 +321,15 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
             this.#userNavigated = true;
         }
         presenter.setActiveTab(this._activeTab);
+        // A page that isn't in an Abyss theme yet: the Board lands spotless first (decided for good
+        // once everything is counted, in #applyTheme; this only keeps the panes out of sight till then)
+        try {
+            this.#themeAlias = localStorage.getItem(THEME_KEY);
+        } catch { /* then the theme context says */ }
+        if (!inAbyss(this.#themeAlias) && !presenter.fastForwardTo && !this.#isDebug) {
+            this._landing = 'pure';
+            presenter.hold(this, true);
+        }
         presenter.onNextTab(this, () => {
             this.#userNavigated = true;
             const ids = TABS.map((t) => t.id);
@@ -302,9 +339,15 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
         });
         this.consumeContext(UMB_THEME_CONTEXT, (ctx) => {
             this.#themeCtx = ctx;
+            if (ctx) this.observe(ctx.theme, (alias) => { this.#themeAlias = alias ?? this.#themeAlias; }, 'sinnersBoardTheme');
             this.#applyTheme();
         });
         boardMounted();
+    }
+
+    override disconnectedCallback() {
+        super.disconnectedCallback();
+        presenter.hold(this, false);
     }
 
     /** A tab's status, once every one of its parts has reported. */
@@ -334,7 +377,60 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
         // return from an exhibit. The page arrives in the theme it was left in; keep that meanwhile.
         if (this._spookyFactor === 0 && !ALL_PARTS.every((p) => this._statuses.has(p))) return;
         const level = this.#effectiveLevel;
+        if (this._landing === 'falling') return; // the descent sets it, behind its fire
+        if (this._landing === 'pure') {
+            // spotless first, then the fall: only for a sinful site, on a page that isn't in hell already
+            if (level > 0 && !inAbyss(this.#themeAlias) && this.#themeCtx) {
+                if (!this.#fallBooked) {
+                    this.#fallBooked = true;
+                    setTimeout(() => void this.#fall(), PURE_BEAT);
+                }
+                return;
+            }
+            this._landing = 'no';
+            presenter.hold(this, false);
+        }
         this.#themeCtx?.setThemeByAlias(level > 0 ? SPOOKY_ALIAS(level) : 'umb-light-theme');
+        if (level > 0 && this.#themeCtx && !this.#hellSaid) {
+            this.#hellSaid = true;
+            hellArrived();
+        }
+    }
+
+    /** The landing's second half: the descent, and behind its fire the truth. */
+    async #fall() {
+        if (!this.isConnected || this._landing !== 'pure') return;
+        this._landing = 'falling';
+        try {
+            await descend(() => {
+                this._landing = 'no';
+                this._slam = true;
+                this.#applyTheme();
+                this.#countUp();
+            });
+        } finally {
+            // (the descent's callback set it to 'no' behind the fire; if it never got there, do it now)
+            if ((this._landing as string) !== 'no') {
+                this._landing = 'no';
+                this.#applyTheme();
+            }
+            presenter.hold(this, false);
+        }
+    }
+
+    #countUp() {
+        const t0 = performance.now();
+        const tick = () => {
+            const k = Math.min(1, (performance.now() - t0) / COUNT_UP);
+            if (k >= 1 || !this.isConnected) {
+                this._counting = null;
+                return;
+            }
+            this._counting = 1 - (1 - k) ** 3; // fast, then settling on the number
+            requestAnimationFrame(tick);
+        };
+        this._counting = 0;
+        requestAnimationFrame(tick);
     }
 
     #onSpookyChange(e: Event) {
@@ -376,18 +472,24 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
             });
     }
 
+    /** The landing's lie is on: everything shows as kept. */
+    get #spotless(): boolean {
+        return this._landing !== 'no';
+    }
+
     #renderBadge(tab: typeof TABS[number]) {
         const status = this.#tabStatus(tab);
         if (!status) return html`<span class="status-badge pending"></span>`;
-        if (status.issueCount === 0) return html`<span class="status-badge ok">✓</span>`;
+        if (status.issueCount === 0 || this.#spotless) return html`<span class="status-badge ok">✓</span>`;
         return html`<span class="status-badge ${status.severity}">${status.issueCount}</span>`;
     }
 
     /** Every sin still on the site, as one big number (once every part has counted). */
     #renderTally() {
         if (!ALL_PARTS.every((p) => this._statuses.has(p))) return nothing;
-        const total = [...this._statuses.values()].reduce((sum, s) => sum + s.issueCount, 0);
-        return html`<div class="tally ${total === 0 ? 'clean' : ''}"><b>${total}</b><span>${total === 1 ? 'sin' : 'sins'}</span></div>`;
+        const real = [...this._statuses.values()].reduce((sum, s) => sum + s.issueCount, 0);
+        const total = this.#spotless ? 0 : this._counting != null ? Math.round(real * this._counting) : real;
+        return html`<div class="tally ${total === 0 ? 'clean' : ''} ${this._slam ? 'slam' : ''}"><b>${total}</b><span>${total === 1 ? 'sin' : 'sins'}</span></div>`;
     }
 
     #pane(tab: TabId, content: unknown) {
@@ -404,7 +506,7 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
             <div class="hero">
                 <div>
                     <h1>Penance Board</h1>
-                    ${ALL_PARTS.every((p) => this._statuses.has(p)) ? html`<p class="verdict">${SPOOKY_LABELS[this.#effectiveLevel]}</p>` : nothing}
+                    ${ALL_PARTS.every((p) => this._statuses.has(p)) ? html`<p class="verdict ${this._slam ? 'slam' : ''}">${SPOOKY_LABELS[this.#spotless ? 0 : this.#effectiveLevel]}</p>` : nothing}
                 </div>
                 ${this.#renderTally()}
             </div>
@@ -412,7 +514,7 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
             <div class="tab-strip">
                 ${TABS.map((tab) => html`
                     <button
-                        class="tab-btn ${this._activeTab === tab.id ? 'active' : ''} ${this.#tabStatus(tab)?.issueCount === 0 ? 'absolved' : ''}"
+                        class="tab-btn ${this._activeTab === tab.id && !this.#spotless ? 'active' : ''} ${this.#tabStatus(tab)?.issueCount === 0 || (this.#spotless && this.#tabStatus(tab)) ? 'absolved' : ''}"
                         title=${tab.label}
                         @click=${() => { this.#userNavigated = true; this._activeTab = tab.id; presenter.setActiveTab(tab.id); }}>
                         <span class="numeral">${tab.id}</span>
@@ -421,7 +523,7 @@ export class PenanceDashboardElement extends UmbElementMixin(LitElement) {
                 `)}
             </div>
 
-            <div class="tab-content">
+            <div class="tab-content" style=${this.#spotless ? 'visibility:hidden' : ''}>
                 ${this.#pane('I', html`
                     <sinners-content-not-composable @sinners-status=${this.#status('I')}></sinners-content-not-composable>`)}
                 ${this.#pane('II', html`

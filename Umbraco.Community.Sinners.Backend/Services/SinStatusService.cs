@@ -138,7 +138,9 @@ public class SinStatusService(
 /// <summary>
 /// The status is polled every couple of seconds, so it's kept for a moment. Every mutating Sinners API call
 /// clears it (<see cref="Controllers.InvalidateSinStatusAttribute"/>), so the deck never reads a count from
-/// before the action it was just told about.
+/// before the action it was just told about. While such a call is running the last count is handed out as it
+/// is: a status poll that reads content types in the middle of a fix can deadlock the site (see
+/// <see cref="TypeWriteScope"/>), and the fresh count comes right after anyway.
 /// </summary>
 public class SinStatusCache
 {
@@ -146,13 +148,18 @@ public class SinStatusCache
     private readonly Lock _lock = new();
     private (DateTime At, long Generation, SinStatusResult Result)? _entry;
     private long _generation;
+    private int _writes;
+    private DateTime _lastWriteBegan;
+
+    // (a write that never reported back stops counting after two minutes)
+    private bool Writing => _writes > 0 && DateTime.UtcNow - _lastWriteBegan < TimeSpan.FromMinutes(2);
 
     public bool TryGet(out SinStatusResult result, out long generation)
     {
         lock (_lock)
         {
             generation = _generation;
-            if (_entry is { } e && e.Generation == _generation && DateTime.UtcNow - e.At < CacheFor)
+            if (_entry is { } e && (Writing || (e.Generation == _generation && DateTime.UtcNow - e.At < CacheFor)))
             {
                 result = e.Result;
                 return true;
@@ -172,6 +179,24 @@ public class SinStatusCache
     public void Invalidate()
     {
         lock (_lock) _generation++;
+    }
+
+    public void BeginWrite()
+    {
+        lock (_lock)
+        {
+            _writes++;
+            _lastWriteBegan = DateTime.UtcNow;
+        }
+    }
+
+    public void EndWrite()
+    {
+        lock (_lock)
+        {
+            if (_writes > 0) _writes--;
+            _generation++;
+        }
     }
 }
 
